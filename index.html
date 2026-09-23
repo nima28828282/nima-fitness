@@ -1,3 +1,19 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<!--
+  CodeRabbit's WCAG scan flagged a missing document-language attribute — the
+  real cause was bigger than that: this file had no <!DOCTYPE>, <html>, <head>
+  or <meta viewport> at all, just a bare fragment starting with <title>.
+  Browsers silently patch that together, but with NO viewport meta, mobile
+  browsers default to a ~980px desktop-width virtual viewport and then scale
+  the whole page down to fit — which is almost certainly the real reason the
+  mobile profile screen was overflowing/mis-laid-out, not just a CSS issue on
+  that one screen. Adding a real doctype + html[lang][dir] + head + viewport
+  fixes the WCAG finding AND the layout-overflow finding at their shared root.
+-->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>اپ ورز</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#012FA7">
@@ -371,6 +387,8 @@
   .install-already{ display:flex; flex-direction:column; align-items:center; gap:8px; padding:18px 0 6px; text-align:center; }
   .install-already .chk{ width:44px; height:44px; border-radius:50%; background:var(--good-soft); color:var(--good); display:flex; align-items:center; justify-content:center; }
 </style>
+</head>
+<body>
 
 <div id="landingGate">
   <div class="landing-box">
@@ -733,7 +751,7 @@
     <h2 class="section-title">عکس‌های پیشرفت</h2>
     <div class="card">
       <p style="margin:0 0 12px;font-size:12.5px;color:var(--text-dim);line-height:1.7">
-        عکس‌ها فقط برای همین پیش‌نمایش و روی همین دستگاه نگه داشته می‌شن. توی نسخه نهایی، عکس‌ها با فریم‌بندی یکسان مقایسه می‌شن — نه برای اثبات چربی/عضله، فقط برای دیدن تصویر کنار هم.
+        عکس‌ها به‌صورت خصوصی و رمزنگاری‌شده در حساب خودت ذخیره می‌شن تا از هر دستگاهی بهشون دسترسی داشته باشی، و با زدن ✕ برای همیشه حذف می‌شن. فقط برای دیدن تصویر کنار هم‌اند — نه برای اثبات چربی/عضله.
       </p>
       <div class="photo-grid" id="photoGrid">
         <button class="photo-upload-btn" id="photoAddBtn">
@@ -754,7 +772,7 @@
     <div id="chat-main" style="display:flex; flex-direction:column; flex:1; min-height:0">
       <div class="chat-scroll" id="chatScroll">
         <div class="chat-intro">
-          من ورزم 💪 هر چیزی که به ذهنت می‌رسه رو همین‌جا بنویس — سوال درباره تمرینت، وزنت، یه هفته‌ی بد، یا حتی چیزی که به کارت‌های پیشنهادی زیر ربطی نداره. اگه برای جواب دادن نیاز به عدد واقعی از داده‌هات داشته باشم، میرم چک می‌کنم و بعد جواب می‌دم؛ چیزی از خودم نمی‌سازم.
+          هر سوالی درباره تمرینت، وزنت، یه هفته‌ی بد، یا حتی چیزی که به کارت‌های پیشنهادی زیر ربطی نداره رو همین‌جا بپرس. اگه برای جواب دادن نیاز به عدد واقعی از داده‌هات داشته باشم، میرم چک می‌کنم و بعد جواب می‌دم؛ چیزی از خودم نمی‌سازم.
         </div>
       </div>
       <div class="chat-suggest" id="chatSuggest"></div>
@@ -796,6 +814,16 @@
   "use strict";
 
   const FA_DIGITS = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+  /* Escapes any string before it's interpolated into an innerHTML template.
+     Fixes the DOM-XSS CodeRabbit flagged: user-typed text (exercise search
+     query, food-log names, display name shown on the leaderboard) was being
+     dropped straight into innerHTML, so a payload like <img src=x onerror=...>
+     would execute and could read the Supabase auth token out of localStorage. */
+  function escapeHtml(s){
+    return String(s==null?'':s).replace(/[&<>"']/g, ch => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+    }[ch]));
+  }
   function faNum(n, dp){
     dp = dp==null?1:dp;
     const s = Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:dp});
@@ -990,6 +1018,19 @@
       });
       return (res && res.ok) ? path : null;
     } catch(e){ return null; }
+  }
+  /* Actually deletes a progress photo from the private storage bucket.
+     Previously the "✕" button only called tile.remove() — that hid the tile
+     from THIS render, but the file stayed in Supabase Storage and would
+     silently reappear (via loadRemotePhotos) on the next load or another
+     device, even though the app told the athlete photos were "device-only"
+     and removable. */
+  async function deletePhoto(path){
+    if (!path || !isOnline()) return false;
+    try {
+      const res = await sbFetch('/storage/v1/object/progress-photos/' + path, { method:'DELETE' });
+      return !!(res && res.ok);
+    } catch(e){ return false; }
   }
 
   /* one-time pull of an existing account's history onto a new device
@@ -1632,16 +1673,25 @@
     deadlift: makeSessions(95, 0.02, 9),
     overhead_press: makeSessions(32, -0.15, 9),
   };
-  // ---- logged sessions: seed + anything the athlete submits, kept per-viewer in localStorage ----
+  // ---- logged sessions: seed + anything the athlete submits, kept PER-ACCOUNT in localStorage ----
+  /* Previously this was a single global 'varz_logged_sets' key shared by every
+     account signed into this browser/device, so one phone's logged sets could
+     leak into another account's progress view. Now scoped by phone, the same
+     way userLogsKey() already scopes body-measurement logs. */
+  function loggedSetsKey(){ return 'varz_logged_sets_' + (authUser && authUser.phone ? authUser.phone : 'guest'); }
   let loggedExtra = {};
-  try { loggedExtra = JSON.parse(localStorage.getItem('varz_logged_sets') || '{}'); } catch(e){ loggedExtra = {}; }
-  function saveLogged(){ try { localStorage.setItem('varz_logged_sets', JSON.stringify(loggedExtra)); } catch(e){} }
+  try { loggedExtra = JSON.parse(localStorage.getItem(loggedSetsKey()) || '{}'); } catch(e){ loggedExtra = {}; }
+  function reloadLoggedForCurrentUser(){
+    try { loggedExtra = JSON.parse(localStorage.getItem(loggedSetsKey()) || '{}'); } catch(e){ loggedExtra = {}; }
+  }
+  function saveLogged(){ try { localStorage.setItem(loggedSetsKey(), JSON.stringify(loggedExtra)); } catch(e){} }
   function sessionsFor(exerciseId){
     const seed = SEED_SESSIONS[exerciseId] || [];
     const extra = loggedExtra[exerciseId] || [];
-    // Give each logged-by-the-athlete entry a synthetic weekly date counting back from "today",
-    // so a few real submissions in one sitting form a proper weekly series the same math can classify.
-    const withDates = extra.map((e,i)=> ({ weightKg:e.weightKg, sets:e.sets, reps:e.reps, date: addDays(ASOF, -7*(extra.length-1-i)) }));
+    // Each entry now carries the REAL date it was actually submitted on (see the
+    // submit handler below) instead of a synthetic backdated weekly date, so the
+    // trend math reflects when the athlete really trained, not a fabricated history.
+    const withDates = extra.map(e=> ({ weightKg:e.weightKg, sets:e.sets, reps:e.reps, date: e.date || ASOF }));
     return [...seed, ...withDates].sort((a,b)=>a.date<b.date?-1:1);
   }
   const lifts = {};
@@ -1666,7 +1716,9 @@
     {quality:3, intake:'less'}, {quality:4, intake:'same'}, {quality:4, intake:'more'}, {quality:5, intake:'same'},
   ];
   const checkins = IS_FRESH ? [] : CHECKIN_DAY_OFFSETS.map((off,i)=>({ date: addDays(ASOF,-off), ...CHECKIN_SEED[i] }));
-  const GOAL = 'gain'; // هدف نمونه: افزایش حجم
+  // قبلاً همیشه 'gain' فرض می‌شد؛ حالا هدف واقعی کاربر (ثبت‌شده در آنبوردینگ/پروفایل) خونده می‌شه.
+  function currentGoal(){ return (authUser && authUser.goal) ? authUser.goal : 'gain'; }
+  Object.defineProperty(window, '__VARZ_GOAL_GETTER__', { value: currentGoal, configurable: true });
 
   /* ============================================================
      Real user-entered body logs (weight + measurements), persisted
@@ -1817,15 +1869,15 @@
 
     let weightAlign = 0.5;
     if (bw.status==='ok'){
-      if (GOAL==='gain') weightAlign = weightSignal==='up' ? 1 : (weightSignal==='flat' ? 0.5 : 0);
-      else if (GOAL==='lose') weightAlign = weightSignal==='down' ? 1 : (weightSignal==='flat' ? 0.5 : 0);
+      if (currentGoal()==='gain') weightAlign = weightSignal==='up' ? 1 : (weightSignal==='flat' ? 0.5 : 0);
+      else if (currentGoal()==='lose') weightAlign = weightSignal==='down' ? 1 : (weightSignal==='flat' ? 0.5 : 0);
       else weightAlign = weightSignal==='flat' ? 1 : 0.5;
     }
 
     let waistAlign = 0.5;
     if (waist && waist.verdict==='meaningful'){
-      if (GOAL==='gain') waistAlign = 0.5; // waist isn't the target signal for a gain goal
-      else if (GOAL==='lose') waistAlign = waist.direction==='down' ? 1 : 0;
+      if (currentGoal()==='gain') waistAlign = 0.5; // waist isn't the target signal for a gain goal
+      else if (currentGoal()==='lose') waistAlign = waist.direction==='down' ? 1 : 0;
       else waistAlign = waist.direction==='flat' ? 1 : 0.5;
     } else if (waist){
       waistAlign = 1; // meaningfully unchanged is a fine outcome when not actively cutting
@@ -1876,7 +1928,7 @@
       if (progressingCount>regressingCount && progressingCount>=evaluated/2) strengthSignal='up';
       else if (regressingCount>progressingCount) strengthSignal='down';
     }
-    pattern = classifyPattern(weightSignal, waistSignal, strengthSignal, GOAL);
+    pattern = classifyPattern(weightSignal, waistSignal, strengthSignal, currentGoal());
     const statusLabel = bw.status!=='ok' ? 'داده کافی نیست برای این بازه' : {on_track:'در مسیر هدفت هستی', mixed:'سیگنال‌ها مخلوط‌اند', off_track:'در مسیر هدفت نیستی', not_enough_data:'داده کافی نیست'}[pattern.status];
 
     /* ---- Home ---- */
@@ -1937,7 +1989,7 @@
           <div class="lb-rank">${faNum(i+1,0)}</div>
           <div class="lb-avatar">${avatarSvg(row.avatar)}</div>
           <div style="flex:1; min-width:0">
-            <div class="lb-name">${row.you?'⭐ ':''}${row.name}</div>
+            <div class="lb-name">${row.you?'⭐ ':''}${escapeHtml(row.name)}</div>
             <div class="lb-level">${rt.name}</div>
           </div>
           <div class="lb-score">${faNum(row.score)}</div>
@@ -2053,7 +2105,7 @@
       });
     });
     if (q && !filtered.length){
-      html = `<div style="padding:16px 4px;text-align:center;font-size:13px;color:var(--text-faint)">حرکتی با اسم «${q}» توی دیتابیس ورز نیست. حرکت‌های نزدیک رو امتحان کن یا از چت با ورز بپرس.</div>`;
+      html = `<div style="padding:16px 4px;text-align:center;font-size:13px;color:var(--text-faint)">حرکتی با اسم «${escapeHtml(q)}» توی دیتابیس ورز نیست. حرکت‌های نزدیک رو امتحان کن یا از چت با ورز بپرس.</div>`;
     }
     document.getElementById('liftList').innerHTML = html;
   }
@@ -2085,7 +2137,7 @@
         return;
       }
       loggedExtra[id] = loggedExtra[id] || [];
-      loggedExtra[id].push({ weightKg:w, sets:s, reps:r });
+      loggedExtra[id].push({ weightKg:w, sets:s, reps:r, date: todayISO() });
       saveLogged();
       openLiftCards.add(id);
       renderAll();
@@ -2413,13 +2465,42 @@ ${buildFactBlock()}`;
     const activityFactor = days<=2 ? 1.3 : days<=4 ? 1.45 : days<=5 ? 1.6 : 1.75;
     const tdee = bmr * activityFactor;
     const goalMult = goal==='lose' ? 0.8 : goal==='gain' ? 1.1 : goal==='recomp' ? 0.95 : 1.0;
-    const calories = tdee * goalMult;
+    let calories = tdee * goalMult;
+    /* Safety floor: for a light bodyweight combined with a "lose" goal, tdee*0.8
+       could previously fall to an unsafely low intake (well under widely-used
+       minimums) with nothing stopping it. Never recommend below this regardless
+       of the raw formula's output. */
+    const MIN_CALORIES = gender==='female' ? 1200 : 1500;
+    calories = Math.max(calories, MIN_CALORIES);
 
     const proteinPerKg = gender==='female' ? 1.8 : 2.0;
-    const proteinG = Math.round(weightKg * proteinPerKg);
-    const fatCals = calories * 0.25;
-    const fatG = Math.round(fatCals/9);
-    const carbCals = Math.max(0, calories - proteinG*4 - fatCals);
+    let proteinG = Math.round(weightKg * proteinPerKg);
+    let fatG = Math.round((calories*0.25)/9);
+    /* Previously carbCals was clamped to a minimum of 0 with Math.max(0, ...),
+       which — for a small/lighter athlete where protein+fat calories already
+       meet or exceed the calorie target — silently produced 0g carbs AND left
+       protein+fat alone adding up to more than the displayed total calories
+       (an internally inconsistent result CodeRabbit flagged). Instead, always
+       reserve a minimum real carb allocation and scale protein/fat down
+       proportionally (never below a safe per-kg floor) so the three macros
+       actually sum to the displayed calorie target. */
+    const MIN_CARB_G = 50;
+    const reserveForCarb = MIN_CARB_G*4;
+    const proteinFloorG = Math.round(weightKg * 1.2);
+    const fatFloorG = Math.round(weightKg * 0.5);
+    let overshoot = (proteinG*4 + fatG*9 + reserveForCarb) - calories;
+    if (overshoot > 0){
+      const trimmableFatCals = Math.max(0, (fatG - fatFloorG) * 9);
+      const fatTrimCals = Math.min(trimmableFatCals, overshoot);
+      fatG -= Math.round(fatTrimCals/9);
+      overshoot -= fatTrimCals;
+      if (overshoot > 0){
+        const trimmableProteinCals = Math.max(0, (proteinG - proteinFloorG) * 4);
+        const proteinTrimCals = Math.min(trimmableProteinCals, overshoot);
+        proteinG -= Math.round(proteinTrimCals/4);
+      }
+    }
+    const carbCals = Math.max(reserveForCarb, calories - proteinG*4 - fatG*9);
     const carbG = Math.round(carbCals/4);
 
     return { calories: Math.round(calories), proteinG, carbG, fatG };
@@ -2458,7 +2539,7 @@ ${buildFactBlock()}`;
     const listEl = document.getElementById('nutritionEntries');
     listEl.innerHTML = entries.length ? entries.map((e,i)=>`
       <div style="display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--surface-2); border-radius:10px; font-size:12.5px">
-        <div style="flex:1"><b>${e.name}</b> <span style="color:var(--text-faint)">— ${e.meal}</span></div>
+        <div style="flex:1"><b>${escapeHtml(e.name)}</b> <span style="color:var(--text-faint)">— ${escapeHtml(e.meal)}</span></div>
         <div style="color:var(--text-faint)">${faNum(e.kcal,0)} kcal</div>
         <button type="button" data-food-del="${i}" style="background:none; border:none; color:var(--bad); cursor:pointer; font-size:14px; padding:0 4px">✕</button>
       </div>
@@ -2588,14 +2669,22 @@ ${buildFactBlock()}`;
       tile.className = 'photo-tile';
       tile.innerHTML = `<img src="${url}" alt="عکس پیشرفت"><button class="del" aria-label="حذف">✕</button><button class="analyze" aria-label="تحلیل با ورز">🔍</button>`;
       const delBtn = tile.querySelector('.del');
-      if (delBtn) delBtn.addEventListener('click', ()=> tile.remove());
+      if (delBtn) delBtn.addEventListener('click', async ()=>{
+        delBtn.disabled = true;
+        // remotePath is only known once the background upload (below) resolves;
+        // if the athlete deletes before that finishes, wait for it so the file
+        // doesn't end up orphaned (uploaded but un-deletable) in storage.
+        const path = await tile.__uploadPromise;
+        if (path) await deletePhoto(path);
+        tile.remove();
+      });
       const analyzeBtn = tile.querySelector('.analyze');
       if (analyzeBtn) analyzeBtn.addEventListener('click', ()=> analyzePhoto(file));
       photoGrid.insertBefore(tile, photoAddBtn);
       // uploaded to the private per-user storage bucket in the background —
       // the tile above is the instant local preview, this just makes the
-      // same photo reachable from another device.
-      pushPhoto(file);
+      // same photo reachable from another device (and deletable — see above).
+      tile.__uploadPromise = pushPhoto(file).then(path=>{ tile.dataset.remotePath = path || ''; return path; });
     });
     photoInput.value = '';
   });
@@ -2623,7 +2712,11 @@ ${buildFactBlock()}`;
         tile.dataset.remotePath = authUser.uid + '/' + f.name;
         tile.innerHTML = `<img src="${SUPABASE_URL}${signedURL}" alt="عکس پیشرفت"><button class="del" aria-label="حذف">✕</button>`;
         const delBtn = tile.querySelector('.del');
-        if (delBtn) delBtn.addEventListener('click', ()=> tile.remove());
+        if (delBtn) delBtn.addEventListener('click', async ()=>{
+          delBtn.disabled = true;
+          await deletePhoto(tile.dataset.remotePath);
+          tile.remove();
+        });
         photoGrid.insertBefore(tile, photoAddBtn);
       }
     } catch(e){}
@@ -2708,3 +2801,5 @@ ${buildFactBlock()}`;
   }
 })();
 </script>
+</body>
+</html>
