@@ -96,6 +96,11 @@
   .greeting{display:flex; align-items:center; justify-content:space-between; padding:2px 2px 0}
   .greeting h2{font-size:17px; margin:0; font-weight:800; line-height:1.5}
   .greeting p{margin:2px 0 0; font-size:12.5px; color:var(--text-dim)}
+  .greeting-hello{font-size:12.5px; color:var(--text-dim); font-weight:600; margin-bottom:1px}
+  .next-action-card{background:var(--surface); border:1px solid var(--border); display:flex; flex-direction:column; gap:8px; padding:14px 16px}
+  .next-action-label{font-size:11px; font-weight:800; color:var(--accent); letter-spacing:.2px}
+  .next-action-text{font-size:13.5px; line-height:1.75; color:var(--text)}
+  .next-action-btn{align-self:flex-start; background:var(--accent); color:var(--accent-ink); border:none; border-radius:11px; padding:9px 16px; font-family:inherit; font-weight:700; font-size:12.5px; cursor:pointer}
   .streak-pill{
     display:flex; align-items:center; gap:5px; background:var(--surface); border:1px solid var(--border);
     border-radius:99px; padding:7px 12px; font-size:12px; font-weight:700; box-shadow:var(--shadow); flex:none;
@@ -558,6 +563,7 @@
   <main class="active" id="tab-home">
     <div class="greeting">
       <div>
+        <div class="greeting-hello" id="greetingHello">—</div>
         <h2 id="greetingTitle">بیا ببینیم این هفته چطوری گذشت</h2>
       </div>
     </div>
@@ -567,8 +573,15 @@
       <div id="pmNotifText" style="font-size:13.5px; line-height:1.8"></div>
     </div>
 
-    <h2 class="section-title">بازه‌ی زمانی</h2>
-    <div class="chips" id="windowChips"></div>
+    <!-- Next action: ONE clear, computed suggestion (not a wall of features) — see
+         computeNextAction() below. Structured after Home was restructured around
+         greeting → today's progress → next action → coach's insight, instead of
+         opening straight into a time-window filter control. -->
+    <div class="card next-action-card" id="nextActionCard" style="display:none">
+      <div class="next-action-label" id="naLabel">قدم بعدی</div>
+      <div class="next-action-text" id="naText"></div>
+      <button type="button" class="next-action-btn" id="naBtn" style="display:none"></button>
+    </div>
 
     <div class="card verdict-card">
       <svg class="verdict-wave" width="160" height="90" viewBox="0 0 160 90"><path d="M0 60 Q30 20 55 55 T110 40 T160 55" stroke="#fff" stroke-width="2" fill="none" opacity=".5"/></svg>
@@ -593,6 +606,14 @@
       </div>
     </div>
 
+    <!-- Time-window filter — a control, not content, so it now sits after the
+         things it filters rather than being the very first thing on Home. -->
+    <h2 class="section-title" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer" id="windowToggleRow">
+      <span>بازه‌ی محاسبه</span>
+      <svg id="windowToggleIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" style="transition:transform .2s"><path d="M6 9l6 6 6-6" stroke="var(--text-faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </h2>
+    <div class="chips" id="windowChips" style="display:none"></div>
+
     <h2 class="section-title">مقایسه با بقیه</h2>
     <div class="lb-card">
       <div class="lb-head">
@@ -604,7 +625,7 @@
       <div id="lbList"></div>
     </div>
 
-    <h2 class="section-title">نکاتی که در نظر بگیر</h2>
+    <h2 class="section-title">نکته‌های مربی</h2>
     <div class="card">
       <div class="caveat-list" id="caveatList"></div>
     </div>
@@ -1905,6 +1926,71 @@
     ).join('');
   }
 
+  /* Personalized, time-of-day greeting ("صبح بخیر، امیر") instead of a generic
+     static title — small thing, but it's the very first line Home shows, and a
+     flat instructional headline reads more like a dashboard than an app. */
+  function renderGreetingHello(){
+    const hour = new Date().getHours();
+    const timeGreeting = hour<5 ? 'شب بخیر' : hour<12 ? 'صبح بخیر' : hour<17 ? 'ظهر بخیر' : hour<21 ? 'عصر بخیر' : 'شب بخیر';
+    const firstName = authUser && authUser.firstName ? authUser.firstName : '';
+    const el = document.getElementById('greetingHello');
+    if (el) el.textContent = firstName ? `${timeGreeting}، ${firstName}` : timeGreeting;
+  }
+
+  /* Home used to open with a time-window filter and otherwise leave the athlete
+     to scroll and find something to do. This computes the ONE most useful next
+     step — never more than one — from real state (today's log, today's food,
+     lift progress), so Home reads as "here's what to do" rather than a menu of
+     every feature the app has. Falls back to the top coaching caveat when
+     everything for today is already done. */
+  function computeNextAction(score){
+    const today = todayISO();
+    const loggedToday = bodyweightSeries.some(p=>p.date===today);
+    if (!loggedToday){
+      return {
+        text: bodyweightSeries.length===0
+          ? 'هنوز هیچ داده‌ای ثبت نکردی. اولین وزن و دور کمرت رو ثبت کن تا امتیاز هفتگیت محاسبه بشه.'
+          : 'امروز هنوز وزن یا دور کمرت رو ثبت نکردی.',
+        btnLabel: 'ثبت امروز',
+        action: ()=> goToTabAndFocus('progress', 'logWeightInput'),
+      };
+    }
+    const target = loadNutritionTarget();
+    if (target && loadFoodLog(today).length===0){
+      return {
+        text: 'وزنت رو امروز ثبت کردی 👌 حالا چیزی که خوردی رو هم ثبت کن تا پیگیری تغذیه‌ات کامل بشه.',
+        btnLabel: 'ثبت غذای امروز',
+        action: ()=> goToTabAndFocus('profile', 'foodNameInput'),
+      };
+    }
+    if (typeof stalledCount==='number' && stalledCount>0){
+      return {
+        text: `${faNum(stalledCount,0)} تا از حرکت‌هات این بازه عملاً متوقف بوده — شاید وقتشه وزنه یا برنامه‌ی اون حرکت‌ها رو تغییر بدی.`,
+        btnLabel: 'مشاهده در چت با ورز',
+        action: ()=> goToChatWith('کدوم حرکتم متوقف شده؟'),
+      };
+    }
+    if (score!=null){
+      return { text: 'امروز کارت رو انجام دادی 🎉 فردا دوباره سر بزن تا روندت رو حفظ کنی.', btnLabel:null, action:null };
+    }
+    return null;
+  }
+  function renderNextAction(score){
+    const card = document.getElementById('nextActionCard');
+    const na = computeNextAction(score);
+    if (!na){ card.style.display = 'none'; return; }
+    card.style.display = 'flex';
+    document.getElementById('naText').textContent = na.text;
+    const btn = document.getElementById('naBtn');
+    if (na.btnLabel){
+      btn.style.display = '';
+      btn.textContent = na.btnLabel;
+      btn.onclick = na.action;
+    } else {
+      btn.style.display = 'none';
+    }
+  }
+
   function renderAll(){
     bw = trend(bodyweightSeries, selectedWindowDays, ASOF);
     waist = compareMeasurement(waistSeries, ASOF, selectedWindowDays, 0.7);
@@ -1968,6 +2054,8 @@
       document.getElementById('badgeCard').style.setProperty('--badge-glow', tier.glow);
     }
     document.getElementById('greetingTitle').textContent = checkins.length>0 ? 'بیا ببینیم این هفته چطوری گذشت' : 'به ورز خوش اومدی';
+    renderGreetingHello();
+    renderNextAction(score);
 
     /* ---- demo leaderboard: real user row + fake rows within the user's own age bracket, sorted best-to-worst ---- */
     const myName = authUser ? (authUser.username || (authUser.firstName + ' ' + authUser.lastName)) : 'خودت';
@@ -2278,6 +2366,25 @@
       Object.values(tabs).forEach(t=>t.classList.remove('active'));
       tabs[btn.dataset.tab].classList.add('active');
     });
+  });
+  /* Used by the Home "next action" card so its button actually lands the athlete
+     on the right tab AND the right field, instead of just naming a section. */
+  function goToTabAndFocus(tabName, focusId){
+    const tabBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+    if (tabBtn) tabBtn.click();
+    if (focusId){
+      setTimeout(()=>{
+        const el = document.getElementById(focusId);
+        if (el){ el.scrollIntoView({behavior:'smooth', block:'center'}); el.focus({preventScroll:true}); }
+      }, 60);
+    }
+  }
+  document.getElementById('windowToggleRow').addEventListener('click', ()=>{
+    const chips = document.getElementById('windowChips');
+    const icon = document.getElementById('windowToggleIcon');
+    const open = chips.style.display !== 'none';
+    chips.style.display = open ? 'none' : 'flex';
+    icon.style.transform = open ? '' : 'rotate(180deg)';
   });
   function goToChatWith(q){
     document.querySelector('.tab-btn[data-tab="chat"]').click();
