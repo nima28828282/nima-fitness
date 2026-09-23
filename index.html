@@ -352,6 +352,27 @@
   .auth-box .form-field{margin-bottom:10px; text-align:start}
   .auth-box .err{color:var(--bad); font-size:11.5px; min-height:16px; margin-bottom:6px}
 
+  /* ---- guided onboarding: progress dots + one big-card question per screen ---- */
+  .ob-dots{display:flex; justify-content:center; gap:6px; margin-bottom:18px}
+  .ob-dots .dot{width:7px; height:7px; border-radius:50%; background:var(--border); transition:background .2s, transform .2s}
+  .ob-dots .dot.done{background:var(--accent)}
+  .ob-dots .dot.current{background:var(--accent); transform:scale(1.35)}
+  .ob-back{background:none; border:none; color:var(--text-faint); font-size:12.5px; cursor:pointer; padding:0 0 10px; align-self:flex-start}
+  .ob-cards{display:flex; flex-direction:column; gap:8px; margin-top:16px}
+  .ob-card{
+    display:flex; align-items:center; gap:10px; text-align:start; width:100%; border:1.5px solid var(--border);
+    background:var(--surface-2); border-radius:14px; padding:13px 14px; font-family:inherit; cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .ob-card:active{transform:scale(.98)}
+  .ob-card.selected{border-color:var(--accent); background:rgba(1,47,167,0.06)}
+  .ob-card .emoji{font-size:19px; flex:none; width:26px; text-align:center}
+  .ob-card .txt{flex:1; min-width:0}
+  .ob-card .label{font-weight:800; font-size:14px; color:var(--text)}
+  .ob-card .sub{font-size:11.5px; color:var(--text-faint); margin-top:1px}
+  .ob-card .check{flex:none; width:20px; height:20px; border-radius:50%; border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center}
+  .ob-card.selected .check{background:var(--accent); border-color:var(--accent)}
+
   /* ---- avatar picker (signup + profile) ---- */
   .avatar-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:14px 0 18px; }
   .avatar-opt{ border:2px solid transparent; border-radius:16px; background:var(--surface-2); padding:6px 4px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; }
@@ -482,58 +503,19 @@
   </div>
 </div>
 
+<!-- Onboarding used to be one long form with 5 dropdowns stacked on a single
+     screen — functional, but exactly the kind of friction-before-value Humoo
+     Wear's critique flagged ("that's a lot of friction before the user sees
+     value... I'd make it feel like a guided assessment"). Rebuilt below as a
+     one-question-at-a-time flow with a progress indicator and large tappable
+     cards instead of <select> menus; tapping a card auto-advances, so there's
+     no separate "next" button to press five times. The underlying fields
+     (authUser.goal/exp/days/gender/obstacle) are unchanged, so nothing else
+     that reads them needs to change. -->
 <div id="onboardGate" style="display:none">
   <div class="auth-box wide">
-    <div class="step-tag">۵ سوال کوتاه — کمتر از ۱ دقیقه</div>
-    <h1>بذار هدفت رو بشناسیم</h1>
-    <p>قبل از اینکه بریم سراغ صفحه اصلی، این ۵ سوال کمک می‌کنه ورز درست‌تر باهات پیش بره.</p>
-    <div class="form-field">
-      <label>هدف اصلی‌ت از استفاده از ورز چیه؟</label>
-      <select id="obGoal">
-        <option value="lose">کاهش چربی</option>
-        <option value="gain">افزایش حجم عضله</option>
-        <option value="recomp">بازترکیب بدن (هم‌زمان چربی کم و عضله زیاد)</option>
-        <option value="strength">افزایش قدرت</option>
-        <option value="maintain">حفظ وضعیت فعلی</option>
-      </select>
-    </div>
-    <div class="form-field">
-      <label>سطح تجربه‌ت با تمرین چقدره؟</label>
-      <select id="obExp">
-        <option value="beginner">مبتدی</option>
-        <option value="intermediate" selected>متوسط</option>
-        <option value="advanced">پیشرفته</option>
-      </select>
-    </div>
-    <div class="form-field">
-      <label>چند روز در هفته می‌تونی تمرین کنی؟</label>
-      <select id="obDays">
-        <option value="2">۲ روز</option>
-        <option value="3" selected>۳ روز</option>
-        <option value="4">۴ روز</option>
-        <option value="5">۵ روز</option>
-        <option value="6">۶ روز</option>
-      </select>
-    </div>
-    <div class="form-field">
-      <label>جنسیت (برای دقیق‌تر شدن محاسبه‌ی کالری و ماکرو)</label>
-      <select id="obGender">
-        <option value="male">مرد</option>
-        <option value="female">زن</option>
-      </select>
-    </div>
-    <div class="form-field">
-      <label>بزرگ‌ترین مانعی که تا الان جلوی پیشرفتت رو گرفته؟</label>
-      <select id="obObstacle">
-        <option value="time">کمبود وقت</option>
-        <option value="motivation">نبود انگیزه</option>
-        <option value="plan">ندونستن برنامه درست</option>
-        <option value="nutrition">تغذیه نامنظم</option>
-        <option value="injury">آسیب‌دیدگی</option>
-      </select>
-    </div>
-    <div style="height:4px"></div>
-    <button class="primary-btn" id="onboardSubmit">ثبت و ادامه</button>
+    <div class="ob-dots" id="obDots"></div>
+    <div id="obStepHost"></div>
   </div>
 </div>
 
@@ -1291,6 +1273,120 @@
     setTimeout(()=>{ try { loadRemotePhotos(); } catch(e){} }, 0);
   }
 
+
+  /* ---- guided onboarding — asked once, right after signup, before the
+     athlete ever sees the home screen. Answers double as sensible defaults
+     for the Profile tab (goal/exp/days/gender) so they don't have to enter
+     them twice. One question per screen, large tappable cards, auto-advance
+     on tap, a closing "profile's ready" screen — replacing the old single
+     scroll of five <select> dropdowns. ---- */
+  const OB_STEPS = [
+    { field:'goal', title:'هدف اصلی‌ت از استفاده از ورز چیه؟', options:[
+        { value:'lose', emoji:'🔥', label:'کاهش چربی' },
+        { value:'gain', emoji:'💪', label:'افزایش حجم عضله' },
+        { value:'recomp', emoji:'⚖️', label:'بازترکیب بدن', sub:'هم‌زمان چربی کم و عضله زیاد' },
+        { value:'strength', emoji:'🏋️', label:'افزایش قدرت' },
+        { value:'maintain', emoji:'🎯', label:'حفظ وضعیت فعلی' },
+      ]},
+    { field:'exp', title:'سطح تجربه‌ت با تمرین چقدره؟', options:[
+        { value:'beginner', emoji:'🌱', label:'مبتدی' },
+        { value:'intermediate', emoji:'📈', label:'متوسط' },
+        { value:'advanced', emoji:'🏆', label:'پیشرفته' },
+      ]},
+    { field:'days', title:'چند روز در هفته می‌تونی تمرین کنی؟', options:[
+        { value:'2', emoji:'🗓️', label:'۲ روز' },
+        { value:'3', emoji:'🗓️', label:'۳ روز' },
+        { value:'4', emoji:'🗓️', label:'۴ روز' },
+        { value:'5', emoji:'🗓️', label:'۵ روز' },
+        { value:'6', emoji:'🗓️', label:'۶ روز' },
+      ]},
+    { field:'gender', title:'جنسیت (برای دقیق‌تر شدن محاسبه‌ی کالری و ماکرو)', options:[
+        { value:'male', emoji:'♂️', label:'مرد' },
+        { value:'female', emoji:'♀️', label:'زن' },
+      ]},
+    { field:'obstacle', title:'بزرگ‌ترین مانعی که تا الان جلوی پیشرفتت رو گرفته؟', options:[
+        { value:'time', emoji:'⏳', label:'کمبود وقت' },
+        { value:'motivation', emoji:'😮‍💨', label:'نبود انگیزه' },
+        { value:'plan', emoji:'🧭', label:'ندونستن برنامه درست' },
+        { value:'nutrition', emoji:'🍽️', label:'تغذیه نامنظم' },
+        { value:'injury', emoji:'🩹', label:'آسیب‌دیدگی' },
+      ]},
+  ];
+  const OB_FA = { lose:'کاهش چربی', gain:'افزایش حجم عضله', recomp:'بازترکیب بدن', strength:'افزایش قدرت', maintain:'حفظ وضعیت فعلی' };
+  let obIndex = -1; // -1 = intro screen, 0..OB_STEPS.length-1 = questions, OB_STEPS.length = closing screen
+  let obAnswers = {};
+  function initOnboardWizard(){
+    obIndex = -1;
+    obAnswers = {};
+    renderOnboardStep();
+  }
+  function renderOnboardDots(){
+    const dots = document.getElementById('obDots');
+    if (obIndex < 0 || obIndex > OB_STEPS.length - 1){ dots.innerHTML = ''; return; }
+    dots.innerHTML = OB_STEPS.map((_, i)=>
+      `<span class="dot ${i<obIndex?'done':''} ${i===obIndex?'current':''}"></span>`
+    ).join('');
+  }
+  function renderOnboardStep(){
+    renderOnboardDots();
+    const host = document.getElementById('obStepHost');
+    if (obIndex === -1){
+      host.innerHTML = `
+        <h1>بذار پروفایل ورزت رو بسازیم</h1>
+        <p>۵ سوال کوتاه، کمتر از ۱ دقیقه — تا ورز از همون روز اول درست باهات پیش بره.</p>
+        <button class="primary-btn" id="obStartBtn">شروع کن</button>
+      `;
+      document.getElementById('obStartBtn').addEventListener('click', ()=>{ obIndex = 0; renderOnboardStep(); });
+      return;
+    }
+    if (obIndex === OB_STEPS.length){
+      host.innerHTML = `
+        <h1>پروفایلت آماده‌ست 🎉</h1>
+        <p>هدف: <b>${OB_FA[obAnswers.goal] || '—'}</b> · ${faNum(obAnswers.days,0)} روز در هفته · سطح ${EXP_FA[obAnswers.exp] || '—'}</p>
+        <button class="primary-btn" id="obFinishBtn">بریم ببینیم کجای مسیری</button>
+      `;
+      document.getElementById('obFinishBtn').addEventListener('click', finishOnboarding);
+      return;
+    }
+    const step = OB_STEPS[obIndex];
+    host.innerHTML = `
+      ${obIndex>0 ? '<button type="button" class="ob-back" id="obBackBtn">‹ برگشت</button>' : ''}
+      <h1>${step.title}</h1>
+      <div class="ob-cards">
+        ${step.options.map(opt => `
+          <button type="button" class="ob-card ${obAnswers[step.field]===opt.value?'selected':''}" data-value="${opt.value}">
+            <span class="emoji">${opt.emoji||''}</span>
+            <span class="txt"><span class="label">${opt.label}</span>${opt.sub?`<span class="sub">${opt.sub}</span>`:''}</span>
+            <span class="check"></span>
+          </button>
+        `).join('')}
+      </div>
+    `;
+    if (obIndex>0) document.getElementById('obBackBtn').addEventListener('click', ()=>{ obIndex--; renderOnboardStep(); });
+    host.querySelectorAll('.ob-card').forEach(card=>{
+      card.addEventListener('click', ()=>{
+        obAnswers[step.field] = card.dataset.value;
+        // Small delay so the athlete sees their tap register (selected state)
+        // before the screen changes — an auto-advance with zero feedback
+        // feels like a glitch, not a guided flow.
+        card.classList.add('selected');
+        setTimeout(()=>{ obIndex++; renderOnboardStep(); }, 180);
+      });
+    });
+  }
+  function finishOnboarding(){
+    if (!authUser) return;
+    authUser.goal = obAnswers.goal;
+    authUser.exp = obAnswers.exp;
+    authUser.days = obAnswers.days;
+    authUser.gender = obAnswers.gender;
+    authUser.obstacle = obAnswers.obstacle;
+    authUser.onboarded = true;
+    saveAuthUser();
+    onboardGate.style.display = 'none';
+    if (!authUser.notifAsked){ notifGate.style.display = 'flex'; return; }
+    enterMainApp();
+  }
   const avatarGate = document.getElementById('avatarGate');
   const landingGate = document.getElementById('landingGate');
   function showApp(){
@@ -1303,6 +1399,7 @@
     }
     avatarGate.style.display = 'none';
     if (!authUser.onboarded){
+      initOnboardWizard();
       onboardGate.style.display = 'flex';
       return;
     }
@@ -1506,23 +1603,6 @@
     avatarGate.style.display = 'flex';
   });
 
-  /* ---- 5-question onboarding — asked once, right after signup, before
-     the athlete ever sees the home screen. Answers double as sensible
-     defaults for the Profile tab (goal/exp/days/gender) so they don't
-     have to enter them twice. ---- */
-  document.getElementById('onboardSubmit').addEventListener('click', ()=>{
-    if (!authUser) return;
-    authUser.goal = document.getElementById('obGoal').value;
-    authUser.exp = document.getElementById('obExp').value;
-    authUser.days = document.getElementById('obDays').value;
-    authUser.gender = document.getElementById('obGender').value;
-    authUser.obstacle = document.getElementById('obObstacle').value;
-    authUser.onboarded = true;
-    saveAuthUser();
-    onboardGate.style.display = 'none';
-    if (!authUser.notifAsked){ notifGate.style.display = 'flex'; return; }
-    enterMainApp();
-  });
 
   /* ---- Notification opt-in — asked once. If yes, the home tab shows a
      short AI-personalized motivational message every few days (see
