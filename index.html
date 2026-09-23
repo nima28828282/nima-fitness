@@ -301,6 +301,24 @@
   .score-card .lbl{font-size:12.5px; opacity:.85; margin-top:2px}
   .plan-text{white-space:pre-wrap; font-size:13.5px; line-height:1.9; color:var(--text)}
 
+  /* Profile-tab accordions: the assessment form, nutrition, AI plan and progress
+     photos used to all sit fully expanded in one long scroll (the "information
+     overload" issue flagged against Home applied here too, arguably worse).
+     Native <details>/<summary> collapses everything but one section by default,
+     needs no JS to toggle, and stays keyboard/screen-reader friendly for free. */
+  .acc-section{border:1px solid var(--border); border-radius:16px; background:var(--surface); margin:0 0 4px; overflow:hidden}
+  .acc-section > summary{
+    list-style:none; cursor:pointer; padding:14px 16px; display:flex; align-items:center; justify-content:space-between;
+    font-size:13.5px; font-weight:800; color:var(--text); gap:10px;
+  }
+  .acc-section > summary::-webkit-details-marker{display:none}
+  .acc-section > summary .acc-sub{font-weight:600; font-size:11.5px; color:var(--text-faint); margin-inline-start:auto; margin-inline-end:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:50%}
+  .acc-section > summary .acc-chevron{flex:none; transition:transform .2s; color:var(--text-faint)}
+  .acc-section[open] > summary .acc-chevron{transform:rotate(180deg)}
+  .acc-section > summary:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
+  .acc-body{padding:0 16px 16px}
+  .acc-section[open] > summary{border-bottom:1px solid var(--border)}
+
   .photo-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
   .photo-tile{
     aspect-ratio:3/4; border-radius:14px; overflow:hidden; background:var(--surface-2); border:1px solid var(--border);
@@ -699,93 +717,135 @@
       <button class="ic-btn" id="installCardBtn">نصب</button>
     </div>
 
-    <h2 class="section-title">سنجش اولیه با ورز</h2>
-    <div class="card">
-      <p style="margin:0 0 14px;font-size:13px;color:var(--text-dim);line-height:1.8">
-        قد، وزن و هدفت رو بگو تا ورز یه امتیاز آمادگی بده و برات یه برنامه شخصی‌سازی‌شده بنویسه. امتیاز از روی محاسبه واقعی (نه حدس) به‌دست میاد؛ متن برنامه رو ورز می‌نویسه.
-      </p>
-      <div class="form-grid">
-        <div class="form-field"><label>قد (سانتی‌متر)</label><input type="text" id="pfHeight" inputmode="numeric" placeholder="175"></div>
-        <div class="form-field"><label>وزن (کیلوگرم)</label><input type="text" id="pfWeight" inputmode="numeric" placeholder="78"></div>
-        <div class="form-field"><label>سن</label><input type="text" id="pfAge" inputmode="numeric" placeholder="26"></div>
-        <div class="form-field">
-          <label>جنسیت</label>
-          <select id="pfGender"><option value="male">مرد</option><option value="female">زن</option></select>
+    <!-- Profile used to stack the assessment form, macros, food log, AI plan and
+         progress photos all fully expanded in one continuous scroll — the same
+         "information overload" issue Humoo Wear flagged on Home, just here too.
+         Each concern is now its own collapsible section (native <details>, no
+         extra JS needed to toggle); only the one most relevant to a new athlete
+         starts open, everything else starts collapsed with a one-line summary. -->
+    <details class="acc-section" id="accAssess" open>
+      <summary>
+        <span>سنجش اولیه با ورز</span>
+        <span class="acc-sub" id="accAssessSub"></span>
+        <svg class="acc-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="acc-body">
+        <p style="margin:0 0 14px;font-size:13px;color:var(--text-dim);line-height:1.8">
+          قد، وزن و هدفت رو بگو تا ورز یه امتیاز آمادگی بده و برات یه برنامه شخصی‌سازی‌شده بنویسه. امتیاز از روی محاسبه واقعی (نه حدس) به‌دست میاد؛ متن برنامه رو ورز می‌نویسه.
+        </p>
+        <div class="form-grid">
+          <div class="form-field"><label>قد (سانتی‌متر)</label><input type="text" id="pfHeight" inputmode="numeric" placeholder="175"></div>
+          <div class="form-field"><label>وزن (کیلوگرم)</label><input type="text" id="pfWeight" inputmode="numeric" placeholder="78"></div>
+          <div class="form-field"><label>سن</label><input type="text" id="pfAge" inputmode="numeric" placeholder="26"></div>
+          <div class="form-field">
+            <label>جنسیت</label>
+            <select id="pfGender"><option value="male">مرد</option><option value="female">زن</option></select>
+          </div>
+          <div class="form-field">
+            <label>سطح تجربه</label>
+            <select id="pfExp"><option value="beginner">مبتدی</option><option value="intermediate" selected>متوسط</option><option value="advanced">پیشرفته</option></select>
+          </div>
+          <div class="form-field full">
+            <label>هدف اصلی</label>
+            <select id="pfGoal">
+              <option value="gain">افزایش حجم عضله</option>
+              <option value="lose">کاهش چربی</option>
+              <option value="recomp">بازترکیب بدن (هم‌زمان)</option>
+              <option value="strength">افزایش قدرت</option>
+              <option value="maintain">حفظ وضعیت فعلی</option>
+            </select>
+          </div>
+          <div class="form-field full"><label>چند روز در هفته تمرین می‌کنی؟</label><input type="text" id="pfDays" inputmode="numeric" placeholder="4"></div>
         </div>
-        <div class="form-field">
-          <label>سطح تجربه</label>
-          <select id="pfExp"><option value="beginner">مبتدی</option><option value="intermediate" selected>متوسط</option><option value="advanced">پیشرفته</option></select>
+        <div style="height:14px"></div>
+        <button class="primary-btn" id="pfSubmit">دریافت امتیاز و برنامه شخصی‌سازی‌شده</button>
+
+        <div class="score-card" id="scoreCard" style="margin-top:14px">
+          <div class="num" id="scoreNum">—</div>
+          <div class="lbl">شاخص پایه بدنی از ۱۰۰ (فقط بر اساس قد و وزن — نه یه معیار سلامتی یا آمادگی، چون کسی با عضله زیاد ممکنه BMI بالاتری داشته باشه)</div>
         </div>
-        <div class="form-field full">
-          <label>هدف اصلی</label>
-          <select id="pfGoal">
-            <option value="gain">افزایش حجم عضله</option>
-            <option value="lose">کاهش چربی</option>
-            <option value="recomp">بازترکیب بدن (هم‌زمان)</option>
-            <option value="strength">افزایش قدرت</option>
-            <option value="maintain">حفظ وضعیت فعلی</option>
-          </select>
+      </div>
+    </details>
+
+    <details class="acc-section" id="accNutrition">
+      <summary>
+        <span>تغذیه — ماکرو و ثبت غذا</span>
+        <span class="acc-sub" id="accNutritionSub"></span>
+        <svg class="acc-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="acc-body">
+        <div class="card" id="macroCard" style="display:none">
+          <h2 class="section-title" style="margin:0 0 10px">ماکروی پیشنهادی روزانه</h2>
+          <div class="form-grid" id="macroGrid" style="margin-bottom:4px"></div>
+          <div style="font-size:11.5px; color:var(--text-faint); line-height:1.7">
+            این فقط مقدار هدفه (پروتئین/کربوهیدرات/چربی) که با فرمول استاندارد از قد، وزن، سن، جنسیت، هدف و روزهای تمرینت حساب شده — نه یه رژیم غذایی دقیق با لیست وعده. پایین‌تر می‌تونی غذاهاتو ثبت کنی تا ببینی چقدر به این هدف رسیدی.
+          </div>
         </div>
-        <div class="form-field full"><label>چند روز در هفته تمرین می‌کنی؟</label><input type="text" id="pfDays" inputmode="numeric" placeholder="4"></div>
-      </div>
-      <div style="height:14px"></div>
-      <button class="primary-btn" id="pfSubmit">دریافت امتیاز و برنامه شخصی‌سازی‌شده</button>
-    </div>
 
-    <div class="score-card" id="scoreCard">
-      <div class="num" id="scoreNum">—</div>
-      <div class="lbl">شاخص پایه بدنی از ۱۰۰ (فقط بر اساس قد و وزن — نه یه معیار سلامتی یا آمادگی، چون کسی با عضله زیاد ممکنه BMI بالاتری داشته باشه)</div>
-    </div>
+        <div class="card" id="nutritionLogCard" style="display:none">
+          <h2 class="section-title" style="margin:0 0 10px">ثبت غذای امروز</h2>
+          <div id="nutritionTotals" style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px"></div>
+          <div id="nutritionEntries" style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px"></div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px">
+            <input type="text" id="foodNameInput" placeholder="اسم غذا (مثلاً برنج و مرغ)" style="flex:2; min-width:140px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 12px; font-family:inherit; font-size:13px; box-sizing:border-box">
+            <select id="foodMealInput" style="flex:1; min-width:90px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 8px; font-family:inherit; font-size:13px">
+              <option value="صبحانه">صبحانه</option><option value="ناهار">ناهار</option><option value="شام">شام</option><option value="میان‌وعده">میان‌وعده</option>
+            </select>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px">
+            <input type="number" inputmode="decimal" id="foodKcalInput" placeholder="کالری" style="flex:1; min-width:70px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 10px; font-family:inherit; font-size:13px; box-sizing:border-box">
+            <input type="number" inputmode="decimal" id="foodProteinInput" placeholder="پروتئین (g)" style="flex:1; min-width:70px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 10px; font-family:inherit; font-size:13px; box-sizing:border-box">
+            <input type="number" inputmode="decimal" id="foodCarbInput" placeholder="کربو (g)" style="flex:1; min-width:70px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 10px; font-family:inherit; font-size:13px; box-sizing:border-box">
+            <input type="number" inputmode="decimal" id="foodFatInput" placeholder="چربی (g)" style="flex:1; min-width:70px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 10px; font-family:inherit; font-size:13px; box-sizing:border-box">
+          </div>
+          <button type="button" id="foodAddBtn" style="width:100%; background:var(--accent); color:var(--accent-ink); border:none; border-radius:12px; padding:11px; font-weight:800; font-size:13.5px; cursor:pointer">افزودن غذا</button>
+        </div>
 
-    <div class="card" id="macroCard" style="display:none">
-      <h2 class="section-title" style="margin:0 0 10px">ماکروی پیشنهادی روزانه</h2>
-      <div class="form-grid" id="macroGrid" style="margin-bottom:4px"></div>
-      <div style="font-size:11.5px; color:var(--text-faint); line-height:1.7">
-        این فقط مقدار هدفه (پروتئین/کربوهیدرات/چربی) که با فرمول استاندارد از قد، وزن، سن، جنسیت، هدف و روزهای تمرینت حساب شده — نه یه رژیم غذایی دقیق با لیست وعده. پایین‌تر می‌تونی غذاهاتو ثبت کنی تا ببینی چقدر به این هدف رسیدی.
+        <div id="nutritionEmptyMsg" style="font-size:12.5px; color:var(--text-faint); line-height:1.7">
+          بعد از تکمیل «سنجش اولیه» بالا، هدف روزانه‌ی کالری/پروتئین/کربو/چربیت اینجا محاسبه می‌شه و می‌تونی غذاهاتو ثبت کنی.
+        </div>
       </div>
-    </div>
+    </details>
 
-    <div class="card" id="nutritionLogCard" style="display:none">
-      <h2 class="section-title" style="margin:0 0 10px">ثبت غذای امروز</h2>
-      <div id="nutritionTotals" style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px"></div>
-      <div id="nutritionEntries" style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px"></div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px">
-        <input type="text" id="foodNameInput" placeholder="اسم غذا (مثلاً برنج و مرغ)" style="flex:2; min-width:140px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 12px; font-family:inherit; font-size:13px; box-sizing:border-box">
-        <select id="foodMealInput" style="flex:1; min-width:90px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 8px; font-family:inherit; font-size:13px">
-          <option value="صبحانه">صبحانه</option><option value="ناهار">ناهار</option><option value="شام">شام</option><option value="میان‌وعده">میان‌وعده</option>
-        </select>
+    <details class="acc-section" id="accPlan">
+      <summary>
+        <span>برنامه‌ای که ورز نوشت</span>
+        <span class="acc-sub" id="accPlanSub"></span>
+        <svg class="acc-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="acc-body">
+        <div class="card" id="planCard" style="display:none">
+          <div class="plan-text" id="planText">در حال نوشتن...</div>
+        </div>
+        <div id="planEmptyMsg" style="font-size:12.5px; color:var(--text-faint); line-height:1.7">
+          بعد از تکمیل «سنجش اولیه» بالا، ورز یه برنامه‌ی شخصی‌سازی‌شده اینجا برات می‌نویسه.
+        </div>
       </div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px">
-        <input type="number" inputmode="decimal" id="foodKcalInput" placeholder="کالری" style="flex:1; min-width:70px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 10px; font-family:inherit; font-size:13px; box-sizing:border-box">
-        <input type="number" inputmode="decimal" id="foodProteinInput" placeholder="پروتئین (g)" style="flex:1; min-width:70px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 10px; font-family:inherit; font-size:13px; box-sizing:border-box">
-        <input type="number" inputmode="decimal" id="foodCarbInput" placeholder="کربو (g)" style="flex:1; min-width:70px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 10px; font-family:inherit; font-size:13px; box-sizing:border-box">
-        <input type="number" inputmode="decimal" id="foodFatInput" placeholder="چربی (g)" style="flex:1; min-width:70px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 10px; font-family:inherit; font-size:13px; box-sizing:border-box">
-      </div>
-      <button type="button" id="foodAddBtn" style="width:100%; background:var(--accent); color:var(--accent-ink); border:none; border-radius:12px; padding:11px; font-weight:800; font-size:13.5px; cursor:pointer">افزودن غذا</button>
-    </div>
+    </details>
 
-    <div class="card" id="planCard" style="display:none">
-      <h2 class="section-title" style="margin:0 0 10px">برنامه‌ای که ورز برات نوشت</h2>
-      <div class="plan-text" id="planText">در حال نوشتن...</div>
-    </div>
-
-    <h2 class="section-title">عکس‌های پیشرفت</h2>
-    <div class="card">
-      <p style="margin:0 0 12px;font-size:12.5px;color:var(--text-dim);line-height:1.7">
-        عکس‌ها به‌صورت خصوصی و رمزنگاری‌شده در حساب خودت ذخیره می‌شن تا از هر دستگاهی بهشون دسترسی داشته باشی، و با زدن ✕ برای همیشه حذف می‌شن. فقط برای دیدن تصویر کنار هم‌اند — نه برای اثبات چربی/عضله.
-      </p>
-      <div class="photo-grid" id="photoGrid">
-        <button class="photo-upload-btn" id="photoAddBtn">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          افزودن عکس
-        </button>
+    <details class="acc-section" id="accPhotos">
+      <summary>
+        <span>عکس‌های پیشرفت</span>
+        <span class="acc-sub" id="accPhotosSub"></span>
+        <svg class="acc-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="acc-body">
+        <p style="margin:0 0 12px;font-size:12.5px;color:var(--text-dim);line-height:1.7">
+          عکس‌ها به‌صورت خصوصی و رمزنگاری‌شده در حساب خودت ذخیره می‌شن تا از هر دستگاهی بهشون دسترسی داشته باشی، و با زدن ✕ برای همیشه حذف می‌شن. فقط برای دیدن تصویر کنار هم‌اند — نه برای اثبات چربی/عضله.
+        </p>
+        <div class="photo-grid" id="photoGrid">
+          <button class="photo-upload-btn" id="photoAddBtn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            افزودن عکس
+          </button>
+        </div>
+        <input type="file" id="photoInput" accept="image/*" multiple style="display:none">
+        <div id="photoAnalysis" style="display:none; margin-top:12px">
+          <div style="font-size:11.5px; color:var(--text-faint); margin-bottom:6px">تحلیل ورز از این عکس — یه برآورد تقریبیه، نه اندازه‌گیری پزشکی</div>
+          <div class="plan-text" id="photoAnalysisText"></div>
+        </div>
       </div>
-      <input type="file" id="photoInput" accept="image/*" multiple style="display:none">
-      <div id="photoAnalysis" style="display:none; margin-top:12px">
-        <div style="font-size:11.5px; color:var(--text-faint); margin-bottom:6px">تحلیل ورز از این عکس — یه برآورد تقریبیه، نه اندازه‌گیری پزشکی</div>
-        <div class="plan-text" id="photoAnalysisText"></div>
-      </div>
-    </div>
+    </details>
   </main>
 
   <!-- ===================== CHAT ===================== -->
@@ -2678,7 +2738,14 @@ ${buildFactBlock()}`;
     renderNutritionCard();
   });
   // Restore a previously computed target (from an earlier visit) on load.
-  if (loadNutritionTarget()){ document.getElementById('nutritionLogCard').style.display = 'block'; renderNutritionCard(); }
+  const existingTarget = loadNutritionTarget();
+  if (existingTarget){
+    document.getElementById('nutritionLogCard').style.display = 'block';
+    document.getElementById('nutritionEmptyMsg').style.display = 'none';
+    document.getElementById('accNutritionSub').textContent = `🎯 ${faNum(existingTarget.calories,0)} کالری/روز`;
+    document.getElementById('accAssess').open = false; // already done — collapse in favor of the accordion below
+    renderNutritionCard();
+  }
 
   document.getElementById('pfSubmit').addEventListener('click', async ()=>{
     const height = parseFloat(document.getElementById('pfHeight').value);
@@ -2713,12 +2780,23 @@ ${buildFactBlock()}`;
     macroCard.style.display = 'block';
     saveNutritionTarget(macros);
     document.getElementById('nutritionLogCard').style.display = 'block';
+    document.getElementById('nutritionEmptyMsg').style.display = 'none';
     renderNutritionCard();
     if (authUser){ authUser.gender = gender; authUser.age = age; saveAuthUser(); renderAll(); }
 
+    // Assessment is done — collapse it in favor of showing the results the
+    // athlete actually asked for, instead of leaving every section expanded.
+    document.getElementById('accAssessSub').textContent = `قد ${faNum(height,0)} · وزن ${faNum(weight,0)} · ${GOAL_FA[goal]}`;
+    document.getElementById('accAssess').open = false;
+    document.getElementById('accNutrition').open = true;
+    document.getElementById('accNutritionSub').textContent = `🎯 ${faNum(macros.calories,0)} کالری/روز`;
+    document.getElementById('accPlan').open = true;
+
     const planCard = document.getElementById('planCard');
     const planText = document.getElementById('planText');
+    const planEmptyMsg = document.getElementById('planEmptyMsg');
     planCard.style.display = 'block';
+    if (planEmptyMsg) planEmptyMsg.style.display = 'none';
     planText.textContent = 'در حال نوشتن برنامه...';
     btn.disabled = true;
 
@@ -2748,6 +2826,7 @@ ${buildFactBlock()}`;
     try {
       const { text } = await sampler(prompt, { modelTier:'default', cache:false, onText:({text})=>{ planText.textContent = text; } });
       planText.textContent = text;
+      document.getElementById('accPlanSub').textContent = 'آماده ✓';
     } catch(e){
       planText.textContent = (e && e.code==='not_granted')
         ? 'برای نوشتن برنامه شخصی‌سازی‌شده باید اجازه استفاده از هوش مصنوعی رو بدی — دوباره امتحان کن.'
@@ -2764,6 +2843,14 @@ ${buildFactBlock()}`;
      and the app says so before and after every result.
      ============================================================ */
   const photoGrid = document.getElementById('photoGrid');
+  // Keeps the collapsed "عکس‌های پیشرفت" accordion header showing a live photo
+  // count, without needing to hunt down every add/delete code path below.
+  function updatePhotoCountSub(){
+    const n = photoGrid.querySelectorAll('.photo-tile').length;
+    const sub = document.getElementById('accPhotosSub');
+    if (sub) sub.textContent = n>0 ? `🖼 ${faNum(n,0)} عکس` : '';
+  }
+  new MutationObserver(updatePhotoCountSub).observe(photoGrid, {childList:true});
   const photoInput = document.getElementById('photoInput');
   const photoAddBtn = document.getElementById('photoAddBtn');
   const photoAnalysisWrap = document.getElementById('photoAnalysis');
