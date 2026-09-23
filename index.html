@@ -34,6 +34,32 @@
     --navy:#0B1230;
     --shadow: 0 10px 30px -12px rgba(16,21,38,.18);
     --font-fa:'Estedad',Tahoma,sans-serif;
+
+    /* ---- Design system: radius / spacing / type scale --------------------
+       A naming pass over the numbers already used everywhere in this file —
+       every border-radius below maps 1:1 to a value that was already in use,
+       so nothing should look different after this. The point is that any
+       *new* component from now on picks a step from here instead of
+       inventing another one-off pixel number (this is the "formal design
+       system" Humoo Wear's critique asked for). ---- */
+    --radius-2xs:8px;   /* small square images/icons (brand mark) */
+    --radius-xs:10px;   /* small buttons, chips */
+    --radius-sm:11px;   /* compact CTA buttons (next-action) */
+    --radius-md:12px;   /* default card radius — used most often */
+    --radius-lg:14px;   /* primary buttons, secondary cards */
+    --radius-xl:16px;   /* larger cards, list rows */
+    --radius-2xl:18px;  /* chat bubbles, leaderboard card */
+    --radius-3xl:20px;  /* hero cards, chart panel */
+    --radius-4xl:22px;  /* auth / landing boxes */
+    --radius-5xl:24px;  /* bottom sheets */
+    --radius-pill:999px;/* fully-rounded pills, dots, filter chips */
+
+    --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px;
+    --space-5:20px; --space-6:24px; --space-7:30px;
+
+    --fs-xs:11px; --fs-sm:12.5px; --fs-base:13.5px; --fs-md:14px;
+    --fs-lg:16px; --fs-xl:18px; --fs-2xl:22px;
+    --fw-regular:400; --fw-medium:600; --fw-bold:700; --fw-black:800;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
@@ -69,15 +95,16 @@
   }
   .brand{display:flex; align-items:center; gap:8px; font-weight:700; font-size:17px}
   .brand svg{flex:none}
-  .brand img{flex:none; width:28px; height:28px; border-radius:8px; object-fit:contain}
-  .topbar .win{margin-inline-start:auto; font-size:12px; color:var(--text-faint); background:var(--surface-2); border:1px solid var(--border); padding:5px 10px; border-radius:99px; font-variant-numeric:tabular-nums}
+  .topbar .win{margin-inline-start:auto; font-size:12px; color:var(--text-faint); background:var(--surface-2); border:1px solid var(--border); padding:5px 10px; border-radius:var(--radius-pill); font-variant-numeric:tabular-nums}
 
   main{flex:1; padding:6px 18px 100px; display:none; flex-direction:column; gap:16px}
-  main.active{display:flex}
+  main.active{display:flex; animation:tabFadeIn .22s ease}
+  @keyframes tabFadeIn{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)}}
+  @media (prefers-reduced-motion: reduce){ main.active{animation:none} }
 
   /* ---- cards ---- */
   .card{
-    background:var(--surface); border:1px solid var(--border); border-radius:20px;
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-3xl);
     padding:18px; box-shadow:var(--shadow);
   }
   .verdict-card{
@@ -86,7 +113,7 @@
   }
   .verdict-card .pill{
     display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600;
-    background:rgba(255,255,255,.16); padding:6px 12px; border-radius:99px; margin-bottom:12px;
+    background:rgba(255,255,255,.16); padding:6px 12px; border-radius:var(--radius-pill); margin-bottom:12px;
   }
   .verdict-card .pill .dot{width:7px; height:7px; border-radius:50%; background:#fff}
   .verdict-card h1{font-size:19px; line-height:1.6; margin:0 0 14px; font-weight:700}
@@ -100,15 +127,15 @@
   .next-action-card{background:var(--surface); border:1px solid var(--border); display:flex; flex-direction:column; gap:8px; padding:14px 16px}
   .next-action-label{font-size:11px; font-weight:800; color:var(--accent); letter-spacing:.2px}
   .next-action-text{font-size:13.5px; line-height:1.75; color:var(--text)}
-  .next-action-btn{align-self:flex-start; background:var(--accent); color:var(--accent-ink); border:none; border-radius:11px; padding:9px 16px; font-family:inherit; font-weight:700; font-size:12.5px; cursor:pointer}
+  .next-action-btn{align-self:flex-start; background:var(--accent); color:var(--accent-ink); border:none; border-radius:var(--radius-sm); padding:9px 16px; font-family:inherit; font-weight:700; font-size:12.5px; cursor:pointer}
   .streak-pill{
     display:flex; align-items:center; gap:5px; background:var(--surface); border:1px solid var(--border);
-    border-radius:99px; padding:7px 12px; font-size:12px; font-weight:700; box-shadow:var(--shadow); flex:none;
+    border-radius:var(--radius-pill); padding:7px 12px; font-size:12px; font-weight:700; box-shadow:var(--shadow); flex:none;
   }
 
   .stat-row{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
   .stat-tile{
-    background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:14px 10px 12px;
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); padding:14px 10px 12px;
     text-align:center; box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; gap:7px;
   }
   .stat-tile .icon-circle{
@@ -121,7 +148,7 @@
   /* ---- weekly performance badge ---- */
   .badge-card{
     display:flex; align-items:center; gap:16px; background:var(--surface); border:1px solid var(--border);
-    border-radius:20px; padding:16px 18px; box-shadow:var(--shadow); position:relative; overflow:hidden;
+    border-radius:var(--radius-3xl); padding:16px 18px; box-shadow:var(--shadow); position:relative; overflow:hidden;
   }
   .badge-card::before{
     content:''; position:absolute; inset-inline-end:-40px; top:-40px; width:130px; height:130px; border-radius:50%;
@@ -135,12 +162,12 @@
   .badge-info .tier-desc{font-size:12px; color:var(--text-dim); line-height:1.6}
 
   /* ---- leaderboard ---- */
-  .lb-card{background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:14px 16px; box-shadow:var(--shadow)}
+  .lb-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-2xl); padding:14px 16px; box-shadow:var(--shadow)}
   .lb-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:4px}
-  .lb-demo-tag{font-size:10.5px; font-weight:800; color:#9C6A2E; background:rgba(224,164,34,.16); border-radius:999px; padding:3px 9px; flex:none}
+  .lb-demo-tag{font-size:10.5px; font-weight:800; color:#9C6A2E; background:rgba(224,164,34,.16); border-radius:var(--radius-pill); padding:3px 9px; flex:none}
   .lb-note{font-size:11.5px; color:var(--text-dim); line-height:1.7; margin-bottom:10px}
-  .lb-prize{font-size:12px; font-weight:700; color:#9C6A2E; background:rgba(224,164,34,.12); border-radius:12px; padding:9px 11px; margin-bottom:10px; line-height:1.7}
-  .lb-row{display:flex; align-items:center; gap:10px; padding:8px 4px; border-radius:12px}
+  .lb-prize{font-size:12px; font-weight:700; color:#9C6A2E; background:rgba(224,164,34,.12); border-radius:var(--radius-md); padding:9px 11px; margin-bottom:10px; line-height:1.7}
+  .lb-row{display:flex; align-items:center; gap:10px; padding:8px 4px; border-radius:var(--radius-md)}
   .lb-row.you{background:rgba(1,47,167,.07); border:1.5px solid var(--accent)}
   .lb-rank{width:22px; flex:none; text-align:center; font-weight:800; font-size:12.5px; color:var(--text-dim); font-variant-numeric:tabular-nums}
   .lb-row:nth-child(1) .lb-rank{color:#E0A422} .lb-row:nth-child(2) .lb-rank{color:#9AA4B6} .lb-row:nth-child(3) .lb-rank{color:#9C6A2E}
@@ -151,23 +178,23 @@
   /* ---- measurements grid ---- */
   .meas-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
   .meas-card{
-    background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:13px 14px;
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); padding:13px 14px;
     box-shadow:var(--shadow); display:flex; flex-direction:column; gap:6px;
   }
   .meas-card .m-label{font-size:12px; color:var(--text-dim); font-weight:600}
   .meas-card .m-value{font-size:19px; font-weight:700; font-variant-numeric:tabular-nums}
-  .meas-card .m-tag{font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:99px; align-self:flex-start}
+  .meas-card .m-tag{font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:var(--radius-pill); align-self:flex-start}
 
   h2.section-title{font-size:13px; color:var(--text-dim); font-weight:700; margin:2px 2px 0; letter-spacing:.2px}
   .score-title-row{display:flex; align-items:center; justify-content:space-between; gap:8px}
   .info-btn{width:18px; height:18px; border-radius:50%; border:1px solid var(--text-dim); background:transparent; color:var(--text-dim); font-size:11px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; flex:none; font-family:inherit}
   .info-btn:active{opacity:.7}
-  .info-pop{display:none; font-size:12px; line-height:1.7; color:var(--text-dim); background:var(--surface-2); border-radius:10px; padding:10px 12px; margin:6px 2px 0}
+  .info-pop{display:none; font-size:12px; line-height:1.7; color:var(--text-dim); background:var(--surface-2); border-radius:var(--radius-xs); padding:10px 12px; margin:6px 2px 0}
   .info-pop.open{display:block}
 
   .chips{display:flex; flex-wrap:wrap; gap:8px}
   .chip{
-    background:var(--accent-soft); color:var(--accent); border:1px solid transparent; border-radius:99px;
+    background:var(--accent-soft); color:var(--accent); border:1px solid transparent; border-radius:var(--radius-pill);
     padding:9px 14px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;
   }
   .chip:active{opacity:.7}
@@ -177,20 +204,30 @@
   .note-row .ic{flex:none; width:20px; height:20px; margin-top:1px}
 
   /* ---- progress tab ---- */
-  .chart-wrap{background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:16px; box-shadow:var(--shadow)}
+  .chart-wrap{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-3xl); padding:16px; box-shadow:var(--shadow)}
   .chart-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px}
   .chart-head .big{font-size:22px; font-weight:700; font-variant-numeric:tabular-nums}
-  .chart-head .delta{font-size:12.5px; font-weight:700; padding:3px 8px; border-radius:99px}
+  .chart-head .delta{font-size:12.5px; font-weight:700; padding:3px 8px; border-radius:var(--radius-pill)}
   .delta.good{color:var(--good); background:var(--good-soft)} .delta.bad{color:var(--bad); background:var(--bad-soft)} .delta.warn{color:var(--warn); background:var(--warn-soft)}
+  /* ---- chart polish: grid lines, y-axis labels, area fill under the trend
+     line, a highlighted "latest" point and relative start/end captions —
+     replacing the old bare polyline-on-transparent-background look. ---- */
+  .chart-svg .grid-line{stroke:var(--border); stroke-width:1}
+  .chart-svg .axis-label{font-size:9px; fill:var(--text-faint); font-family:var(--font-fa); font-variant-numeric:tabular-nums}
+  .chart-svg .span-label{font-size:9.5px; fill:var(--text-faint); font-family:var(--font-fa)}
+  .chart-svg .trend-line{fill:none; stroke:var(--accent); stroke-width:2.5; stroke-linecap:round}
+  .chart-svg .actual-line{fill:none; stroke:var(--text-faint); stroke-width:1.2; stroke-dasharray:2 3; opacity:.55}
+  .chart-svg .pt{fill:var(--surface); stroke:var(--accent); stroke-width:1.6}
+  .chart-svg .pt-latest{fill:var(--accent); stroke:var(--surface); stroke-width:2}
 
   .lift-list{display:flex; flex-direction:column; gap:10px}
   .lift-row{
     display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border);
-    border-radius:16px; padding:12px 14px; box-shadow:var(--shadow);
+    border-radius:var(--radius-xl); padding:12px 14px; box-shadow:var(--shadow);
   }
   .lift-row .name{font-weight:700; font-size:14px; flex:1}
   .lift-row .meta{font-size:12px; color:var(--text-faint); margin-top:2px}
-  .status-badge{font-size:11.5px; font-weight:700; padding:5px 10px; border-radius:99px; white-space:nowrap}
+  .status-badge{font-size:11.5px; font-weight:700; padding:5px 10px; border-radius:var(--radius-pill); white-space:nowrap}
   .status-badge.progressing{background:var(--good-soft); color:var(--good)}
   .status-badge.stalled{background:var(--warn-soft); color:var(--warn)}
   .status-badge.regressing{background:var(--bad-soft); color:var(--bad)}
@@ -203,13 +240,13 @@
   .bubble-row.user{justify-content:flex-start}
   .bubble-row.assistant{justify-content:flex-end}
   .bubble{
-    max-width:82%; padding:11px 15px; border-radius:18px; font-size:14px; line-height:1.9; white-space:pre-wrap;
+    max-width:82%; padding:11px 15px; border-radius:var(--radius-2xl); font-size:14px; line-height:1.9; white-space:pre-wrap;
   }
   .bubble-row.user .bubble{background:var(--accent); color:var(--accent-ink); border-end-end-radius:5px}
   .bubble-row.assistant .bubble{background:var(--surface); border:1px solid var(--border); border-end-start-radius:5px; box-shadow:var(--shadow)}
   .bubble.thinking{color:var(--text-faint); font-style:italic}
   .chat-intro{
-    background:var(--surface-2); border:1px solid var(--border); border-radius:16px; padding:14px 16px;
+    background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-xl); padding:14px 16px;
     font-size:13px; color:var(--text-dim); line-height:1.8; margin:0 18px;
   }
   .chat-suggest{display:flex; gap:8px; overflow-x:auto; padding:0 18px 6px; scrollbar-width:none}
@@ -221,7 +258,7 @@
   }
   .composer textarea{
     flex:1; resize:none; border:1px solid var(--border); background:var(--surface); color:var(--text);
-    border-radius:16px; padding:11px 14px; font-family:inherit; font-size:14px; max-height:90px; line-height:1.6;
+    border-radius:var(--radius-xl); padding:11px 14px; font-family:inherit; font-size:14px; max-height:90px; line-height:1.6;
   }
   .composer textarea:focus{outline:2px solid var(--accent); outline-offset:1px}
   .send-btn{
@@ -240,20 +277,20 @@
   }
   .tab-btn{
     flex:1; background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:4px;
-    padding:6px 4px; color:var(--text-faint); font-family:inherit; font-size:11px; cursor:pointer; border-radius:12px;
+    padding:6px 4px; color:var(--text-faint); font-family:inherit; font-size:11px; cursor:pointer; border-radius:var(--radius-md);
   }
   .tab-btn.active{color:var(--accent)}
   .tab-btn svg{width:22px; height:22px}
 
   .callout{
     display:flex; gap:10px; align-items:flex-start; background:var(--warn-soft); color:var(--warn);
-    border-radius:14px; padding:12px 14px; font-size:12.5px; line-height:1.7;
+    border-radius:var(--radius-lg); padding:12px 14px; font-size:12.5px; line-height:1.7;
   }
   .callout.bad{background:var(--bad-soft); color:var(--bad)}
   .callout b{font-weight:700}
 
   /* ---- exercise log rows ---- */
-  .lift-card{background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); overflow:hidden}
+  .lift-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow); overflow:hidden}
   .lift-card-head{display:flex; align-items:center; gap:12px; padding:12px 14px; cursor:pointer}
   .lift-card-head .name{font-weight:700; font-size:14px; flex:1}
   .lift-card-head .meta{font-size:12px; color:var(--text-faint); margin-top:2px}
@@ -264,11 +301,11 @@
   .lift-log-form label{font-size:11px; color:var(--text-faint); display:block; margin-bottom:4px}
   .lift-log-form input{
     width:100%; border:1px solid var(--border); background:var(--surface-2); color:var(--text);
-    border-radius:10px; padding:8px 9px; font-family:inherit; font-size:13px; font-variant-numeric:tabular-nums;
+    border-radius:var(--radius-xs); padding:8px 9px; font-family:inherit; font-size:13px; font-variant-numeric:tabular-nums;
   }
   .lift-log-form input:focus{outline:2px solid var(--accent); outline-offset:1px}
   .lift-log-form button{
-    align-self:end; background:var(--accent); color:#fff; border:none; border-radius:10px;
+    align-self:end; background:var(--accent); color:#fff; border:none; border-radius:var(--radius-xs);
     padding:8px 14px; font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap;
   }
   .lift-log-form button:active{opacity:.8}
@@ -282,18 +319,21 @@
   .form-field.full{grid-column:1/-1}
   .form-field label{font-size:12px; color:var(--text-dim); font-weight:600}
   .form-field input, .form-field select{
-    border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px;
+    border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:var(--radius-md);
     padding:10px 12px; font-family:inherit; font-size:13.5px; font-variant-numeric:tabular-nums;
   }
   .form-field input:focus, .form-field select:focus{outline:2px solid var(--accent); outline-offset:1px}
   .primary-btn{
-    background:var(--accent); color:#fff; border:none; border-radius:14px; padding:13px; font-family:inherit;
+    background:var(--accent); color:#fff; border:none; border-radius:var(--radius-lg); padding:13px; font-family:inherit;
     font-size:14px; font-weight:700; cursor:pointer; width:100%;
   }
   .primary-btn:active{opacity:.85}
   .primary-btn:disabled{opacity:.55; cursor:default}
+  /* ---- button variant: secondary — same shape/size as primary-btn, muted
+     fill, for a dismissive/low-priority action next to a primary CTA. ---- */
+  .primary-btn.btn-secondary{background:var(--surface-2); color:var(--text)}
   .score-card{
-    background:linear-gradient(165deg, var(--accent) 0%, #021d6e 100%); color:#fff; border-radius:20px;
+    background:linear-gradient(165deg, var(--accent) 0%, #021d6e 100%); color:#fff; border-radius:var(--radius-3xl);
     padding:20px; text-align:center; display:none;
   }
   .score-card.show{display:block}
@@ -306,7 +346,7 @@
      overload" issue flagged against Home applied here too, arguably worse).
      Native <details>/<summary> collapses everything but one section by default,
      needs no JS to toggle, and stays keyboard/screen-reader friendly for free. */
-  .acc-section{border:1px solid var(--border); border-radius:16px; background:var(--surface); margin:0 0 4px; overflow:hidden}
+  .acc-section{border:1px solid var(--border); border-radius:var(--radius-xl); background:var(--surface); margin:0 0 4px; overflow:hidden}
   .acc-section > summary{
     list-style:none; cursor:pointer; padding:14px 16px; display:flex; align-items:center; justify-content:space-between;
     font-size:13.5px; font-weight:800; color:var(--text); gap:10px;
@@ -321,12 +361,12 @@
 
   .photo-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
   .photo-tile{
-    aspect-ratio:3/4; border-radius:14px; overflow:hidden; background:var(--surface-2); border:1px solid var(--border);
+    aspect-ratio:3/4; border-radius:var(--radius-lg); overflow:hidden; background:var(--surface-2); border:1px solid var(--border);
     display:flex; align-items:center; justify-content:center; position:relative;
   }
   .photo-tile img{width:100%; height:100%; object-fit:cover}
   .photo-upload-btn{
-    aspect-ratio:3/4; border-radius:14px; border:1.5px dashed var(--border); background:none; color:var(--text-faint);
+    aspect-ratio:3/4; border-radius:var(--radius-lg); border:1.5px dashed var(--border); background:none; color:var(--text-faint);
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; cursor:pointer; font-family:inherit; font-size:11px;
   }
   .photo-upload-btn:active{opacity:.7}
@@ -343,10 +383,10 @@
     position:fixed; inset:0; z-index:50; background:var(--bg); display:flex; align-items:center; justify-content:center;
     padding:24px; font-family:var(--font-fa); direction:rtl;
   }
-  .auth-box{max-width:340px; width:100%; background:var(--surface); border:1px solid var(--border); border-radius:22px; padding:26px 22px; box-shadow:var(--shadow); text-align:center}
+  .auth-box{max-width:340px; width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-4xl); padding:26px 22px; box-shadow:var(--shadow); text-align:center}
   .auth-box.wide{max-width:400px}
   .auth-box .step-tag{font-size:11px; color:var(--text-faint); margin-bottom:8px}
-  .auth-box img{width:56px; height:56px; border-radius:16px; margin-bottom:10px}
+  .auth-box img{width:56px; height:56px; border-radius:var(--radius-xl); margin-bottom:10px}
   .auth-box h1{font-size:18px; margin:0 0 4px; font-weight:800}
   .auth-box p{font-size:12.5px; color:var(--text-dim); margin:0 0 18px; line-height:1.7}
   .auth-box .form-field{margin-bottom:10px; text-align:start}
@@ -361,21 +401,28 @@
   .ob-cards{display:flex; flex-direction:column; gap:8px; margin-top:16px}
   .ob-card{
     display:flex; align-items:center; gap:10px; text-align:start; width:100%; border:1.5px solid var(--border);
-    background:var(--surface-2); border-radius:14px; padding:13px 14px; font-family:inherit; cursor:pointer;
+    background:var(--surface-2); border-radius:var(--radius-lg); padding:13px 14px; font-family:inherit; cursor:pointer;
     transition:border-color .15s, background .15s;
   }
   .ob-card:active{transform:scale(.98)}
+  .ob-card{transition:border-color .15s ease, background-color .15s ease}
   .ob-card.selected{border-color:var(--accent); background:rgba(1,47,167,0.06)}
   .ob-card .emoji{font-size:19px; flex:none; width:26px; text-align:center}
   .ob-card .txt{flex:1; min-width:0}
   .ob-card .label{font-weight:800; font-size:14px; color:var(--text)}
   .ob-card .sub{font-size:11.5px; color:var(--text-faint); margin-top:1px}
-  .ob-card .check{flex:none; width:20px; height:20px; border-radius:50%; border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center}
+  .ob-card .check{
+    flex:none; width:20px; height:20px; border-radius:50%; border:1.5px solid var(--border);
+    display:flex; align-items:center; justify-content:center; transition:border-color .15s ease, background-color .15s ease;
+  }
+  .ob-card .check svg{opacity:0; transform:scale(.4); transition:opacity .15s ease, transform .2s cubic-bezier(.34,1.56,.64,1)}
   .ob-card.selected .check{background:var(--accent); border-color:var(--accent)}
+  .ob-card.selected .check svg{opacity:1; transform:scale(1)}
+  @media (prefers-reduced-motion: reduce){ .ob-card, .ob-card .check, .ob-card .check svg{transition:none} }
 
   /* ---- avatar picker (signup + profile) ---- */
   .avatar-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:14px 0 18px; }
-  .avatar-opt{ border:2px solid transparent; border-radius:16px; background:var(--surface-2); padding:6px 4px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; }
+  .avatar-opt{ border:2px solid transparent; border-radius:var(--radius-xl); background:var(--surface-2); padding:6px 4px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; }
   .avatar-opt svg{ width:52px; height:52px; display:block; }
   .avatar-opt span{ font-size:10px; color:var(--text-faint); }
   .avatar-opt.selected{ border-color:var(--accent); background:rgba(255,182,72,0.12); }
@@ -393,8 +440,19 @@
      visitor who has no account yet. States the problem in one bold line,
      then lets them expand into the "how it works" details at their own pace
      via a tap-to-open FAQ list, before the actual signup form. ---- */
-  .landing-box{ max-width:420px; width:100%; background:var(--surface); border:1px solid var(--border); border-radius:22px; padding:30px 22px 24px; box-shadow:var(--shadow); text-align:center; max-height:92vh; overflow-y:auto; }
-  .landing-logo{ display:inline-flex; align-items:center; justify-content:center; width:56px; height:56px; border-radius:16px; background:var(--accent); color:#fff; font-weight:800; font-size:20px; margin-bottom:14px; font-family:var(--font-fa); }
+  .landing-box{ max-width:420px; width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-4xl); padding:30px 22px 24px; box-shadow:var(--shadow); text-align:center; max-height:92vh; overflow-y:auto; }
+  /* ---- brand mark: one wordmark badge used everywhere the app shows its
+     logo (topbar, sign-in, landing), instead of three different treatments
+     (a generic bitmap icon + separate text label in two places, and a
+     plain flat-color badge here). Same shape, three sizes. ---- */
+  .brand-mark{
+    display:inline-flex; align-items:center; justify-content:center; flex:none;
+    background:linear-gradient(165deg, var(--accent) 0%, #021d6e 100%); color:#fff;
+    font-weight:800; font-family:var(--font-fa); letter-spacing:.3px;
+    box-shadow:0 4px 12px -4px rgba(1,47,167,.55);
+  }
+  .brand-mark.sm{width:34px; height:34px; border-radius:var(--radius-md); font-size:12.5px}
+  .brand-mark.lg{width:56px; height:56px; border-radius:var(--radius-xl); font-size:20px; margin-bottom:14px}
   .landing-box h1{ font-size:21px; line-height:1.5; font-weight:800; margin:0 0 10px; }
   .landing-box h1 b{ color:var(--accent); }
   .landing-box .landing-sub{ font-size:13px; color:var(--text-dim); line-height:1.85; margin:0 0 22px; }
@@ -405,19 +463,19 @@
   .landing-faq-item .answer{ display:none; font-size:12.5px; color:var(--text-dim); line-height:1.85; padding:0 2px 14px; }
   .landing-faq-item.open .answer{ display:block; }
   .landing-faq-item.open .chev{ transform:rotate(180deg); }
-  .landing-cta{ width:100%; background:var(--accent); color:var(--accent-ink); border:none; border-radius:14px; padding:15px; font-family:inherit; font-size:15px; font-weight:800; cursor:pointer; margin-top:20px; }
+  .landing-cta{ width:100%; background:var(--accent); color:var(--accent-ink); border:none; border-radius:var(--radius-lg); padding:15px; font-family:inherit; font-size:15px; font-weight:800; cursor:pointer; margin-top:20px; }
   .landing-cta-sub{ font-size:11px; color:var(--text-faint); margin-top:10px; }
 
   /* ---- install-app card (profile tab) + modal (Add to Home Screen / native install) ---- */
   .install-card{ display:flex; align-items:center; gap:12px; padding:14px 16px; }
-  .install-card .ic-badge{ width:40px; height:40px; border-radius:12px; background:var(--accent-soft); color:var(--accent); display:flex; align-items:center; justify-content:center; flex:none; }
+  .install-card .ic-badge{ width:40px; height:40px; border-radius:var(--radius-md); background:var(--accent-soft); color:var(--accent); display:flex; align-items:center; justify-content:center; flex:none; }
   .install-card .ic-text{ flex:1; min-width:0; }
   .install-card .ic-title{ font-weight:800; font-size:13.5px; }
   .install-card .ic-sub{ font-size:11.5px; color:var(--text-dim); margin-top:1px; }
-  .install-card .ic-btn{ flex:none; font-size:12px; font-weight:700; color:#fff; background:var(--accent); border:none; border-radius:10px; padding:8px 12px; cursor:pointer; font-family:inherit; }
+  .install-card .ic-btn{ flex:none; font-size:12px; font-weight:700; color:#fff; background:var(--accent); border:none; border-radius:var(--radius-xs); padding:8px 12px; cursor:pointer; font-family:inherit; }
   #installModal{ position:fixed; inset:0; z-index:60; background:rgba(8,10,20,.6); display:none; align-items:flex-end; justify-content:center; }
   #installModal.open{ display:flex; }
-  .install-sheet{ width:100%; max-width:460px; background:var(--surface); border-radius:24px 24px 0 0; padding:22px 22px calc(24px + env(safe-area-inset-bottom,0px)); box-shadow:0 -10px 40px rgba(0,0,0,.3); direction:rtl; font-family:var(--font-fa); max-height:80vh; overflow-y:auto; }
+  .install-sheet{ width:100%; max-width:460px; background:var(--surface); border-radius:var(--radius-5xl) var(--radius-5xl) 0 0; padding:22px 22px calc(24px + env(safe-area-inset-bottom,0px)); box-shadow:0 -10px 40px rgba(0,0,0,.3); direction:rtl; font-family:var(--font-fa); max-height:80vh; overflow-y:auto; }
   .install-sheet h2{ font-size:16.5px; font-weight:800; margin:0 0 4px; }
   .install-sheet p.lead{ font-size:12.5px; color:var(--text-dim); margin:0 0 16px; line-height:1.7; }
   .install-step{ display:flex; gap:12px; align-items:flex-start; padding:10px 0; border-top:1px solid var(--border); }
@@ -426,8 +484,8 @@
   .install-step .step-icon{ flex:none; width:26px; height:26px; display:flex; align-items:center; justify-content:center; color:var(--accent); }
   .install-step .step-text{ flex:1; font-size:13px; line-height:1.7; padding-top:2px; }
   .install-step .step-text b{ color:var(--accent); }
-  .install-modal-close{ display:block; margin:16px auto 0; background:var(--surface-2); color:var(--text); border:none; border-radius:12px; padding:10px 22px; font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; }
-  .install-native-btn{ width:100%; background:var(--accent); color:#fff; border:none; border-radius:14px; padding:13px; font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; margin-top:4px; }
+  .install-modal-close{ display:block; margin:16px auto 0; background:var(--surface-2); color:var(--text); border:none; border-radius:var(--radius-md); padding:10px 22px; font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; }
+  .install-native-btn{ width:100%; background:var(--accent); color:#fff; border:none; border-radius:var(--radius-lg); padding:13px; font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; margin-top:4px; }
   .install-already{ display:flex; flex-direction:column; align-items:center; gap:8px; padding:18px 0 6px; text-align:center; }
   .install-already .chk{ width:44px; height:44px; border-radius:50%; background:var(--good-soft); color:var(--good); display:flex; align-items:center; justify-content:center; }
 </style>
@@ -436,7 +494,7 @@
 
 <div id="landingGate">
   <div class="landing-box">
-    <div class="landing-logo">ورز</div>
+    <div class="brand-mark lg">ورز</div>
     <h1>آیا واقعاً داری <b>پیشرفت</b> می‌کنی؟<br>یا فقط حس می‌کنی که داری؟</h1>
     <p class="landing-sub">اکثر ورزشکارها همینو نمی‌دونن — چون فقط از روی حس‌وحال یا آینه قضاوت می‌کنن. ورز به‌جای حدس، از روی وزن، دور کمر و وزنه‌هایی که واقعاً زدی، با محاسبه دقیق بهت می‌گه کجای مسیری، نه از روی حس.</p>
     <div class="landing-faq" id="landingFaq">
@@ -476,7 +534,7 @@
 
 <div id="authGate" style="display:none">
   <div class="auth-box">
-    <img src="data:image/png;base64,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" alt="ورز">
+    <div class="brand-mark lg">ورز</div>
     <h1 id="authTitle">خوش اومدی به ورز</h1>
     <p id="authSubtitle">برای شروع، اسمت و شماره موبایلت رو وارد کن.</p>
     <div class="err" id="authErr"></div>
@@ -526,7 +584,7 @@
     <p>می‌خوای هر چند روز یک‌بار ورز یه پیام کوتاه و شخصی‌سازی‌شده برات بفرسته که بر اساس داده‌های خودتِ، نه یه پیام کلی؟</p>
     <button class="primary-btn" id="notifYesBtn">بله، بفرست</button>
     <div style="height:8px"></div>
-    <button class="primary-btn" id="notifNoBtn" style="background:var(--surface-2); color:var(--text)">نه فعلاً</button>
+    <button class="primary-btn btn-secondary" id="notifNoBtn">نه فعلاً</button>
     <div style="height:8px"></div>
     <div style="font-size:11px; color:var(--text-faint); line-height:1.7">این پیام‌ها داخل خود اپ (توی تب خانه) نشون داده می‌شن، نه به‌صورت نوتیفیکیشن سیستم‌عامل — هر وقت خواستی از تنظیمات پروفایل می‌تونی خاموشش کنی.</div>
   </div>
@@ -551,8 +609,7 @@
 
   <div class="topbar">
     <div class="brand">
-      <img src="data:image/png;base64,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" alt="ورز">
-      <span>ورز</span>
+      <div class="brand-mark sm">ورز</div>
     </div>
     <button class="win" id="trialPill" style="border:none; cursor:pointer">—</button>
     <span class="win" id="winLabel">۸ هفته اخیر</span>
@@ -651,7 +708,7 @@
         </div>
         <div class="delta" id="bwDelta">—</div>
       </div>
-      <svg id="bwChart" width="100%" height="120" viewBox="0 0 400 120" preserveAspectRatio="none"></svg>
+      <svg id="bwChart" class="chart-svg" width="100%" height="140" viewBox="0 0 400 140" preserveAspectRatio="none"></svg>
     </div>
 
     <h2 class="section-title">ثبت امروز</h2>
@@ -891,6 +948,28 @@
     dp = dp==null?1:dp;
     const s = Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:dp});
     return s.replace(/[0-9]/g,d=>FA_DIGITS[+d]).replace(/\./g,'٫').replace(/,/g,'٬');
+  }
+  /* ---- micro-animation: count a number up from its previous value instead
+     of just snapping the textContent — used for the two "reveal a score"
+     moments (weekly badge score, readiness score) so a number appearing on
+     screen reads as something that was just computed, not a static label.
+     Respects prefers-reduced-motion by just setting the final value. ---- */
+  const REDUCE_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function animateCountUp(el, toValue, dp){
+    const toNum = Number(toValue);
+    if (!el || isNaN(toNum)) return;
+    if (REDUCE_MOTION){ el.textContent = faNum(toNum, dp); return; }
+    const fromNum = Number(el.dataset.rawVal || 0);
+    const duration = 650;
+    const t0 = performance.now();
+    function tick(now){
+      const p = Math.min(1, (now - t0) / duration);
+      const eased = 1 - Math.pow(1 - p, 3); // ease-out-cubic
+      el.textContent = faNum(fromNum + (toNum - fromNum) * eased, dp);
+      if (p < 1) requestAnimationFrame(tick);
+      else el.dataset.rawVal = String(toNum);
+    }
+    requestAnimationFrame(tick);
   }
 
   /* Some athletes type numbers with a Persian/Arabic-Indic keyboard (۰۹۱۲...).
@@ -1357,7 +1436,7 @@
           <button type="button" class="ob-card ${obAnswers[step.field]===opt.value?'selected':''}" data-value="${opt.value}">
             <span class="emoji">${opt.emoji||''}</span>
             <span class="txt"><span class="label">${opt.label}</span>${opt.sub?`<span class="sub">${opt.sub}</span>`:''}</span>
-            <span class="check"></span>
+            <span class="check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4 10-10" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           </button>
         `).join('')}
       </div>
@@ -2188,7 +2267,7 @@
     } else {
       const tier = getTier(score);
       document.getElementById('badgeMedal').innerHTML = badgeSVG(tier, 68);
-      document.getElementById('scoreVal').textContent = faNum(score);
+      animateCountUp(document.getElementById('scoreVal'), score, 1);
       document.getElementById('levelName').textContent = tier.name;
       document.getElementById('tierDesc').textContent = tier.desc;
       document.getElementById('badgeCard').style.setProperty('--badge-glow', tier.glow);
@@ -2259,19 +2338,46 @@
       if (pts.length < 2 || bw.status!=='ok'){ svg.innerHTML = ''; return; }
       const vals = pts.map(p=>p.value);
       const min = Math.min(...vals)-0.4, max = Math.max(...vals)+0.4;
-      const W=400,H=120,pad=10;
-      const x = i => pad + (i/(pts.length-1))*(W-2*pad);
-      const y = v => H-pad - ((v-min)/(max-min))*(H-2*pad);
+      // Plot area leaves room below the line for the relative start/end
+      // captions ("شروع" / "امروز") instead of raw Gregorian dates — this
+      // app never shows calendar dates to the user, only relative language,
+      // so the chart follows the same rule rather than introducing one.
+      const W=400, H=140, padX=8, padTop=10, plotBottom=108;
+      const x = i => padX + (i/(pts.length-1))*(W-2*padX);
+      const y = v => plotBottom - ((v-min)/(max-min))*(plotBottom-padTop);
       const linePts = pts.map((p,i)=>`${x(i)},${y(p.value)}`).join(' ');
       const day0 = toDay(pts[0].date);
-      const trendLine = pts.map((p,i)=>{
-        const dx = toDay(p.date)-day0;
-        return `${x(i)},${y(bw.startFitted + (bw.slopePerWeek/7)*dx)}`;
-      }).join(' ');
+      const trendVals = pts.map((p,i)=>({ x:x(i), y:y(bw.startFitted + (bw.slopePerWeek/7)*(toDay(p.date)-day0)) }));
+      const trendLine = trendVals.map(t=>`${t.x},${t.y}`).join(' ');
+      const areaPath = `M${trendVals[0].x},${plotBottom} L` + trendVals.map(t=>`${t.x},${t.y}`).join(' L') + ` L${trendVals[trendVals.length-1].x},${plotBottom} Z`;
+      // 3 evenly-spaced horizontal gridlines with kg labels on the axis, so
+      // the trend is readable at a glance instead of a bare line floating
+      // with no scale.
+      const gridSteps = [0, 0.5, 1];
+      const gridHtml = gridSteps.map(t=>{
+        const val = max - t*(max-min);
+        const gy = padTop + t*(plotBottom-padTop);
+        return `<line class="grid-line" x1="${padX}" y1="${gy}" x2="${W-padX}" y2="${gy}"/>
+                <text class="axis-label" x="${padX}" y="${gy-3}">${faNum(val)}</text>`;
+      }).join('');
+      const lastIdx = pts.length-1;
       svg.innerHTML = `
-        <polyline points="${trendLine}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
-        <polyline points="${linePts}" fill="none" stroke="var(--text-faint)" stroke-width="1.2" stroke-dasharray="2 3" opacity=".6"/>
-        ${pts.map((p,i)=>`<circle cx="${x(i)}" cy="${y(p.value)}" r="2.6" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.6"/>`).join('')}
+        <defs>
+          <linearGradient id="bwFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--accent)" stop-opacity=".22"/>
+            <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        ${gridHtml}
+        <path d="${areaPath}" fill="url(#bwFill)" stroke="none"/>
+        <polyline class="actual-line" points="${linePts}"/>
+        <polyline class="trend-line" points="${trendLine}"/>
+        ${pts.map((p,i)=> i===lastIdx
+          ? `<circle class="pt pt-latest" cx="${x(i)}" cy="${y(p.value)}" r="4.2"/>`
+          : `<circle class="pt" cx="${x(i)}" cy="${y(p.value)}" r="2.4"/>`
+        ).join('')}
+        <text class="span-label" x="${padX}" y="132">شروع</text>
+        <text class="span-label" x="${W-padX}" y="132" text-anchor="end">امروز</text>
       `;
     })();
 
@@ -2845,7 +2951,7 @@ ${buildFactBlock()}`;
 
     const score = computeReadinessScore(height, weight, age);
     const scoreCard = document.getElementById('scoreCard');
-    document.getElementById('scoreNum').textContent = faNum(score, 0);
+    animateCountUp(document.getElementById('scoreNum'), score, 0);
     scoreCard.classList.add('show');
 
     const macros = computeMacros(gender, height, weight, age, days, goal);
