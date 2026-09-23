@@ -1,0 +1,2710 @@
+<title>اپ ورز</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#012FA7">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ورز">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Estedad:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F6FB; --surface:#FFFFFF; --surface-2:#EEF1F9; --border:#DEE3F0;
+    --text:#101526; --text-dim:#5B6478; --text-faint:#8890A3;
+    --accent:#012FA7; --accent-ink:#FFFFFF; --accent-soft:#E7ECFB;
+    --good:#0E8F5F; --good-soft:#E4F6EE; --warn:#B8721A; --warn-soft:#FBF0DE; --bad:#C23A3A; --bad-soft:#FBE7E7;
+    --navy:#0B1230;
+    --shadow: 0 10px 30px -12px rgba(16,21,38,.18);
+    --font-fa:'Estedad',Tahoma,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0B1020; --surface:#141A31; --surface-2:#1B2240; --border:#2A3357;
+      --text:#EEF1FA; --text-dim:#AEB6D0; --text-faint:#7B84A3;
+      --accent:#5D82F0; --accent-ink:#0B1020; --accent-soft:#1D2A55;
+      --good:#4FCE9B; --good-soft:#123527; --warn:#F0B15D; --warn-soft:#3A2C13; --bad:#F2807D; --bad-soft:#3A1818;
+      --shadow: 0 10px 30px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0B1020; --surface:#141A31; --surface-2:#1B2240; --border:#2A3357;
+    --text:#EEF1FA; --text-dim:#AEB6D0; --text-faint:#7B84A3;
+    --accent:#5D82F0; --accent-ink:#0B1020; --accent-soft:#1D2A55;
+    --good:#4FCE9B; --good-soft:#123527; --warn:#F0B15D; --warn-soft:#3A2C13; --bad:#F2807D; --bad-soft:#3A1818;
+    --shadow: 0 10px 30px -12px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text); font-family:var(--font-fa);
+    -webkit-font-smoothing:antialiased; height:100%;
+  }
+  html,body{height:100%}
+  #app{
+    max-width:460px; margin:0 auto; min-height:100%; position:relative;
+    display:flex; flex-direction:column; background:var(--bg);
+  }
+  /* ---- top bar ---- */
+  .topbar{
+    position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
+    background:var(--bg); padding:14px 18px 10px; display:flex; align-items:center; gap:10px;
+    border-bottom:1px solid transparent;
+  }
+  .brand{display:flex; align-items:center; gap:8px; font-weight:700; font-size:17px}
+  .brand svg{flex:none}
+  .brand img{flex:none; width:28px; height:28px; border-radius:8px; object-fit:contain}
+  .topbar .win{margin-inline-start:auto; font-size:12px; color:var(--text-faint); background:var(--surface-2); border:1px solid var(--border); padding:5px 10px; border-radius:99px; font-variant-numeric:tabular-nums}
+
+  main{flex:1; padding:6px 18px 100px; display:none; flex-direction:column; gap:16px}
+  main.active{display:flex}
+
+  /* ---- cards ---- */
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:20px;
+    padding:18px; box-shadow:var(--shadow);
+  }
+  .verdict-card{
+    background:linear-gradient(165deg, var(--accent) 0%, #021d6e 100%); color:#fff; border:none;
+    padding:22px 20px 20px; position:relative; overflow:hidden;
+  }
+  .verdict-card .pill{
+    display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600;
+    background:rgba(255,255,255,.16); padding:6px 12px; border-radius:99px; margin-bottom:12px;
+  }
+  .verdict-card .pill .dot{width:7px; height:7px; border-radius:50%; background:#fff}
+  .verdict-card h1{font-size:19px; line-height:1.6; margin:0 0 14px; font-weight:700}
+  .verdict-card .sub{font-size:13px; opacity:.85; line-height:1.7; margin:0}
+  .verdict-wave{position:absolute; inset-inline-end:-30px; bottom:-30px; opacity:.5}
+
+  .greeting{display:flex; align-items:center; justify-content:space-between; padding:2px 2px 0}
+  .greeting h2{font-size:17px; margin:0; font-weight:800; line-height:1.5}
+  .greeting p{margin:2px 0 0; font-size:12.5px; color:var(--text-dim)}
+  .streak-pill{
+    display:flex; align-items:center; gap:5px; background:var(--surface); border:1px solid var(--border);
+    border-radius:99px; padding:7px 12px; font-size:12px; font-weight:700; box-shadow:var(--shadow); flex:none;
+  }
+
+  .stat-row{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+  .stat-tile{
+    background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:14px 10px 12px;
+    text-align:center; box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; gap:7px;
+  }
+  .stat-tile .icon-circle{
+    width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex:none;
+  }
+  .stat-tile .v{font-size:16px; font-weight:700; font-variant-numeric:tabular-nums}
+  .stat-tile .v.good{color:var(--good)} .stat-tile .v.warn{color:var(--warn)} .stat-tile .v.bad{color:var(--bad)}
+  .stat-tile .l{font-size:11px; color:var(--text-dim); line-height:1.5}
+
+  /* ---- weekly performance badge ---- */
+  .badge-card{
+    display:flex; align-items:center; gap:16px; background:var(--surface); border:1px solid var(--border);
+    border-radius:20px; padding:16px 18px; box-shadow:var(--shadow); position:relative; overflow:hidden;
+  }
+  .badge-card::before{
+    content:''; position:absolute; inset-inline-end:-40px; top:-40px; width:130px; height:130px; border-radius:50%;
+    background:radial-gradient(circle, var(--badge-glow, rgba(1,47,167,.14)) 0%, transparent 70%);
+  }
+  .badge-medal{flex:none; width:68px; height:68px}
+  .badge-info{flex:1; min-width:0}
+  .badge-info .score-line{font-size:12px; color:var(--text-dim)}
+  .badge-info .score-line b{color:var(--text); font-size:15px; font-variant-numeric:tabular-nums}
+  .badge-info .level-name{font-size:16px; font-weight:800; color:var(--accent); margin:2px 0 3px}
+  .badge-info .tier-desc{font-size:12px; color:var(--text-dim); line-height:1.6}
+
+  /* ---- leaderboard ---- */
+  .lb-card{background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:14px 16px; box-shadow:var(--shadow)}
+  .lb-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:4px}
+  .lb-demo-tag{font-size:10.5px; font-weight:800; color:#9C6A2E; background:rgba(224,164,34,.16); border-radius:999px; padding:3px 9px; flex:none}
+  .lb-note{font-size:11.5px; color:var(--text-dim); line-height:1.7; margin-bottom:10px}
+  .lb-prize{font-size:12px; font-weight:700; color:#9C6A2E; background:rgba(224,164,34,.12); border-radius:12px; padding:9px 11px; margin-bottom:10px; line-height:1.7}
+  .lb-row{display:flex; align-items:center; gap:10px; padding:8px 4px; border-radius:12px}
+  .lb-row.you{background:rgba(1,47,167,.07); border:1.5px solid var(--accent)}
+  .lb-rank{width:22px; flex:none; text-align:center; font-weight:800; font-size:12.5px; color:var(--text-dim); font-variant-numeric:tabular-nums}
+  .lb-row:nth-child(1) .lb-rank{color:#E0A422} .lb-row:nth-child(2) .lb-rank{color:#9AA4B6} .lb-row:nth-child(3) .lb-rank{color:#9C6A2E}
+  .lb-name{flex:1; min-width:0; font-size:13px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .lb-level{font-size:10.5px; color:var(--text-faint)}
+  .lb-score{flex:none; font-size:13px; font-weight:800; font-variant-numeric:tabular-nums; color:var(--accent)}
+
+  /* ---- measurements grid ---- */
+  .meas-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .meas-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:13px 14px;
+    box-shadow:var(--shadow); display:flex; flex-direction:column; gap:6px;
+  }
+  .meas-card .m-label{font-size:12px; color:var(--text-dim); font-weight:600}
+  .meas-card .m-value{font-size:19px; font-weight:700; font-variant-numeric:tabular-nums}
+  .meas-card .m-tag{font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:99px; align-self:flex-start}
+
+  h2.section-title{font-size:13px; color:var(--text-dim); font-weight:700; margin:2px 2px 0; letter-spacing:.2px}
+  .score-title-row{display:flex; align-items:center; justify-content:space-between; gap:8px}
+  .info-btn{width:18px; height:18px; border-radius:50%; border:1px solid var(--text-dim); background:transparent; color:var(--text-dim); font-size:11px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; flex:none; font-family:inherit}
+  .info-btn:active{opacity:.7}
+  .info-pop{display:none; font-size:12px; line-height:1.7; color:var(--text-dim); background:var(--surface-2); border-radius:10px; padding:10px 12px; margin:6px 2px 0}
+  .info-pop.open{display:block}
+
+  .chips{display:flex; flex-wrap:wrap; gap:8px}
+  .chip{
+    background:var(--accent-soft); color:var(--accent); border:1px solid transparent; border-radius:99px;
+    padding:9px 14px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;
+  }
+  .chip:active{opacity:.7}
+
+  .caveat-list, .gap-list{display:flex; flex-direction:column; gap:10px}
+  .note-row{display:flex; gap:10px; align-items:flex-start; font-size:13px; color:var(--text-dim); line-height:1.7}
+  .note-row .ic{flex:none; width:20px; height:20px; margin-top:1px}
+
+  /* ---- progress tab ---- */
+  .chart-wrap{background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:16px; box-shadow:var(--shadow)}
+  .chart-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px}
+  .chart-head .big{font-size:22px; font-weight:700; font-variant-numeric:tabular-nums}
+  .chart-head .delta{font-size:12.5px; font-weight:700; padding:3px 8px; border-radius:99px}
+  .delta.good{color:var(--good); background:var(--good-soft)} .delta.bad{color:var(--bad); background:var(--bad-soft)} .delta.warn{color:var(--warn); background:var(--warn-soft)}
+
+  .lift-list{display:flex; flex-direction:column; gap:10px}
+  .lift-row{
+    display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border);
+    border-radius:16px; padding:12px 14px; box-shadow:var(--shadow);
+  }
+  .lift-row .name{font-weight:700; font-size:14px; flex:1}
+  .lift-row .meta{font-size:12px; color:var(--text-faint); margin-top:2px}
+  .status-badge{font-size:11.5px; font-weight:700; padding:5px 10px; border-radius:99px; white-space:nowrap}
+  .status-badge.progressing{background:var(--good-soft); color:var(--good)}
+  .status-badge.stalled{background:var(--warn-soft); color:var(--warn)}
+  .status-badge.regressing{background:var(--bad-soft); color:var(--bad)}
+  .status-badge.inconclusive{background:var(--surface-2); color:var(--text-dim)}
+
+  /* ---- chat tab ---- */
+  #chat-main{padding-inline:0; padding-bottom:0}
+  .chat-scroll{flex:1; overflow-y:auto; padding:6px 18px 12px; display:flex; flex-direction:column; gap:12px}
+  .bubble-row{display:flex}
+  .bubble-row.user{justify-content:flex-start}
+  .bubble-row.assistant{justify-content:flex-end}
+  .bubble{
+    max-width:82%; padding:11px 15px; border-radius:18px; font-size:14px; line-height:1.9; white-space:pre-wrap;
+  }
+  .bubble-row.user .bubble{background:var(--accent); color:var(--accent-ink); border-end-end-radius:5px}
+  .bubble-row.assistant .bubble{background:var(--surface); border:1px solid var(--border); border-end-start-radius:5px; box-shadow:var(--shadow)}
+  .bubble.thinking{color:var(--text-faint); font-style:italic}
+  .chat-intro{
+    background:var(--surface-2); border:1px solid var(--border); border-radius:16px; padding:14px 16px;
+    font-size:13px; color:var(--text-dim); line-height:1.8; margin:0 18px;
+  }
+  .chat-suggest{display:flex; gap:8px; overflow-x:auto; padding:0 18px 6px; scrollbar-width:none}
+  .chat-suggest::-webkit-scrollbar{display:none}
+  .chat-suggest .chip{white-space:nowrap; flex:none}
+  .composer{
+    display:flex; gap:8px; align-items:flex-end; padding:10px 18px calc(14px + env(safe-area-inset-bottom,0px));
+    background:var(--bg); border-top:1px solid var(--border);
+  }
+  .composer textarea{
+    flex:1; resize:none; border:1px solid var(--border); background:var(--surface); color:var(--text);
+    border-radius:16px; padding:11px 14px; font-family:inherit; font-size:14px; max-height:90px; line-height:1.6;
+  }
+  .composer textarea:focus{outline:2px solid var(--accent); outline-offset:1px}
+  .send-btn{
+    flex:none; width:42px; height:42px; border-radius:50%; border:none; background:var(--accent); color:#fff;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .send-btn:disabled{opacity:.5; cursor:default}
+  .send-btn svg{transform:scaleX(-1)}
+
+  /* ---- tab bar ---- */
+  .tabbar{
+    position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:460px;
+    background:var(--surface); border-top:1px solid var(--border);
+    display:flex; padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));
+    z-index:30;
+  }
+  .tab-btn{
+    flex:1; background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:4px;
+    padding:6px 4px; color:var(--text-faint); font-family:inherit; font-size:11px; cursor:pointer; border-radius:12px;
+  }
+  .tab-btn.active{color:var(--accent)}
+  .tab-btn svg{width:22px; height:22px}
+
+  .callout{
+    display:flex; gap:10px; align-items:flex-start; background:var(--warn-soft); color:var(--warn);
+    border-radius:14px; padding:12px 14px; font-size:12.5px; line-height:1.7;
+  }
+  .callout.bad{background:var(--bad-soft); color:var(--bad)}
+  .callout b{font-weight:700}
+
+  /* ---- exercise log rows ---- */
+  .lift-card{background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); overflow:hidden}
+  .lift-card-head{display:flex; align-items:center; gap:12px; padding:12px 14px; cursor:pointer}
+  .lift-card-head .name{font-weight:700; font-size:14px; flex:1}
+  .lift-card-head .meta{font-size:12px; color:var(--text-faint); margin-top:2px}
+  .lift-card-head .chev{flex:none; color:var(--text-faint); transition:transform .15s}
+  .lift-card.open .chev{transform:rotate(180deg)}
+  .lift-log-form{display:none; padding:0 14px 14px; gap:8px; grid-template-columns:1fr 1fr 1fr auto}
+  .lift-card.open .lift-log-form{display:grid}
+  .lift-log-form label{font-size:11px; color:var(--text-faint); display:block; margin-bottom:4px}
+  .lift-log-form input{
+    width:100%; border:1px solid var(--border); background:var(--surface-2); color:var(--text);
+    border-radius:10px; padding:8px 9px; font-family:inherit; font-size:13px; font-variant-numeric:tabular-nums;
+  }
+  .lift-log-form input:focus{outline:2px solid var(--accent); outline-offset:1px}
+  .lift-log-form button{
+    align-self:end; background:var(--accent); color:#fff; border:none; border-radius:10px;
+    padding:8px 14px; font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap;
+  }
+  .lift-log-form button:active{opacity:.8}
+  .log-toast{font-size:11.5px; color:var(--good); padding:0 14px 10px; display:none}
+  .log-toast.show{display:block}
+  .group-label{font-size:11.5px; color:var(--text-faint); font-weight:700; margin:10px 2px 0}
+
+  /* ---- profile tab ---- */
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .form-field{display:flex; flex-direction:column; gap:5px}
+  .form-field.full{grid-column:1/-1}
+  .form-field label{font-size:12px; color:var(--text-dim); font-weight:600}
+  .form-field input, .form-field select{
+    border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px;
+    padding:10px 12px; font-family:inherit; font-size:13.5px; font-variant-numeric:tabular-nums;
+  }
+  .form-field input:focus, .form-field select:focus{outline:2px solid var(--accent); outline-offset:1px}
+  .primary-btn{
+    background:var(--accent); color:#fff; border:none; border-radius:14px; padding:13px; font-family:inherit;
+    font-size:14px; font-weight:700; cursor:pointer; width:100%;
+  }
+  .primary-btn:active{opacity:.85}
+  .primary-btn:disabled{opacity:.55; cursor:default}
+  .score-card{
+    background:linear-gradient(165deg, var(--accent) 0%, #021d6e 100%); color:#fff; border-radius:20px;
+    padding:20px; text-align:center; display:none;
+  }
+  .score-card.show{display:block}
+  .score-card .num{font-size:40px; font-weight:800; font-variant-numeric:tabular-nums}
+  .score-card .lbl{font-size:12.5px; opacity:.85; margin-top:2px}
+  .plan-text{white-space:pre-wrap; font-size:13.5px; line-height:1.9; color:var(--text)}
+
+  .photo-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+  .photo-tile{
+    aspect-ratio:3/4; border-radius:14px; overflow:hidden; background:var(--surface-2); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; position:relative;
+  }
+  .photo-tile img{width:100%; height:100%; object-fit:cover}
+  .photo-upload-btn{
+    aspect-ratio:3/4; border-radius:14px; border:1.5px dashed var(--border); background:none; color:var(--text-faint);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; cursor:pointer; font-family:inherit; font-size:11px;
+  }
+  .photo-upload-btn:active{opacity:.7}
+  .photo-tile .del{
+    position:absolute; top:5px; inset-inline-end:5px; width:20px; height:20px; border-radius:50%;
+    background:rgba(0,0,0,.55); color:#fff; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px;
+  }
+
+  ::selection{background:var(--accent-soft)}
+  a{color:inherit}
+
+  /* ---- check-in gate / onboarding gate / subscription gate ---- */
+  #landingGate, #authGate, #avatarGate, #onboardGate, #notifGate, #subGate{
+    position:fixed; inset:0; z-index:50; background:var(--bg); display:flex; align-items:center; justify-content:center;
+    padding:24px; font-family:var(--font-fa); direction:rtl;
+  }
+  .auth-box{max-width:340px; width:100%; background:var(--surface); border:1px solid var(--border); border-radius:22px; padding:26px 22px; box-shadow:var(--shadow); text-align:center}
+  .auth-box.wide{max-width:400px}
+  .auth-box .step-tag{font-size:11px; color:var(--text-faint); margin-bottom:8px}
+  .auth-box img{width:56px; height:56px; border-radius:16px; margin-bottom:10px}
+  .auth-box h1{font-size:18px; margin:0 0 4px; font-weight:800}
+  .auth-box p{font-size:12.5px; color:var(--text-dim); margin:0 0 18px; line-height:1.7}
+  .auth-box .form-field{margin-bottom:10px; text-align:start}
+  .auth-box .err{color:var(--bad); font-size:11.5px; min-height:16px; margin-bottom:6px}
+
+  /* ---- avatar picker (signup + profile) ---- */
+  .avatar-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:14px 0 18px; }
+  .avatar-opt{ border:2px solid transparent; border-radius:16px; background:var(--surface-2); padding:6px 4px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; }
+  .avatar-opt svg{ width:52px; height:52px; display:block; }
+  .avatar-opt span{ font-size:10px; color:var(--text-faint); }
+  .avatar-opt.selected{ border-color:var(--accent); background:rgba(255,182,72,0.12); }
+  .topbar-avatar{ width:34px; height:34px; border-radius:50%; overflow:hidden; border:1.5px solid var(--border); cursor:pointer; flex-shrink:0; }
+  .topbar-avatar svg{ width:100%; height:100%; display:block; }
+  .profile-avatar-card{ display:flex; align-items:center; gap:12px; padding:14px 16px; }
+  .profile-avatar-card .pa-pic{ width:56px; height:56px; border-radius:50%; overflow:hidden; border:2px solid var(--accent); flex-shrink:0; }
+  .profile-avatar-card .pa-pic svg{ width:100%; height:100%; display:block; }
+  .profile-avatar-card .pa-name{ font-weight:800; font-size:14.5px; }
+  .profile-avatar-card .pa-change{ margin-inline-start:auto; font-size:11.5px; color:var(--accent); background:none; border:none; cursor:pointer; }
+  .lb-avatar{ width:28px; height:28px; border-radius:50%; overflow:hidden; flex:none; }
+  .lb-avatar svg{ width:100%; height:100%; display:block; }
+
+  /* ---- landing / pitch screen — shown once, before signup, to a first-time
+     visitor who has no account yet. States the problem in one bold line,
+     then lets them expand into the "how it works" details at their own pace
+     via a tap-to-open FAQ list, before the actual signup form. ---- */
+  .landing-box{ max-width:420px; width:100%; background:var(--surface); border:1px solid var(--border); border-radius:22px; padding:30px 22px 24px; box-shadow:var(--shadow); text-align:center; max-height:92vh; overflow-y:auto; }
+  .landing-logo{ display:inline-flex; align-items:center; justify-content:center; width:56px; height:56px; border-radius:16px; background:var(--accent); color:#fff; font-weight:800; font-size:20px; margin-bottom:14px; font-family:var(--font-fa); }
+  .landing-box h1{ font-size:21px; line-height:1.5; font-weight:800; margin:0 0 10px; }
+  .landing-box h1 b{ color:var(--accent); }
+  .landing-box .landing-sub{ font-size:13px; color:var(--text-dim); line-height:1.85; margin:0 0 22px; }
+  .landing-faq{ text-align:start; border-top:1px solid var(--border); margin-bottom:8px; }
+  .landing-faq-item{ border-bottom:1px solid var(--border); }
+  .landing-faq-item button{ width:100%; background:none; border:none; display:flex; justify-content:space-between; align-items:center; gap:8px; font-family:inherit; font-size:13.5px; font-weight:700; color:var(--text); cursor:pointer; padding:14px 2px; text-align:start; }
+  .landing-faq-item .chev{ flex:none; transition:transform .15s; color:var(--text-faint); }
+  .landing-faq-item .answer{ display:none; font-size:12.5px; color:var(--text-dim); line-height:1.85; padding:0 2px 14px; }
+  .landing-faq-item.open .answer{ display:block; }
+  .landing-faq-item.open .chev{ transform:rotate(180deg); }
+  .landing-cta{ width:100%; background:var(--accent); color:var(--accent-ink); border:none; border-radius:14px; padding:15px; font-family:inherit; font-size:15px; font-weight:800; cursor:pointer; margin-top:20px; }
+  .landing-cta-sub{ font-size:11px; color:var(--text-faint); margin-top:10px; }
+
+  /* ---- install-app card (profile tab) + modal (Add to Home Screen / native install) ---- */
+  .install-card{ display:flex; align-items:center; gap:12px; padding:14px 16px; }
+  .install-card .ic-badge{ width:40px; height:40px; border-radius:12px; background:var(--accent-soft); color:var(--accent); display:flex; align-items:center; justify-content:center; flex:none; }
+  .install-card .ic-text{ flex:1; min-width:0; }
+  .install-card .ic-title{ font-weight:800; font-size:13.5px; }
+  .install-card .ic-sub{ font-size:11.5px; color:var(--text-dim); margin-top:1px; }
+  .install-card .ic-btn{ flex:none; font-size:12px; font-weight:700; color:#fff; background:var(--accent); border:none; border-radius:10px; padding:8px 12px; cursor:pointer; font-family:inherit; }
+  #installModal{ position:fixed; inset:0; z-index:60; background:rgba(8,10,20,.6); display:none; align-items:flex-end; justify-content:center; }
+  #installModal.open{ display:flex; }
+  .install-sheet{ width:100%; max-width:460px; background:var(--surface); border-radius:24px 24px 0 0; padding:22px 22px calc(24px + env(safe-area-inset-bottom,0px)); box-shadow:0 -10px 40px rgba(0,0,0,.3); direction:rtl; font-family:var(--font-fa); max-height:80vh; overflow-y:auto; }
+  .install-sheet h2{ font-size:16.5px; font-weight:800; margin:0 0 4px; }
+  .install-sheet p.lead{ font-size:12.5px; color:var(--text-dim); margin:0 0 16px; line-height:1.7; }
+  .install-step{ display:flex; gap:12px; align-items:flex-start; padding:10px 0; border-top:1px solid var(--border); }
+  .install-step:first-of-type{ border-top:none; }
+  .install-step .step-num{ flex:none; width:26px; height:26px; border-radius:50%; background:var(--accent-soft); color:var(--accent); font-weight:800; font-size:12.5px; display:flex; align-items:center; justify-content:center; }
+  .install-step .step-icon{ flex:none; width:26px; height:26px; display:flex; align-items:center; justify-content:center; color:var(--accent); }
+  .install-step .step-text{ flex:1; font-size:13px; line-height:1.7; padding-top:2px; }
+  .install-step .step-text b{ color:var(--accent); }
+  .install-modal-close{ display:block; margin:16px auto 0; background:var(--surface-2); color:var(--text); border:none; border-radius:12px; padding:10px 22px; font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; }
+  .install-native-btn{ width:100%; background:var(--accent); color:#fff; border:none; border-radius:14px; padding:13px; font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; margin-top:4px; }
+  .install-already{ display:flex; flex-direction:column; align-items:center; gap:8px; padding:18px 0 6px; text-align:center; }
+  .install-already .chk{ width:44px; height:44px; border-radius:50%; background:var(--good-soft); color:var(--good); display:flex; align-items:center; justify-content:center; }
+</style>
+
+<div id="landingGate">
+  <div class="landing-box">
+    <div class="landing-logo">ورز</div>
+    <h1>آیا واقعاً داری <b>پیشرفت</b> می‌کنی؟<br>یا فقط حس می‌کنی که داری؟</h1>
+    <p class="landing-sub">اکثر ورزشکارها همینو نمی‌دونن — چون فقط از روی حس‌وحال یا آینه قضاوت می‌کنن. ورز به‌جای حدس، از روی وزن، دور کمر و وزنه‌هایی که واقعاً زدی، با محاسبه دقیق بهت می‌گه کجای مسیری، نه از روی حس.</p>
+    <div class="landing-faq" id="landingFaq">
+      <div class="landing-faq-item" id="landingFaqItem1">
+        <button id="landingFaqBtn1">
+          <span>ورز دقیقاً چیکار می‌کنه؟</span>
+          <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="answer">هر بار وزنه، وزن یا دور کمرت رو ثبت می‌کنی، ورز با یه محاسبه‌ی آماری واقعی (نه حدس) بهت می‌گه هر حرکت داره پیشرفت می‌کنه، متوقف شده یا داره افت می‌کنه — و همینو برای وزن بدن و دور کمرت هم انجام می‌ده.</div>
+      </div>
+      <div class="landing-faq-item" id="landingFaqItem2">
+        <button id="landingFaqBtn2">
+          <span>امتیاز هفتگی و جدول رتبه‌بندی چیه؟</span>
+          <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="answer">هر هفته، از روی داده‌های واقعی‌ات یه امتیاز از ۱۰ می‌گیری و یه سطح (از پایه تا نخبه) بهت داده می‌شه. جایگاهت رو توی جدول رتبه‌بندی با هم‌سن‌های خودت هم می‌بینی.</div>
+      </div>
+      <div class="landing-faq-item" id="landingFaqItem3">
+        <button id="landingFaqBtn3">
+          <span>چت با ورز یعنی چی؟</span>
+          <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="answer">هر سوالی درباره روندت داشته باشی، می‌تونی مستقیم از ورز بپرسی — و جوابش همیشه بر پایه‌ی همون عددهای واقعی خودته، نه یه جواب کلی و عمومی.</div>
+      </div>
+      <div class="landing-faq-item" id="landingFaqItem4">
+        <button id="landingFaqBtn4">
+          <span>باید پول بدم؟</span>
+          <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="answer">۳ روز اول کاملاً رایگانه و همه‌چیز رو می‌تونی امتحان کنی. بعدش اگه خواستی ادامه بدی، یه اشتراک ماهانه‌ی ساده داره.</div>
+      </div>
+    </div>
+    <button class="landing-cta" id="landingCtaBtn">شروع کن — رایگانه</button>
+    <div class="landing-cta-sub">۳ روز رایگان، بدون نیاز به کارت بانکی</div>
+  </div>
+</div>
+
+<div id="authGate" style="display:none">
+  <div class="auth-box">
+    <img src="data:image/png;base64,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" alt="ورز">
+    <h1 id="authTitle">خوش اومدی به ورز</h1>
+    <p id="authSubtitle">برای شروع، اسمت و شماره موبایلت رو وارد کن.</p>
+    <div class="err" id="authErr"></div>
+    <div id="authSignupOnlyFields">
+      <div class="form-field"><label>نام</label><input type="text" id="authFirst" placeholder="مثلاً امیر"></div>
+      <div class="form-field"><label>نام خانوادگی</label><input type="text" id="authLast" placeholder="مثلاً رضایی"></div>
+    </div>
+    <div class="form-field"><label>شماره موبایل</label><input type="tel" id="authPhone" inputmode="numeric" placeholder="09xxxxxxxxx"></div>
+    <div class="form-field" id="authUsernameField"><label>نام نمایشی (برای جدول رتبه‌بندی)</label><input type="text" id="authUsername" placeholder="اسم واقعیت یا یه نیک‌نیم — بدون عدد"></div>
+    <div class="form-field"><label>رمز عبور</label><input type="password" id="authPassword" placeholder="حداقل ۸ کاراکتر"></div>
+    <div style="height:4px"></div>
+    <button class="primary-btn" id="authSubmit">ورود به ورز</button>
+    <button type="button" id="authModeToggle" style="background:none; border:none; color:var(--text-faint); font-size:12.5px; margin-top:10px; cursor:pointer; text-decoration:underline">قبلاً حساب ساختی؟ وارد شو</button>
+  </div>
+</div>
+
+<div id="avatarGate" style="display:none">
+  <div class="auth-box wide">
+    <div class="step-tag">آخرین قدم قبل از شروع</div>
+    <h1>یه آواتار برای خودت انتخاب کن</h1>
+    <p>این همون چیزیه که توی پروفایل و مقایسه با بقیه نشونت می‌ده.</p>
+    <div class="avatar-grid" id="avatarGrid"></div>
+    <button class="primary-btn" id="avatarSubmit" disabled>ثبت و ادامه</button>
+  </div>
+</div>
+
+<div id="onboardGate" style="display:none">
+  <div class="auth-box wide">
+    <div class="step-tag">۵ سوال کوتاه — کمتر از ۱ دقیقه</div>
+    <h1>بذار هدفت رو بشناسیم</h1>
+    <p>قبل از اینکه بریم سراغ صفحه اصلی، این ۵ سوال کمک می‌کنه ورز درست‌تر باهات پیش بره.</p>
+    <div class="form-field">
+      <label>هدف اصلی‌ت از استفاده از ورز چیه؟</label>
+      <select id="obGoal">
+        <option value="lose">کاهش چربی</option>
+        <option value="gain">افزایش حجم عضله</option>
+        <option value="recomp">بازترکیب بدن (هم‌زمان چربی کم و عضله زیاد)</option>
+        <option value="strength">افزایش قدرت</option>
+        <option value="maintain">حفظ وضعیت فعلی</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label>سطح تجربه‌ت با تمرین چقدره؟</label>
+      <select id="obExp">
+        <option value="beginner">مبتدی</option>
+        <option value="intermediate" selected>متوسط</option>
+        <option value="advanced">پیشرفته</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label>چند روز در هفته می‌تونی تمرین کنی؟</label>
+      <select id="obDays">
+        <option value="2">۲ روز</option>
+        <option value="3" selected>۳ روز</option>
+        <option value="4">۴ روز</option>
+        <option value="5">۵ روز</option>
+        <option value="6">۶ روز</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label>جنسیت (برای دقیق‌تر شدن محاسبه‌ی کالری و ماکرو)</label>
+      <select id="obGender">
+        <option value="male">مرد</option>
+        <option value="female">زن</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label>بزرگ‌ترین مانعی که تا الان جلوی پیشرفتت رو گرفته؟</label>
+      <select id="obObstacle">
+        <option value="time">کمبود وقت</option>
+        <option value="motivation">نبود انگیزه</option>
+        <option value="plan">ندونستن برنامه درست</option>
+        <option value="nutrition">تغذیه نامنظم</option>
+        <option value="injury">آسیب‌دیدگی</option>
+      </select>
+    </div>
+    <div style="height:4px"></div>
+    <button class="primary-btn" id="onboardSubmit">ثبت و ادامه</button>
+  </div>
+</div>
+
+<div id="notifGate" style="display:none">
+  <div class="auth-box">
+    <div style="font-size:36px; margin-bottom:6px">🔔</div>
+    <h1>پیام‌های انگیزشی</h1>
+    <p>می‌خوای هر چند روز یک‌بار ورز یه پیام کوتاه و شخصی‌سازی‌شده برات بفرسته که بر اساس داده‌های خودتِ، نه یه پیام کلی؟</p>
+    <button class="primary-btn" id="notifYesBtn">بله، بفرست</button>
+    <div style="height:8px"></div>
+    <button class="primary-btn" id="notifNoBtn" style="background:var(--surface-2); color:var(--text)">نه فعلاً</button>
+    <div style="height:8px"></div>
+    <div style="font-size:11px; color:var(--text-faint); line-height:1.7">این پیام‌ها داخل خود اپ (توی تب خانه) نشون داده می‌شن، نه به‌صورت نوتیفیکیشن سیستم‌عامل — هر وقت خواستی از تنظیمات پروفایل می‌تونی خاموشش کنی.</div>
+  </div>
+</div>
+
+<div id="subGate" style="display:none">
+  <div class="auth-box">
+    <div style="font-size:36px; margin-bottom:6px">💪</div>
+    <h1 id="subTitle">دوره‌ی رایگانت تموم شد</h1>
+    <p id="subDesc">برای ادامه‌ی استفاده از تحلیل‌های ورز، تمرین‌نگاری، و چت با ورز، اشتراک ماهانه رو از سایت ورز فعال کن.</p>
+    <div class="score-card show" style="padding:16px; margin-bottom:14px">
+      <div class="num" style="font-size:28px">۸۹٬۰۰۰ تومان</div>
+      <div class="lbl">برای هر ماه، پرداخت از طریق سایت</div>
+    </div>
+    <button class="primary-btn" id="subUpgradeBtn">رفتن به سایت برای فعال‌سازی</button>
+    <div style="height:8px"></div>
+    <div style="font-size:11px; color:var(--text-faint); line-height:1.7">خرید و تمدید اشتراک فقط از طریق وب‌سایت ورز (vaarz.ir) انجام می‌شه، نه داخل این اپ. بعد از پرداخت، همینجا با همون شماره‌ت وارد شو تا دسترسیت فعال بشه.</div>
+  </div>
+</div>
+
+<div id="app" dir="rtl" lang="fa" style="display:none">
+
+  <div class="topbar">
+    <div class="brand">
+      <img src="data:image/png;base64,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" alt="ورز">
+      <span>ورز</span>
+    </div>
+    <button class="win" id="trialPill" style="border:none; cursor:pointer">—</button>
+    <span class="win" id="winLabel">۸ هفته اخیر</span>
+    <div class="topbar-avatar" id="topbarAvatar" title="پروفایل"></div>
+  </div>
+
+  <!-- ===================== HOME ===================== -->
+  <main class="active" id="tab-home">
+    <div class="greeting">
+      <div>
+        <h2 id="greetingTitle">بیا ببینیم این هفته چطوری گذشت</h2>
+      </div>
+    </div>
+
+    <div class="card" id="pmNotifCard" style="display:none; background:var(--accent); color:#fff">
+      <div style="font-size:11px; opacity:.8; margin-bottom:4px">پیام از ورز 💬</div>
+      <div id="pmNotifText" style="font-size:13.5px; line-height:1.8"></div>
+    </div>
+
+    <h2 class="section-title">بازه‌ی زمانی</h2>
+    <div class="chips" id="windowChips"></div>
+
+    <div class="card verdict-card">
+      <svg class="verdict-wave" width="160" height="90" viewBox="0 0 160 90"><path d="M0 60 Q30 20 55 55 T110 40 T160 55" stroke="#fff" stroke-width="2" fill="none" opacity=".5"/></svg>
+      <div class="pill"><span class="dot"></span><span id="statusPill">—</span></div>
+      <h1 id="headlineText">—</h1>
+      <p class="sub" id="subText"></p>
+    </div>
+
+    <div class="stat-row" id="statRow"></div>
+
+    <h2 class="section-title score-title-row">
+      <span id="scoreTitleText">امتیاز عملکردت</span>
+      <button type="button" class="info-btn" id="scoreInfoBtn" aria-label="نحوه محاسبه امتیاز">؟</button>
+    </h2>
+    <div class="info-pop" id="scoreInfoPop">این امتیاز کاملاً بر اساس داده‌ست، نه خودارزیابی: چند درصد از حرکاتت واقعاً داره پیشرفت می‌کنه، روند وزن و دور کمرت در جهت هدفته یا نه، و چقدر منظم داری وزن و دور کمرت رو ثبت می‌کنی.</div>
+    <div class="badge-card" id="badgeCard">
+      <div class="badge-medal" id="badgeMedal"></div>
+      <div class="badge-info">
+        <div class="score-line">امتیاز عملکرد: <b id="scoreVal">—</b> از ۱۰</div>
+        <div class="level-name" id="levelName">—</div>
+        <div class="tier-desc" id="tierDesc"></div>
+      </div>
+    </div>
+
+    <h2 class="section-title">مقایسه با بقیه</h2>
+    <div class="lb-card">
+      <div class="lb-head">
+        <div style="font-weight:800; font-size:13.5px">رتبه‌بندی هفتگی</div>
+        <div class="lb-demo-tag">نمایشی</div>
+      </div>
+      <div class="lb-note" id="lbNote">این یه نمونه‌ی نمایشیه که نشون میده وقتی رتبه‌بندی واقعی بین همه‌ی کاربرا فعال بشه، چه شکلی میشه — امتیاز خودت (ردیف مشخص‌شده) واقعیه و از همین داده‌های تو محاسبه شده، بقیه‌ی اسم‌ها ساختگی‌ان.</div>
+      <div class="lb-prize" id="lbPrize">🏆 نفر اول هر هفته ۳۰۰٬۰۰۰ تومان جایزه می‌گیره — این جایزه هنوز فعال نیست و بعد از راه‌اندازی حساب‌های واقعی کاربران شروع می‌شه</div>
+      <div id="lbList"></div>
+    </div>
+
+    <h2 class="section-title">نکاتی که در نظر بگیر</h2>
+    <div class="card">
+      <div class="caveat-list" id="caveatList"></div>
+    </div>
+
+    <h2 class="section-title">می‌خوای بیشتر بدونی؟</h2>
+    <div class="chips" id="homeChips"></div>
+    <div class="card" style="display:flex; gap:8px; align-items:flex-end; padding:12px">
+      <textarea id="homeAskInput" rows="1" placeholder="یا هر چیز دیگه‌ای بپرس..." style="flex:1; resize:none; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:14px; padding:10px 13px; font-family:inherit; font-size:13.5px; max-height:80px; line-height:1.6"></textarea>
+      <button id="homeAskBtn" aria-label="ارسال" style="flex:none; width:40px; height:40px; border-radius:50%; border:none; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 11l18-8-8 18-2-8-8-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="none" style="transform:scaleX(-1); transform-origin:center"/></svg>
+      </button>
+    </div>
+  </main>
+
+  <!-- ===================== PROGRESS ===================== -->
+  <main id="tab-progress">
+    <h2 class="section-title">روند وزن بدن</h2>
+    <div class="chart-wrap">
+      <div class="chart-head">
+        <div>
+          <div class="big" id="bwNow">—</div>
+          <div style="font-size:12px;color:var(--text-faint)">وزن فعلی (روی خط روند)</div>
+        </div>
+        <div class="delta" id="bwDelta">—</div>
+      </div>
+      <svg id="bwChart" width="100%" height="120" viewBox="0 0 400 120" preserveAspectRatio="none"></svg>
+    </div>
+
+    <h2 class="section-title">ثبت امروز</h2>
+    <div class="card" style="padding:14px 16px; display:flex; flex-direction:column; gap:10px">
+      <div style="display:flex; gap:8px; flex-wrap:wrap">
+        <input type="number" inputmode="decimal" id="logWeightInput" placeholder="وزن (kg)" style="flex:1; min-width:110px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 12px; font-family:inherit; font-size:13.5px; box-sizing:border-box">
+        <input type="number" inputmode="decimal" id="logWaistInput" placeholder="دور کمر (cm)" style="flex:1; min-width:110px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 12px; font-family:inherit; font-size:13.5px; box-sizing:border-box">
+      </div>
+      <button type="button" id="logMoreToggle" style="align-self:flex-start; background:none; border:none; color:var(--accent); font-size:12px; cursor:pointer; padding:0">+ اندازه‌گیری‌های بیشتر</button>
+      <div id="logMoreFields" style="display:none; flex-direction:column; gap:8px">
+        <input type="number" inputmode="decimal" id="logShouldersInput" placeholder="عرض شانه (cm)" style="border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 12px; font-family:inherit; font-size:13.5px; box-sizing:border-box">
+        <input type="number" inputmode="decimal" id="logChestInput" placeholder="دور سینه (cm)" style="border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 12px; font-family:inherit; font-size:13.5px; box-sizing:border-box">
+        <input type="number" inputmode="decimal" id="logHipsInput" placeholder="دور باسن (cm)" style="border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 12px; font-family:inherit; font-size:13.5px; box-sizing:border-box">
+        <input type="number" inputmode="decimal" id="logArmInput" placeholder="دور بازو (cm)" style="border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 12px; font-family:inherit; font-size:13.5px; box-sizing:border-box">
+      </div>
+      <button type="button" id="logTodaySubmitBtn" style="background:var(--accent); color:var(--accent-ink); border:none; border-radius:12px; padding:11px; font-weight:800; font-size:13.5px; cursor:pointer">ثبت</button>
+      <div id="logTodayMsg" style="display:none; font-size:12px; color:var(--accent); font-weight:700">ثبت شد ✓ نمودارها به‌روز شدن</div>
+    </div>
+
+    <h2 class="section-title">اندازه‌گیری‌های بدن</h2>
+    <div class="meas-grid" id="measGrid"></div>
+
+    <h2 class="section-title">همه حرکات — بزن رو هرکدوم که می‌خوای ثبت کنی</h2>
+    <input type="text" id="exSearch" placeholder="جستجوی حرکت... مثلاً پرس سینه، اسکات، ددلیفت" style="width:100%; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 12px; font-family:inherit; font-size:13.5px; margin-bottom:4px; box-sizing:border-box">
+    <div class="lift-list" id="liftList"></div>
+
+    <h2 class="section-title">حال‌پرسی‌های اخیر</h2>
+    <div class="card" id="checkinCard"></div>
+  </main>
+
+  <!-- ===================== PROFILE ===================== -->
+  <main id="tab-profile">
+    <div class="card profile-avatar-card">
+      <div class="pa-pic" id="profileAvatarPic"></div>
+      <div class="pa-name" id="profileAvatarName">—</div>
+      <button class="pa-change" id="changeAvatarBtn">تغییر آواتار</button>
+    </div>
+
+    <div class="card install-card" id="installCard" style="display:none">
+      <div class="ic-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="ic-text">
+        <div class="ic-title">نصب ورز روی گوشیت</div>
+        <div class="ic-sub">بدون استور، مثل یه اپ واقعی رو صفحه‌ی خونه‌ت بشینه</div>
+      </div>
+      <button class="ic-btn" id="installCardBtn">نصب</button>
+    </div>
+
+    <h2 class="section-title">سنجش اولیه با ورز</h2>
+    <div class="card">
+      <p style="margin:0 0 14px;font-size:13px;color:var(--text-dim);line-height:1.8">
+        قد، وزن و هدفت رو بگو تا ورز یه امتیاز آمادگی بده و برات یه برنامه شخصی‌سازی‌شده بنویسه. امتیاز از روی محاسبه واقعی (نه حدس) به‌دست میاد؛ متن برنامه رو ورز می‌نویسه.
+      </p>
+      <div class="form-grid">
+        <div class="form-field"><label>قد (سانتی‌متر)</label><input type="text" id="pfHeight" inputmode="numeric" placeholder="175"></div>
+        <div class="form-field"><label>وزن (کیلوگرم)</label><input type="text" id="pfWeight" inputmode="numeric" placeholder="78"></div>
+        <div class="form-field"><label>سن</label><input type="text" id="pfAge" inputmode="numeric" placeholder="26"></div>
+        <div class="form-field">
+          <label>جنسیت</label>
+          <select id="pfGender"><option value="male">مرد</option><option value="female">زن</option></select>
+        </div>
+        <div class="form-field">
+          <label>سطح تجربه</label>
+          <select id="pfExp"><option value="beginner">مبتدی</option><option value="intermediate" selected>متوسط</option><option value="advanced">پیشرفته</option></select>
+        </div>
+        <div class="form-field full">
+          <label>هدف اصلی</label>
+          <select id="pfGoal">
+            <option value="gain">افزایش حجم عضله</option>
+            <option value="lose">کاهش چربی</option>
+            <option value="recomp">بازترکیب بدن (هم‌زمان)</option>
+            <option value="strength">افزایش قدرت</option>
+            <option value="maintain">حفظ وضعیت فعلی</option>
+          </select>
+        </div>
+        <div class="form-field full"><label>چند روز در هفته تمرین می‌کنی؟</label><input type="text" id="pfDays" inputmode="numeric" placeholder="4"></div>
+      </div>
+      <div style="height:14px"></div>
+      <button class="primary-btn" id="pfSubmit">دریافت امتیاز و برنامه شخصی‌سازی‌شده</button>
+    </div>
+
+    <div class="score-card" id="scoreCard">
+      <div class="num" id="scoreNum">—</div>
+      <div class="lbl">شاخص پایه بدنی از ۱۰۰ (فقط بر اساس قد و وزن — نه یه معیار سلامتی یا آمادگی، چون کسی با عضله زیاد ممکنه BMI بالاتری داشته باشه)</div>
+    </div>
+
+    <div class="card" id="macroCard" style="display:none">
+      <h2 class="section-title" style="margin:0 0 10px">ماکروی پیشنهادی روزانه</h2>
+      <div class="form-grid" id="macroGrid" style="margin-bottom:4px"></div>
+      <div style="font-size:11.5px; color:var(--text-faint); line-height:1.7">
+        این فقط مقدار هدفه (پروتئین/کربوهیدرات/چربی) که با فرمول استاندارد از قد، وزن، سن، جنسیت، هدف و روزهای تمرینت حساب شده — نه یه رژیم غذایی دقیق با لیست وعده. پایین‌تر می‌تونی غذاهاتو ثبت کنی تا ببینی چقدر به این هدف رسیدی.
+      </div>
+    </div>
+
+    <div class="card" id="nutritionLogCard" style="display:none">
+      <h2 class="section-title" style="margin:0 0 10px">ثبت غذای امروز</h2>
+      <div id="nutritionTotals" style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px"></div>
+      <div id="nutritionEntries" style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px"></div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px">
+        <input type="text" id="foodNameInput" placeholder="اسم غذا (مثلاً برنج و مرغ)" style="flex:2; min-width:140px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 12px; font-family:inherit; font-size:13px; box-sizing:border-box">
+        <select id="foodMealInput" style="flex:1; min-width:90px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 8px; font-family:inherit; font-size:13px">
+          <option value="صبحانه">صبحانه</option><option value="ناهار">ناهار</option><option value="شام">شام</option><option value="میان‌وعده">میان‌وعده</option>
+        </select>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px">
+        <input type="number" inputmode="decimal" id="foodKcalInput" placeholder="کالری" style="flex:1; min-width:70px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 10px; font-family:inherit; font-size:13px; box-sizing:border-box">
+        <input type="number" inputmode="decimal" id="foodProteinInput" placeholder="پروتئین (g)" style="flex:1; min-width:70px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 10px; font-family:inherit; font-size:13px; box-sizing:border-box">
+        <input type="number" inputmode="decimal" id="foodCarbInput" placeholder="کربو (g)" style="flex:1; min-width:70px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 10px; font-family:inherit; font-size:13px; box-sizing:border-box">
+        <input type="number" inputmode="decimal" id="foodFatInput" placeholder="چربی (g)" style="flex:1; min-width:70px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 10px; font-family:inherit; font-size:13px; box-sizing:border-box">
+      </div>
+      <button type="button" id="foodAddBtn" style="width:100%; background:var(--accent); color:var(--accent-ink); border:none; border-radius:12px; padding:11px; font-weight:800; font-size:13.5px; cursor:pointer">افزودن غذا</button>
+    </div>
+
+    <div class="card" id="planCard" style="display:none">
+      <h2 class="section-title" style="margin:0 0 10px">برنامه‌ای که ورز برات نوشت</h2>
+      <div class="plan-text" id="planText">در حال نوشتن...</div>
+    </div>
+
+    <h2 class="section-title">عکس‌های پیشرفت</h2>
+    <div class="card">
+      <p style="margin:0 0 12px;font-size:12.5px;color:var(--text-dim);line-height:1.7">
+        عکس‌ها فقط برای همین پیش‌نمایش و روی همین دستگاه نگه داشته می‌شن. توی نسخه نهایی، عکس‌ها با فریم‌بندی یکسان مقایسه می‌شن — نه برای اثبات چربی/عضله، فقط برای دیدن تصویر کنار هم.
+      </p>
+      <div class="photo-grid" id="photoGrid">
+        <button class="photo-upload-btn" id="photoAddBtn">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          افزودن عکس
+        </button>
+      </div>
+      <input type="file" id="photoInput" accept="image/*" multiple style="display:none">
+      <div id="photoAnalysis" style="display:none; margin-top:12px">
+        <div style="font-size:11.5px; color:var(--text-faint); margin-bottom:6px">تحلیل ورز از این عکس — یه برآورد تقریبیه، نه اندازه‌گیری پزشکی</div>
+        <div class="plan-text" id="photoAnalysisText"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===================== CHAT ===================== -->
+  <main id="tab-chat" style="padding:0; gap:0">
+    <div id="chat-main" style="display:flex; flex-direction:column; flex:1; min-height:0">
+      <div class="chat-scroll" id="chatScroll">
+        <div class="chat-intro">
+          من ورزم 💪 هر چیزی که به ذهنت می‌رسه رو همین‌جا بنویس — سوال درباره تمرینت، وزنت، یه هفته‌ی بد، یا حتی چیزی که به کارت‌های پیشنهادی زیر ربطی نداره. اگه برای جواب دادن نیاز به عدد واقعی از داده‌هات داشته باشم، میرم چک می‌کنم و بعد جواب می‌دم؛ چیزی از خودم نمی‌سازم.
+        </div>
+      </div>
+      <div class="chat-suggest" id="chatSuggest"></div>
+      <div class="composer">
+        <textarea id="chatInput" rows="1" placeholder="هر چی می‌خوای بپرس یا بگو..."></textarea>
+        <button class="send-btn" id="sendBtn" aria-label="ارسال">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 11l18-8-8 18-2-8-8-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="none"/></svg>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <div class="tabbar">
+    <button class="tab-btn active" data-tab="home">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 11.5 12 4l8 7.5M6 10v9h12v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      خانه
+    </button>
+    <button class="tab-btn" data-tab="progress">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5M4 15l5-5 4 3 7-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      پیشرفت
+    </button>
+    <button class="tab-btn" data-tab="profile">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c1.2-3.6 4-5.5 7-5.5s5.8 1.9 7 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      پروفایل
+    </button>
+    <button class="tab-btn" data-tab="chat">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v11H8l-4 4V5z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      چت با ورز
+    </button>
+  </div>
+</div>
+
+<div id="installModal">
+  <div class="install-sheet" id="installSheet"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const FA_DIGITS = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+  function faNum(n, dp){
+    dp = dp==null?1:dp;
+    const s = Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:dp});
+    return s.replace(/[0-9]/g,d=>FA_DIGITS[+d]).replace(/\./g,'٫').replace(/,/g,'٬');
+  }
+
+  /* Some athletes type numbers with a Persian/Arabic-Indic keyboard (۰۹۱۲...).
+     Native number-ish inputs don't understand those digits and end up looking
+     broken/erroring out, so every numeric-ish field gets auto-converted back
+     to plain English digits as the person types. */
+  function toEnDigits(str){
+    return String(str==null?'':str)
+      .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+      .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+  }
+  document.addEventListener('input', (e)=>{
+    const el = e.target;
+    if (!el || el.tagName !== 'INPUT') return;
+    const isNumericField = el.id==='authPhone' || el.id==='pfHeight' || el.id==='pfWeight' ||
+      el.id==='pfAge' || el.id==='pfDays' ||
+      el.classList.contains('log-weight') || el.classList.contains('log-sets') || el.classList.contains('log-reps');
+    if (!isNumericField) return;
+    const converted = toEnDigits(el.value);
+    if (converted !== el.value){
+      const pos = el.selectionStart;
+      el.value = converted;
+      try { el.setSelectionRange(pos, pos); } catch(e){}
+    }
+  });
+
+  /* ============================================================
+     Check-in gate — every athlete identifies with name + phone
+     before entering the app. Stored locally on this device only
+     (no backend yet — see the "مقایسه با بقیه" note further down).
+     ============================================================ */
+  let authUser = null;
+  try { authUser = JSON.parse(localStorage.getItem('varz_user') || 'null'); } catch(e){ authUser = null; }
+  const authGate = document.getElementById('authGate');
+  const onboardGate = document.getElementById('onboardGate');
+  const notifGate = document.getElementById('notifGate');
+  const subGate = document.getElementById('subGate');
+  const appRoot = document.getElementById('app');
+  function saveAuthUser(){
+    try { localStorage.setItem('varz_user', JSON.stringify(authUser)); } catch(e){}
+    syncProfileToServer();
+  }
+
+  /* ============================================================
+     Real backend (Supabase) — plain REST calls (no SDK, keeps the
+     artifact self-contained). Auth uses a synthetic email built
+     from the phone number since real phone/SMS OTP needs a paid
+     SMS provider we haven't wired up; the person never sees this,
+     they still just type a phone number + password.
+     ============================================================ */
+  const SUPABASE_URL = 'https://yoqtcnlzirqegshiirhh.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_y1TszsO9LsyGwsBV411ftw_V7Xiye9h';
+  function emailForPhone(phone){ return 'p' + String(phone||'').replace(/[^\d]/g,'') + '@varz.local'; }
+
+  function loadSbSession(){ try { return JSON.parse(localStorage.getItem('varz_sb_session') || 'null'); } catch(e){ return null; } }
+  function saveSbSession(s){ try { localStorage.setItem('varz_sb_session', JSON.stringify(s)); } catch(e){} }
+  let sbSession = loadSbSession();
+
+  async function sbAuthRequest(path, body){
+    const res = await fetch(SUPABASE_URL + '/auth/v1' + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+      body: JSON.stringify(body)
+    });
+    let data = {};
+    try { data = await res.json(); } catch(e){}
+    if (!res.ok) { const err = new Error(data.msg || data.error_description || data.error || 'auth_error'); err.status = res.status; err.data = data; throw err; }
+    return data;
+  }
+  async function sbSignUp(email, password){
+    const data = await sbAuthRequest('/signup', { email, password });
+    if (data.access_token){ sbSession = { access_token:data.access_token, refresh_token:data.refresh_token, user:data.user }; saveSbSession(sbSession); }
+    return data;
+  }
+  async function sbSignIn(email, password){
+    const data = await sbAuthRequest('/token?grant_type=password', { email, password });
+    sbSession = { access_token:data.access_token, refresh_token:data.refresh_token, user:data.user };
+    saveSbSession(sbSession);
+    return data;
+  }
+  async function sbRefresh(){
+    if (!sbSession || !sbSession.refresh_token) return null;
+    try {
+      const data = await sbAuthRequest('/token?grant_type=refresh_token', { refresh_token: sbSession.refresh_token });
+      sbSession = { access_token:data.access_token, refresh_token:data.refresh_token, user: data.user || sbSession.user };
+      saveSbSession(sbSession);
+      return sbSession;
+    } catch(e){ return null; }
+  }
+  async function sbFetch(path, opts){
+    opts = opts || {};
+    if (!sbSession) return null;
+    const headers = Object.assign({ 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + sbSession.access_token, 'Content-Type': 'application/json' }, opts.headers || {});
+    let res;
+    try { res = await fetch(SUPABASE_URL + path, Object.assign({}, opts, { headers })); }
+    catch(e){ return null; } // offline / network blocked — caller falls back to local-only
+    if (res.status === 401){
+      const refreshed = await sbRefresh();
+      if (refreshed){
+        headers['Authorization'] = 'Bearer ' + refreshed.access_token;
+        try { res = await fetch(SUPABASE_URL + path, Object.assign({}, opts, { headers })); } catch(e){ return null; }
+      }
+    }
+    return res;
+  }
+  function isOnline(){ return !!(authUser && authUser.uid && sbSession); }
+
+  /* ---- profile: fields not covered by dedicated columns (avatar, onboarding
+     answers, notif prefs, etc.) travel as one jsonb blob so the schema
+     doesn't need to change every time the client adds a field. ---- */
+  function profileSettingsFromAuthUser(){
+    const copy = Object.assign({}, authUser);
+    delete copy.uid; delete copy.password; delete copy.phone; delete copy.firstName; delete copy.lastName; delete copy.username;
+    return copy;
+  }
+  let profileSyncTimer = null;
+  function syncProfileToServer(){
+    if (!isOnline()) return;
+    clearTimeout(profileSyncTimer);
+    profileSyncTimer = setTimeout(async ()=>{
+      try {
+        await sbFetch('/rest/v1/profiles?id=eq.' + authUser.uid, {
+          method: 'PATCH',
+          headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ phone: authUser.phone, name: (authUser.firstName||'') + ' ' + (authUser.lastName||''), username: authUser.username || null, settings: profileSettingsFromAuthUser() })
+        });
+      } catch(e){}
+    }, 600);
+  }
+  async function sbFetchProfile(uid){
+    const res = await sbFetch('/rest/v1/profiles?id=eq.' + uid + '&select=*', { method:'GET' });
+    if (!res || !res.ok) return null;
+    const rows = await res.json().catch(()=>[]);
+    return rows[0] || null;
+  }
+  async function sbFetchSubscription(uid){
+    const res = await sbFetch('/rest/v1/subscriptions?user_id=eq.' + uid + '&select=*', { method:'GET' });
+    if (!res || !res.ok) return null;
+    const rows = await res.json().catch(()=>[]);
+    return rows[0] || null;
+  }
+  let serverSubscription = null;
+  async function refreshSubscription(){
+    if (!isOnline()) return;
+    serverSubscription = await sbFetchSubscription(authUser.uid);
+    try { checkSubscriptionGate(); } catch(e){}
+  }
+
+  /* ---- push a body-measurement / nutrition / workout row to the server
+     (fire-and-forget; localStorage stays the source of truth for instant
+     UI, this just makes the same data reachable from another device). ---- */
+  async function pushBodyLog(vals, dateStr){
+    if (!isOnline()) return;
+    try {
+      await sbFetch('/rest/v1/body_logs', { method:'POST', headers:{'Prefer':'return=minimal'}, body: JSON.stringify({
+        user_id: authUser.uid, logged_at: dateStr, weight_kg: vals.weight||null, waist_cm: vals.waist||null,
+        shoulders_cm: vals.shoulders||null, chest_cm: vals.chest||null, hips_cm: vals.hips||null, arm_cm: vals.upper_arm||null
+      })});
+    } catch(e){}
+  }
+  async function pushNutritionLog(entry, dateStr){
+    if (!isOnline()) return;
+    try {
+      await sbFetch('/rest/v1/nutrition_logs', { method:'POST', headers:{'Prefer':'return=minimal'}, body: JSON.stringify({
+        user_id: authUser.uid, logged_at: dateStr, meal: entry.meal||null, food_name: entry.name,
+        kcal: entry.kcal||null, protein_g: entry.protein||null, carb_g: entry.carb||null, fat_g: entry.fat||null
+      })});
+    } catch(e){}
+  }
+  let scoreSnapshotDay = null;
+  async function pushScoreSnapshot(score, windowDays){
+    if (!isOnline() || score==null) return;
+    const key = todayISO() + '_' + windowDays;
+    if (scoreSnapshotDay === key) return; // already pushed once this session for this window/day
+    scoreSnapshotDay = key;
+    try {
+      await sbFetch('/rest/v1/score_snapshots', { method:'POST', headers:{'Prefer':'return=minimal'}, body: JSON.stringify({
+        user_id: authUser.uid, window_days: windowDays, score: score
+      })});
+    } catch(e){}
+  }
+  async function pushPhoto(file){
+    if (!isOnline()) return null;
+    const path = authUser.uid + '/' + Date.now() + '-' + file.name.replace(/[^a-zA-Z0-9.\-_]/g,'_');
+    try {
+      const res = await sbFetch('/storage/v1/object/progress-photos/' + path, {
+        method:'POST', headers:{ 'Content-Type': file.type || 'application/octet-stream' }, body: file
+      });
+      return (res && res.ok) ? path : null;
+    } catch(e){ return null; }
+  }
+
+  /* one-time pull of an existing account's history onto a new device
+     (only ever runs right after a successful login, not on every load) */
+  async function pullRemoteLogsAfterLogin(){
+    if (!isOnline()) return;
+    try {
+      const [bodyRes, foodRes] = await Promise.all([
+        sbFetch('/rest/v1/body_logs?user_id=eq.' + authUser.uid + '&select=*&order=logged_at.asc', { method:'GET' }),
+        sbFetch('/rest/v1/nutrition_logs?user_id=eq.' + authUser.uid + '&select=*&order=logged_at.asc', { method:'GET' })
+      ]);
+      if (bodyRes && bodyRes.ok){
+        const rows = await bodyRes.json();
+        const logs = loadUserLogs();
+        rows.forEach(r=>{
+          const d = r.logged_at;
+          if (r.weight_kg!=null){ logs.weight = logs.weight||[]; upsertByDate(logs.weight, {date:d, value:+r.weight_kg}); upsertByDate(bodyweightSeries, {date:d, value:+r.weight_kg}); }
+          [['waist_cm','waist'],['shoulders_cm','shoulders'],['chest_cm','chest'],['hips_cm','hips'],['arm_cm','upper_arm']].forEach(([col,key])=>{
+            if (r[col]==null) return;
+            logs.measurements = logs.measurements||{};
+            logs.measurements[key] = logs.measurements[key]||[];
+            upsertByDate(logs.measurements[key], {date:d, value:+r[col]});
+            const m = MEASUREMENTS.find(mm=>mm.key===key);
+            if (m) upsertByDate(m.series, {date:d, value:+r[col]});
+          });
+        });
+        saveUserLogs(logs);
+      }
+      if (foodRes && foodRes.ok){
+        const rows = await foodRes.json();
+        const byDate = {};
+        rows.forEach(r=>{ (byDate[r.logged_at] = byDate[r.logged_at]||[]).push({ name:r.food_name, meal:r.meal, kcal:+r.kcal||0, protein:+r.protein_g||0, carb:+r.carb_g||0, fat:+r.fat_g||0 }); });
+        Object.keys(byDate).forEach(d=> saveFoodLog(d, byDate[d]));
+      }
+    } catch(e){}
+  }
+
+  /* ---- avatar picker: 8 hand-drawn flat SVG avatars, chosen at signup and
+     changeable later from the profile tab. Each is self-contained (own
+     gradient id) so many can sit on one page without id clashes. ---- */
+  const EYES_MOUTH = '<circle cx="49" cy="58" r="3" fill="#241b12"/><circle cx="71" cy="58" r="3" fill="#241b12"/><path d="M46 76 Q60 90 74 76" stroke="#4a2f1e" stroke-width="3.2" fill="none" stroke-linecap="round"/>';
+  function avBase(id, c1, c2, shoulder, skin){
+    return `<defs><radialGradient id="g${id}" cx="50%" cy="35%" r="70%"><stop offset="0%" stop-color="${c1}"/><stop offset="100%" stop-color="${c2}"/></radialGradient></defs>
+      <circle cx="60" cy="62" r="58" fill="url(#g${id})" stroke="rgba(255,182,72,0.4)" stroke-width="2.5"/>
+      <path d="M14 140 C14 112 34 100 60 100 C86 100 106 112 106 140 Z" fill="${shoulder}"/>
+      <circle cx="60" cy="60" r="32" fill="${skin}"/>`;
+  }
+  const AVATAR_SVG = {
+    M1: avBase('M1','#22305a','#0c1120','#e2432f','#f2c9a0') + EYES_MOUTH +
+        '<path d="M26 50 L34 20 L44 44 L52 14 L60 42 L68 14 L76 44 L86 20 L94 50 C94 40 82 32 60 32 C38 32 26 40 26 50 Z" fill="#1a1a1a"/>' +
+        '<rect x="26" y="38" width="68" height="12" rx="6" fill="#ffb648"/>',
+    M3: avBase('M3','#0f3a44','#081018','#2f7a4a','#c98a5a') + EYES_MOUTH +
+        '<g fill="#241a12"><circle cx="30" cy="40" r="14"/><circle cx="48" cy="18" r="15"/><circle cx="72" cy="18" r="15"/><circle cx="90" cy="40" r="14"/><circle cx="60" cy="26" r="18"/></g>' +
+        '<g transform="translate(90,90)"><circle r="13" fill="#ffb648"/><path d="M0 -6 C3 -2 4 2 1 5 C2 2 -1 1 -1 -1 C-3 1 -3 4 -1 6 C-4 4 -6 0 -3 -4 C-2 -6 -1 -7 0 -6 Z" fill="#0c1120" transform="scale(1.4)"/></g>',
+    M4: avBase('M4','#4a2233','#0c1120','#7a3fae','#a86a3f') + EYES_MOUTH +
+        '<g><rect x="35" y="52" width="22" height="14" rx="6" fill="#1c2438"/><rect x="63" y="52" width="22" height="14" rx="6" fill="#1c2438"/><rect x="56" y="57" width="8" height="3" fill="#1c2438"/></g>' +
+        '<path d="M28 54 C28 26 42 12 60 12 C78 12 92 26 92 54 C92 42 84 36 60 36 C36 36 28 42 28 54 Z" fill="#5a3d24"/>',
+    M9: '<circle cx="60" cy="60" r="58" fill="#182140" stroke="rgba(255,182,72,0.35)" stroke-width="2"/>' +
+        '<circle cx="60" cy="66" r="34" fill="#a86a3f"/>' +
+        '<circle cx="49" cy="58" r="3.2" fill="#2a2a2a"/><circle cx="71" cy="58" r="3.2" fill="#2a2a2a"/>' +
+        '<path d="M48 78 Q60 88 72 78" stroke="#5b3a26" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+        '<path d="M24 54 C24 26 40 12 60 12 C80 12 96 26 96 54 L96 46 C96 40 82 34 60 34 C38 34 24 40 24 46 Z" fill="#ffb648"/>' +
+        '<path d="M24 46 C10 46 6 56 6 58 C6 60 14 60 26 58 Z" fill="#ffb648"/>',
+    F1: avBase('F1','#0f3a44','#081018','#c9506b','#c98a5a') + EYES_MOUTH +
+        '<path d="M26 54 C26 26 42 12 60 12 C78 12 94 26 94 54 C94 42 84 34 60 34 C36 34 26 42 26 54 Z" fill="#5a3d24"/><path d="M92 42 C108 46 114 70 104 92 C108 72 100 52 90 46 Z" fill="#5a3d24"/>' +
+        '<circle cx="28" cy="76" r="3" fill="#ffb648"/><circle cx="92" cy="76" r="3" fill="#ffb648"/>',
+    F5: avBase('F5','#22305a','#0c1120','#22304a','#f2c9a0') + EYES_MOUTH +
+        '<path d="M14 100 C8 46 26 4 60 4 C94 4 112 46 106 100 C106 58 90 24 60 24 C30 24 14 58 14 100 Z" fill="#2f7a7a"/>',
+    F7: avBase('F7','#0f3a44','#081018','#4a2233','#c98a5a') + EYES_MOUTH +
+        '<path d="M26 54 C26 26 42 12 60 12 C78 12 94 26 94 54 C94 42 84 34 60 34 C36 34 26 42 26 54 Z" fill="#241a12"/><circle cx="60" cy="6" r="11" fill="#241a12"/>' +
+        '<circle cx="28" cy="76" r="3" fill="#ffb648"/><circle cx="92" cy="76" r="3" fill="#ffb648"/>',
+    F10: avBase('F10','#2a2f52','#0c1120','#7a3fae','#f6d7b8') + EYES_MOUTH +
+        '<path d="M30 46 C30 20 44 8 60 8 C76 8 90 20 90 46 C90 38 80 30 60 30 C40 30 30 38 30 46 Z" fill="#5a3d24"/>' +
+        '<circle cx="28" cy="76" r="3" fill="#ffb648"/><circle cx="92" cy="76" r="3" fill="#ffb648"/>',
+  };
+  const AVATAR_KEYS = ['M1','M3','M4','M9','F1','F5','F7','F10'];
+  const DEFAULT_AVATAR = 'M9';
+  function avatarSvg(key){
+    const inner = AVATAR_SVG[key] || AVATAR_SVG[DEFAULT_AVATAR];
+    return `<svg viewBox="0 0 120 145" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+  }
+  function renderTopbarAvatar(){
+    const el = document.getElementById('topbarAvatar');
+    if (!el || !authUser) return;
+    el.innerHTML = avatarSvg(authUser.avatar || DEFAULT_AVATAR);
+  }
+  function renderProfileAvatarCard(){
+    const pic = document.getElementById('profileAvatarPic');
+    const nameEl = document.getElementById('profileAvatarName');
+    if (!pic || !authUser) return;
+    pic.innerHTML = avatarSvg(authUser.avatar || DEFAULT_AVATAR);
+    if (nameEl) nameEl.textContent = (authUser.firstName || '') + ' ' + (authUser.lastName || '');
+  }
+  let selectedAvatarKey = null;
+  function buildAvatarGrid(){
+    const grid = document.getElementById('avatarGrid');
+    if (!grid || grid.dataset.built) return;
+    grid.dataset.built = '1';
+    AVATAR_KEYS.forEach(key=>{
+      const opt = document.createElement('div');
+      opt.className = 'avatar-opt';
+      opt.dataset.key = key;
+      opt.innerHTML = avatarSvg(key) + `<span>${key}</span>`;
+      opt.addEventListener('click', ()=>{
+        selectedAvatarKey = key;
+        Array.from(grid.children).forEach(c=>c.classList.remove('selected'));
+        opt.classList.add('selected');
+        document.getElementById('avatarSubmit').disabled = false;
+      });
+      grid.appendChild(opt);
+    });
+  }
+
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+  function daysSince(dateStr){
+    try { return Math.floor((toDay(todayISO()) - toDay(dateStr))); } catch(e){ return 0; }
+  }
+  const TRIAL_DAYS = 3;
+  const SUBSCRIPTION_DAYS = 30; // ۸۹٬۰۰۰ تومان برای هر ماه
+
+  /* Not a paywall — nothing in this preview blocks access. The pill just shows
+     an informational trial/subscribe screen if tapped; it never locks anyone out
+     (there's no real payment processing behind it — see the subGate note). */
+  function checkSubscriptionGate(){
+    if (!authUser){ return; }
+    subGate.style.display = 'none';
+    appRoot.style.display = 'flex';
+    const pill = document.getElementById('trialPill');
+    if (!pill) return;
+    // server subscription row is the source of truth once we have one —
+    // it can only be changed from the backend (service_role), never from
+    // this client, so it can't be spoofed by editing localStorage.
+    if (serverSubscription){
+      if (serverSubscription.status === 'active'){
+        const subLeft = serverSubscription.current_period_end ? Math.ceil((new Date(serverSubscription.current_period_end) - new Date())/86400000) : null;
+        pill.textContent = (subLeft!=null && subLeft>0) ? (faNum(subLeft,0) + ' روز تا پایان اشتراک') : 'اشتراک تموم شده';
+      } else {
+        const trialLeft = serverSubscription.trial_ends_at ? Math.max(0, Math.ceil((new Date(serverSubscription.trial_ends_at) - new Date())/86400000)) : 0;
+        pill.textContent = trialLeft>0 ? (faNum(trialLeft,0) + ' روز رایگان مونده') : 'اشتراک';
+      }
+      return;
+    }
+    // fallback for a not-yet-synced / offline session
+    if (authUser.subscribed){
+      const subElapsed = daysSince(authUser.subscribedSince || authUser.since || todayISO());
+      const subLeft = SUBSCRIPTION_DAYS - subElapsed;
+      pill.textContent = subLeft>0 ? (faNum(subLeft,0) + ' روز تا پایان اشتراک') : 'اشتراک تموم شده';
+    } else {
+      const elapsed = daysSince(authUser.since || todayISO());
+      const trialLeft = Math.max(0, TRIAL_DAYS - elapsed);
+      pill.textContent = trialLeft>0 ? (faNum(trialLeft,0) + ' روز رایگان مونده') : 'اشتراک';
+    }
+  }
+
+  function prefillProfileFromOnboarding(){
+    if (!authUser) return;
+    const map = { pfGoal:'goal', pfExp:'exp', pfDays:'days', pfGender:'gender' };
+    Object.keys(map).forEach(id=>{
+      const val = authUser[map[id]];
+      const el = document.getElementById(id);
+      if (val!=null && el) el.value = val;
+    });
+  }
+
+  function enterMainApp(){
+    onboardGate.style.display = 'none';
+    notifGate.style.display = 'none';
+    prefillProfileFromOnboarding();
+    renderTopbarAvatar();
+    renderProfileAvatarCard();
+    checkSubscriptionGate();
+    // Deferred to the next tick so it always runs after the rest of this
+    // script (further down the file) has finished defining the trend/tier
+    // data it reads — safe whether this fires during first page load or
+    // from a later click.
+    setTimeout(()=>{ try { maybeShowPMNotification(); } catch(e){} }, 0);
+    setTimeout(()=>{ try { loadRemotePhotos(); } catch(e){} }, 0);
+  }
+
+  const avatarGate = document.getElementById('avatarGate');
+  const landingGate = document.getElementById('landingGate');
+  function showApp(){
+    landingGate.style.display = 'none';
+    authGate.style.display = 'none';
+    if (!authUser.avatar){
+      buildAvatarGrid();
+      avatarGate.style.display = 'flex';
+      return;
+    }
+    avatarGate.style.display = 'none';
+    if (!authUser.onboarded){
+      onboardGate.style.display = 'flex';
+      return;
+    }
+    if (!authUser.notifAsked){
+      notifGate.style.display = 'flex';
+      return;
+    }
+    enterMainApp();
+  }
+  if (authUser && authUser.firstName && authUser.phone){
+    if (!authUser.since){ authUser.since = todayISO(); }
+    saveAuthUser();
+    showApp();
+  }
+
+  /* ---- background session bootstrap: runs after the UI is already up so
+     it never blocks first paint.
+     - a device that already has a Supabase session just refreshes its
+       subscription status.
+     - a device with only a legacy local account (created before the
+       backend existed — has a plaintext `password` field, no `uid`) gets
+       silently upgraded: we create/attach a real Supabase account for it
+       using the same phone+password, so it's no longer just sitting in
+       localStorage. ---- */
+  (async function bootstrapBackend(){
+    if (!authUser || !authUser.phone) return;
+    const email = emailForPhone(authUser.phone);
+    if (authUser.uid && sbSession){
+      await refreshSubscription();
+      return;
+    }
+    if (authUser.password){
+      try {
+        const data = await sbSignUp(email, authUser.password);
+        if (data && data.user && (!data.user.identities || data.user.identities.length)){
+          authUser.uid = data.user.id;
+          delete authUser.password;
+          saveAuthUser();
+          await refreshSubscription();
+          return;
+        }
+      } catch(e){}
+      // signup failed (most likely: an account already exists for this phone,
+      // e.g. it was created on another device) — try logging into it instead.
+      try {
+        const data = await sbSignIn(email, authUser.password);
+        authUser.uid = data.user.id;
+        delete authUser.password;
+        saveAuthUser();
+        await refreshSubscription();
+      } catch(e){}
+    }
+  })();
+
+  /* ---- landing screen: tap-to-open FAQ items + the CTA that moves on to
+     the actual signup form ---- */
+  [1,2,3,4].forEach(n=>{
+    document.getElementById('landingFaqBtn'+n).addEventListener('click', ()=>{
+      document.getElementById('landingFaqItem'+n).classList.toggle('open');
+    });
+  });
+  document.getElementById('landingCtaBtn').addEventListener('click', ()=>{
+    landingGate.style.display = 'none';
+    authGate.style.display = 'flex';
+  });
+  /* ---- basic denylist so people can't put Persian profanity/slurs into
+     the name fields at signup (these are public-ish — shown on the
+     leaderboard, in chat, etc.) — not a perfect filter, just a first line
+     of defense against the obvious cases. ---- */
+  const NAME_BLOCKLIST = ['کیر','کص','کس','جنده','کونی','گاییدم','گاییده','ننه','مادرجنده','حروم‌زاده','حرومزاده','کسکش','آشغال','عوضی','خارکسه','لاشی','کونده'];
+  function containsProfanity(text){
+    const norm = String(text||'').toLowerCase().replace(/[\u200c\s]/g,'');
+    return NAME_BLOCKLIST.some(w => norm.indexOf(w.replace(/[\u200c\s]/g,'')) > -1);
+  }
+  document.getElementById('scoreInfoBtn').addEventListener('click', ()=>{
+    document.getElementById('scoreInfoPop').classList.toggle('open');
+  });
+  function containsDigits(text){
+    return /[0-9۰-۹٠-٩]/.test(String(text||''));
+  }
+  let authMode = 'signup';
+  document.getElementById('authModeToggle').addEventListener('click', ()=>{
+    authMode = authMode === 'signup' ? 'login' : 'signup';
+    const isLogin = authMode === 'login';
+    document.getElementById('authSignupOnlyFields').style.display = isLogin ? 'none' : 'block';
+    document.getElementById('authUsernameField').style.display = isLogin ? 'none' : 'block';
+    document.getElementById('authTitle').textContent = isLogin ? 'خوش برگشتی' : 'خوش اومدی به ورز';
+    document.getElementById('authSubtitle').textContent = isLogin ? 'شماره موبایل و رمز عبورت رو وارد کن.' : 'برای شروع، اسمت و شماره موبایلت رو وارد کن.';
+    document.getElementById('authSubmit').textContent = isLogin ? 'ورود' : 'ورود به ورز';
+    document.getElementById('authModeToggle').textContent = isLogin ? 'حساب نداری؟ ثبت‌نام کن' : 'قبلاً حساب ساختی؟ وارد شو';
+    document.getElementById('authErr').textContent = '';
+  });
+  document.getElementById('authSubmit').addEventListener('click', async ()=>{
+    const first = document.getElementById('authFirst').value.trim();
+    const last = document.getElementById('authLast').value.trim();
+    const phone = document.getElementById('authPhone').value.trim();
+    const username = document.getElementById('authUsername').value.trim();
+    const password = document.getElementById('authPassword').value;
+    const errEl = document.getElementById('authErr');
+    const btn = document.getElementById('authSubmit');
+    const phoneDigits = phone.replace(/[^\d]/g,'');
+    const phoneOk = /^0?9\d{9}$/.test(phoneDigits);
+    if (!phoneOk){
+      errEl.textContent = 'شماره موبایل درست نیست — مثلاً 0912xxxxxxx (با اعداد انگلیسی).';
+      return;
+    }
+    if (!password || password.length < 8){
+      errEl.textContent = 'رمز عبور باید حداقل ۸ کاراکتر باشه.';
+      return;
+    }
+
+    if (authMode === 'login'){
+      errEl.textContent = '';
+      btn.disabled = true; const oldTxt = btn.textContent; btn.textContent = 'در حال ورود...';
+      try {
+        const data = await sbSignIn(emailForPhone(phoneDigits), password);
+        const profile = await sbFetchProfile(data.user.id);
+        if (!profile){ throw new Error('no_profile'); }
+        const nameParts = String(profile.name||'').trim().split(/\s+/);
+        authUser = Object.assign({}, profile.settings || {}, {
+          uid: data.user.id, phone: phoneDigits, username: profile.username || '',
+          firstName: nameParts[0] || '', lastName: nameParts.slice(1).join(' ') || ''
+        });
+        saveAuthUser();
+        await Promise.all([refreshSubscription(), pullRemoteLogsAfterLogin()]);
+        try { renderAll(); } catch(e){}
+        showApp();
+      } catch(e){
+        errEl.textContent = 'شماره موبایل یا رمز عبور اشتباهه.';
+      } finally {
+        btn.disabled = false; btn.textContent = oldTxt;
+      }
+      return;
+    }
+
+    if (!first || !last){
+      errEl.textContent = 'لطفاً نام و نام خانوادگی رو کامل بنویس.';
+      return;
+    }
+    if (containsProfanity(first) || containsProfanity(last)){
+      errEl.textContent = 'لطفاً از اسم واقعی و مناسب استفاده کن.';
+      return;
+    }
+    if (!username){
+      errEl.textContent = 'لطفاً یه نام نمایشی برای جدول رتبه‌بندی وارد کن.';
+      return;
+    }
+    if (containsDigits(username)){
+      errEl.textContent = 'نام نمایشی نباید عدد داشته باشه.';
+      return;
+    }
+    if (containsProfanity(username)){
+      errEl.textContent = 'نام نمایشی نامناسبه، لطفاً یه اسم دیگه انتخاب کن.';
+      return;
+    }
+    errEl.textContent = '';
+    btn.disabled = true; const oldTxt = btn.textContent; btn.textContent = 'در حال ساخت حساب...';
+    try {
+      const data = await sbSignUp(emailForPhone(phoneDigits), password);
+      if (!data.access_token){
+        // "Confirm email" is off for this project, so a successful signup
+        // always returns a session directly; getting here means the phone
+        // is already registered (Supabase hides that as an empty identities
+        // array instead of an error, to avoid leaking which emails exist).
+        throw new Error('already_registered');
+      }
+      authUser = { uid: data.user.id, firstName:first, lastName:last, phone: phoneDigits, username: username, since: todayISO(), freshStart:true };
+      saveAuthUser();
+      clearSeedDataForFreshUser();
+      try { renderAll(); } catch(e){}
+      showApp();
+    } catch(e){
+      if (String(e.message).indexOf('already_registered') > -1 || (e.data && /already/i.test(e.data.msg||''))){
+        errEl.textContent = 'این شماره قبلاً ثبت‌نام کرده — از گزینه‌ی «قبلاً حساب ساختی؟» استفاده کن.';
+      } else {
+        errEl.textContent = 'مشکلی پیش اومد، دوباره امتحان کن.';
+      }
+    } finally {
+      btn.disabled = false; btn.textContent = oldTxt;
+    }
+  });
+
+  /* ---- avatar picker — shown once right after signup (before the 5-question
+     onboarding), and reachable again anytime from the profile tab. ---- */
+  document.getElementById('avatarSubmit').addEventListener('click', ()=>{
+    if (!authUser || !selectedAvatarKey) return;
+    authUser.avatar = selectedAvatarKey;
+    saveAuthUser();
+    renderTopbarAvatar();
+    renderProfileAvatarCard();
+    try { renderAll(); } catch(e){}
+    showApp();
+  });
+  document.getElementById('changeAvatarBtn').addEventListener('click', ()=>{
+    if (!authUser) return;
+    selectedAvatarKey = authUser.avatar || null;
+    buildAvatarGrid();
+    const grid = document.getElementById('avatarGrid');
+    Array.from(grid.children).forEach(c=>c.classList.toggle('selected', c.dataset.key===selectedAvatarKey));
+    document.getElementById('avatarSubmit').disabled = !selectedAvatarKey;
+    avatarGate.style.display = 'flex';
+  });
+
+  /* ---- 5-question onboarding — asked once, right after signup, before
+     the athlete ever sees the home screen. Answers double as sensible
+     defaults for the Profile tab (goal/exp/days/gender) so they don't
+     have to enter them twice. ---- */
+  document.getElementById('onboardSubmit').addEventListener('click', ()=>{
+    if (!authUser) return;
+    authUser.goal = document.getElementById('obGoal').value;
+    authUser.exp = document.getElementById('obExp').value;
+    authUser.days = document.getElementById('obDays').value;
+    authUser.gender = document.getElementById('obGender').value;
+    authUser.obstacle = document.getElementById('obObstacle').value;
+    authUser.onboarded = true;
+    saveAuthUser();
+    onboardGate.style.display = 'none';
+    if (!authUser.notifAsked){ notifGate.style.display = 'flex'; return; }
+    enterMainApp();
+  });
+
+  /* ---- Notification opt-in — asked once. If yes, the home tab shows a
+     short AI-personalized motivational message every few days (see
+     maybeShowPMNotification below). This is an in-app message, not a
+     system-level push notification — there's no push server behind this
+     preview. ---- */
+  document.getElementById('notifYesBtn').addEventListener('click', ()=>{
+    if (!authUser) return;
+    authUser.notifOptIn = true;
+    authUser.notifAsked = true;
+    saveAuthUser();
+    enterMainApp();
+  });
+  document.getElementById('notifNoBtn').addEventListener('click', ()=>{
+    if (!authUser) return;
+    authUser.notifOptIn = false;
+    authUser.notifAsked = true;
+    saveAuthUser();
+    enterMainApp();
+  });
+
+  /* Subscription purchase never happens inside this app — only on the
+     website (vaarz.ir), which is the only place Zibal payment runs.
+     This keeps the app free of any in-app purchase flow, so App Store
+     rules around IAP never come into play: the app only checks
+     subscription status (once a real backend exists), it never sells
+     anything itself. */
+  document.getElementById('subUpgradeBtn').addEventListener('click', ()=>{
+    try { window.open('https://vaarz.ir', '_blank'); } catch(e){}
+  });
+  document.getElementById('trialPill').addEventListener('click', ()=>{
+    if (!authUser) return;
+    subGate.style.display = 'flex';
+    appRoot.style.display = 'none';
+  });
+
+  /* ============================================================
+     Deterministic engine — ported from the real Varz engine
+     (dates.ts / stats.ts / trend.ts / measurements.ts / e1rm.ts /
+     exercise-stats.ts / patterns.ts). Same math, same thresholds.
+     The chat model never invents a number: everything it can quote
+     comes out of this layer.
+     ============================================================ */
+  function toDay(d){ return Math.floor(Date.parse(d+"T00:00:00Z")/86400000); }
+  function addDays(d,n){ return new Date((toDay(d)+n)*86400000).toISOString().slice(0,10); }
+
+  function mean(a){ return a.reduce((x,y)=>x+y,0)/a.length; }
+  function linreg(xs, ys){
+    const n = xs.length; const mx = mean(xs), my = mean(ys);
+    let sxx=0, sxy=0, sse=0;
+    for(let i=0;i<n;i++){ sxx += (xs[i]-mx)**2; sxy += (xs[i]-mx)*(ys[i]-my); }
+    if (sxx === 0) return null;
+    const slope = sxy/sxx, intercept = my - slope*mx;
+    const predict = x => intercept + slope*x;
+    for(let i=0;i<n;i++){ const r = ys[i]-predict(xs[i]); sse += r*r; }
+    const residualSD = n>2 ? Math.sqrt(sse/(n-2)) : 0;
+    const seSlope = n>2 ? residualSD/Math.sqrt(sxx) : 0;
+    const tCrit = 2.36; // ~95% for small n, close enough for a prototype
+    return { slope, intercept, predict, residualSD, slopeMargin: seSlope*tCrit };
+  }
+  function trend(series, windowDays, asOf){
+    const from = addDays(asOf, -windowDays);
+    const pts = series.filter(p=>p.date>=from && p.date<=asOf).sort((a,b)=>a.date<b.date?-1:1);
+    if (pts.length < 4) return { status:'insufficient_data' };
+    const day0 = toDay(pts[0].date);
+    const xs = pts.map(p=>toDay(p.date)-day0), ys = pts.map(p=>p.value);
+    const reg = linreg(xs, ys);
+    if (!reg) return { status:'insufficient_data' };
+    const spanDays = xs[xs.length-1];
+    const startFitted = reg.predict(0), endFitted = reg.predict(spanDays);
+    const slopePerWeek = reg.slope*7, marginPerWeek = reg.slopeMargin*7;
+    const low = slopePerWeek-marginPerWeek, high = slopePerWeek+marginPerWeek;
+    const pct = startFitted!==0 ? ((endFitted-startFitted)/Math.abs(startFitted))*100 : 0;
+    let direction='flat';
+    if (Math.abs(pct) >= 0.5){ if (low>0) direction='up'; else if (high<0) direction='down'; }
+    return { status:'ok', startFitted, endFitted, change:endFitted-startFitted, slopePerWeek, direction, noiseSD:reg.residualSD, n:pts.length };
+  }
+  function compareMeasurement(series, asOf, daysAgo, tapeSD){
+    const curPts = series.filter(p=>p.date>addDays(asOf,-14) && p.date<=asOf).slice(-3);
+    const prevCenter = addDays(asOf, -daysAgo);
+    const prevPts = series.filter(p=>p.date>=addDays(prevCenter,-10) && p.date<=addDays(prevCenter,10));
+    if (!curPts.length || !prevPts.length) return null;
+    const current = mean(curPts.map(p=>p.value)), previous = mean(prevPts.map(p=>p.value));
+    const se = tapeSD*Math.sqrt(1/curPts.length + 1/prevPts.length);
+    const threshold = 2*se;
+    const change = current-previous;
+    const meaningful = Math.abs(change) > threshold;
+    return { current, previous, change, threshold, verdict: meaningful?'meaningful':'within_measurement_error', direction: !meaningful?'flat':(change>0?'up':'down') };
+  }
+  function epley(load, reps){ return reps===1?load:load*(1+reps/30); }
+  function e1rm(set){
+    if (set.type==='warmup') return null;
+    if (!(set.loadKg>0) || !(set.reps>=1) || set.reps>10) return null;
+    let er = set.reps;
+    if (set.rpe!=null && set.rpe>=6 && set.rpe<=10) er += 10-set.rpe;
+    return epley(set.loadKg, er);
+  }
+  function progression(sessions, asOf, windowWeeks){
+    const from = addDays(asOf, -windowWeeks*7);
+    const inWin = sessions.filter(s=>s.date>=from && s.date<=asOf);
+    if (inWin.length < 4) return { status:'insufficient_data' };
+    const day0 = toDay(inWin[0].date);
+    const xs = inWin.map(s=>toDay(s.date)-day0), ys = inWin.map(s=>s.value);
+    const spanDays = xs[xs.length-1];
+    if (spanDays < 21) return { status:'insufficient_data' };
+    const reg = linreg(xs, ys);
+    if (!reg) return { status:'insufficient_data' };
+    const start = reg.predict(0), end = reg.predict(spanDays);
+    if (!(start>0)) return { status:'insufficient_data' };
+    const pctWk = ((reg.slope*7)/start)*100;
+    const marginPct = ((reg.slopeMargin*7)/start)*100;
+    const low = pctWk-marginPct, high = pctWk+marginPct;
+    let status;
+    if (low>0 && pctWk>=0.2) status='progressing';
+    else if (high<0) status='regressing';
+    else status = (inWin.length>=5 && spanDays>=28 && Math.abs(pctWk)<0.5) ? 'stalled' : 'inconclusive';
+    return { status, changePct: ((end-start)/start)*100, startValue:start, endValue:end };
+  }
+  function classifyPattern(weight, waist, strength, goal){
+    if (weight==='up' && waist==='flat' && strength==='up')
+      return { headline:'وزنت بالا می‌رود، دور کمرت ثابت مانده و قدرتت رشد می‌کند.', status: (goal==='gain'||goal==='recomp')?'on_track':'mixed' };
+    if (weight==='up' && waist==='up' && strength==='up')
+      return { headline:'وزن، دور کمر و قدرت — هر سه با هم بالا می‌روند.', status: goal==='gain'?'on_track':'mixed' };
+    if (weight==='up' && strength!=='up')
+      return { headline:'وزنت بالا می‌رود ولی این در تمرین‌هایت دیده نمی‌شود.', status: goal==='gain'?'mixed':'off_track' };
+    if (weight==='flat' && waist==='down' && strength==='up')
+      return { headline:'وزنت ثابت مانده، دور کمرت کم شده و قدرتت رشد می‌کند.', status:'on_track' };
+    if (weight==='flat' && strength==='up')
+      return { headline:'وزنت ثابت مانده و قدرتت در حال رشد است.', status:(goal==='recomp'||goal==='maintain')?'on_track':'mixed' };
+    if (weight==='flat' && waist==='flat' && strength==='flat')
+      return { headline:'وزن، دور کمر و قدرتت — همه ثابت مانده‌اند.', status: goal==='maintain'?'on_track':'off_track' };
+    if (weight==='flat' && strength==='down')
+      return { headline:'وزنت ثابت است ولی قدرتت در حال افت است.', status:'off_track' };
+    if (weight==='down' && strength!=='down')
+      return { headline:'وزنت پایین می‌آید ولی قدرتت افت نکرده.', status: goal==='lose'?'on_track':'mixed' };
+    if (weight==='down' && strength==='down')
+      return { headline:'وزن و قدرتت — هر دو در حال افت‌اند.', status: goal==='lose'?'mixed':'off_track' };
+    return { headline:'سیگنال‌های داده‌ات هم‌جهت نیستند.', status:'mixed' };
+  }
+
+  /* ============================================================
+     Seed data — clearly a demo (labeled as such), but every number
+     shown on screen is COMPUTED from this data with the functions
+     above, never hand-typed.
+     ============================================================ */
+  const ASOF = todayISO();
+  /* A brand-new account (freshStart, set at signup) starts with NO seed
+     data anywhere — every chart, score and lift shows "not enough data
+     yet" until the athlete actually logs something themselves. The seed
+     data below only powers the pre-existing demo/preview experience. */
+  const IS_FRESH = !!(authUser && authUser.freshStart);
+  const bodyweightSeries = IS_FRESH ? [] : (function(){
+    const out = []; let d = addDays(ASOF,-63); let w = 78.0;
+    const noise = [0,.3,-.2,.4,-.1,.2,.5,.1,-.3,.4,.2,.6,.3,.5];
+    for (let i=0;i<14;i++){ out.push({date:d, value: +(w+noise[i]).toFixed(1)}); d = addDays(d,4.6|0); w += 0.16; }
+    return out;
+  })();
+  // Demo/preview series stay a fixed number of days behind "today" (ASOF),
+  // computed with addDays rather than hard-coded calendar dates, so the
+  // demo still looks recent no matter when it's actually viewed.
+  const MEAS_DAY_OFFSETS = [62,54,47,26,18,2];
+  const waistSeries = IS_FRESH ? [] : MEAS_DAY_OFFSETS.map((off,i)=>({
+    date: addDays(ASOF,-off), value: [84.2,84.0,84.3,83.9,84.1,83.8][i]
+  }));
+  // ---- other body measurements (ported from measurements.ts tape-error thresholds) ----
+  function genMeasSeries(base, endDelta){
+    const dates = MEAS_DAY_OFFSETS.map(off=>addDays(ASOF,-off));
+    const noise = [0.1,-0.1,0.15,-0.05,0.1,0];
+    return dates.map((d,i)=>({date:d, value:+(base + endDelta*(i/(dates.length-1)) + noise[i]).toFixed(1)}));
+  }
+  const MEASUREMENTS = [
+    { key:'waist', label:'دور کمر', tapeSD:0.7, series: waistSeries },
+    { key:'shoulders', label:'عرض شانه', tapeSD:0.9, series: IS_FRESH ? [] : genMeasSeries(112, 0.6) },
+    { key:'chest', label:'دور سینه', tapeSD:0.7, series: IS_FRESH ? [] : genMeasSeries(98, 0.9) },
+    { key:'hips', label:'دور باسن', tapeSD:0.7, series: IS_FRESH ? [] : genMeasSeries(96, 0.2) },
+    { key:'upper_arm', label:'دور بازو', tapeSD:0.4, series: IS_FRESH ? [] : genMeasSeries(34, 0.5) },
+  ];
+  function makeSessions(startKg, weeklyGainPct, weeks){
+    const out = []; let d=addDays(ASOF,-62); let load=startKg;
+    for (let i=0;i<weeks;i++){ out.push({date:d, weightKg:load, sets:4, reps:6}); d = addDays(d,7); load *= (1+weeklyGainPct/100); }
+    return out;
+  }
+  // ---- full exercise catalog (ported from catalog.ts) ----
+  const EXERCISE_CATALOG = [
+    { id:'squat', name:'اسکوات', group:'پا' },
+    { id:'bench_press', name:'پرس سینه', group:'سینه' },
+    { id:'deadlift', name:'ددلیفت', group:'پشت' },
+    { id:'overhead_press', name:'پرس سرشانه', group:'شانه' },
+    { id:'barbell_row', name:'زیر بغل هالتر خم', group:'پشت' },
+    { id:'pull_up', name:'بارفیکس', group:'پشت' },
+    { id:'lat_pulldown', name:'زیربغل سیم‌کش', group:'پشت' },
+    { id:'leg_press', name:'پرس پا', group:'پا' },
+    { id:'romanian_deadlift', name:'ددلیفت رومانیایی', group:'پا' },
+    { id:'incline_bench', name:'پرس بالاسینه', group:'سینه' },
+    { id:'dumbbell_curl', name:'جلو بازو دمبل', group:'بازو' },
+    { id:'triceps_pushdown', name:'پشت بازو سیم‌کش', group:'بازو' },
+    { id:'leg_curl', name:'پشت پا دستگاه', group:'پا' },
+    { id:'leg_extension', name:'جلو پا دستگاه', group:'پا' },
+    { id:'hip_thrust', name:'هیپ تراست', group:'پا' },
+    { id:'dips', name:'دیپ', group:'سینه' },
+    { id:'plank', name:'پلانک', group:'مرکزی' },
+    { id:'dumbbell_bench', name:'پرس سینه دمبل', group:'سینه' },
+    { id:'cable_fly', name:'فلای کابل', group:'سینه' },
+    { id:'pushup', name:'شنا سوئدی', group:'سینه' },
+    { id:'chin_up', name:'بارفیکس معکوس (چین‌آپ)', group:'پشت' },
+    { id:'cable_row', name:'زیربغل سیم‌کش نشسته', group:'پشت' },
+    { id:'lateral_raise', name:'نشر جانب دمبل', group:'شانه' },
+    { id:'arnold_press', name:'پرس آرنولد', group:'شانه' },
+    { id:'face_pull', name:'فیس پول', group:'شانه' },
+    { id:'hammer_curl', name:'جلو بازو چکشی', group:'بازو' },
+    { id:'preacher_curl', name:'جلو بازو لاری', group:'بازو' },
+    { id:'skull_crusher', name:'پشت بازو اسکال کراشر', group:'بازو' },
+    { id:'close_grip_bench', name:'پرس سینه دست جمع', group:'بازو' },
+    { id:'front_squat', name:'اسکات جلو (فرانت اسکات)', group:'پا' },
+    { id:'walking_lunge', name:'لانج راه‌رفتنی', group:'پا' },
+    { id:'bulgarian_split_squat', name:'اسکات بلغاری تک‌پا', group:'پا' },
+    { id:'glute_bridge', name:'گلوت بریج', group:'پا' },
+    { id:'calf_raise_standing', name:'ساق پا ایستاده', group:'پا' },
+    { id:'calf_raise_seated', name:'ساق پا نشسته', group:'پا' },
+    { id:'cable_crunch', name:'کرانچ سیم‌کش', group:'مرکزی' },
+    { id:'hanging_leg_raise', name:'هنگینگ لگ ریز', group:'مرکزی' },
+    { id:'farmers_carry', name:'حمل کشاورزی', group:'ساعد' },
+    { id:'wrist_curl', name:'مچ خم (ریست کرل)', group:'ساعد' },
+    { id:'reverse_wrist_curl', name:'مچ باز (ریورس ریست کرل)', group:'ساعد' },
+  ];
+  const SEED_SESSIONS = IS_FRESH ? {} : {
+    squat: makeSessions(70, 0.9, 9),
+    bench_press: makeSessions(52, 0.4, 9),
+    deadlift: makeSessions(95, 0.02, 9),
+    overhead_press: makeSessions(32, -0.15, 9),
+  };
+  // ---- logged sessions: seed + anything the athlete submits, kept per-viewer in localStorage ----
+  let loggedExtra = {};
+  try { loggedExtra = JSON.parse(localStorage.getItem('varz_logged_sets') || '{}'); } catch(e){ loggedExtra = {}; }
+  function saveLogged(){ try { localStorage.setItem('varz_logged_sets', JSON.stringify(loggedExtra)); } catch(e){} }
+  function sessionsFor(exerciseId){
+    const seed = SEED_SESSIONS[exerciseId] || [];
+    const extra = loggedExtra[exerciseId] || [];
+    // Give each logged-by-the-athlete entry a synthetic weekly date counting back from "today",
+    // so a few real submissions in one sitting form a proper weekly series the same math can classify.
+    const withDates = extra.map((e,i)=> ({ weightKg:e.weightKg, sets:e.sets, reps:e.reps, date: addDays(ASOF, -7*(extra.length-1-i)) }));
+    return [...seed, ...withDates].sort((a,b)=>a.date<b.date?-1:1);
+  }
+  const lifts = {};
+  EXERCISE_CATALOG.forEach(ex=>{ lifts[ex.id] = { name: ex.name, group: ex.group }; });
+  /* Clears all seed/demo arrays IN PLACE (rather than reassigning the const
+     bindings) so every other closure that already captured a reference to
+     these arrays — MEASUREMENTS[i].series, sessionsFor(), renderAll(), etc. —
+     sees the change too. Called right after a brand-new signup, since at
+     script-load time (when IS_FRESH above is first computed) a signing-up
+     user's authUser.freshStart doesn't exist yet — it's only set once they
+     submit the signup form, after all these consts already ran once. */
+  function clearSeedDataForFreshUser(){
+    bodyweightSeries.length = 0;
+    waistSeries.length = 0;
+    MEASUREMENTS.forEach(m => { m.series.length = 0; });
+    Object.keys(SEED_SESSIONS).forEach(k => { delete SEED_SESSIONS[k]; });
+    checkins.length = 0;
+  }
+  const CHECKIN_DAY_OFFSETS = [50,43,36,29,22,15,8,1];
+  const CHECKIN_SEED = [
+    {quality:4, intake:'same'}, {quality:3, intake:'more'}, {quality:4, intake:'same'}, {quality:5, intake:'same'},
+    {quality:3, intake:'less'}, {quality:4, intake:'same'}, {quality:4, intake:'more'}, {quality:5, intake:'same'},
+  ];
+  const checkins = IS_FRESH ? [] : CHECKIN_DAY_OFFSETS.map((off,i)=>({ date: addDays(ASOF,-off), ...CHECKIN_SEED[i] }));
+  const GOAL = 'gain'; // هدف نمونه: افزایش حجم
+
+  /* ============================================================
+     Real user-entered body logs (weight + measurements), persisted
+     per-account in localStorage and merged into the same series the
+     trend engine already reads — so a real "ثبت امروز" entry is
+     computed by the exact same functions as the demo data, with a
+     real timestamp, and survives a refresh on this device.
+     ============================================================ */
+  function userLogsKey(){ return 'varz_logs_' + (authUser && authUser.phone ? authUser.phone : 'guest'); }
+  function loadUserLogs(){
+    try {
+      const raw = localStorage.getItem(userLogsKey());
+      return raw ? JSON.parse(raw) : { weight: [], measurements: {} };
+    } catch(e){ return { weight: [], measurements: {} }; }
+  }
+  function saveUserLogs(logs){ try { localStorage.setItem(userLogsKey(), JSON.stringify(logs)); } catch(e){} }
+  function upsertByDate(arr, entry){
+    const i = arr.findIndex(p=>p.date===entry.date);
+    if (i>=0) arr[i] = entry; else arr.push(entry);
+    arr.sort((a,b)=>a.date<b.date?-1:1);
+  }
+  (function applyUserLogs(){
+    const logs = loadUserLogs();
+    (logs.weight||[]).forEach(e=>upsertByDate(bodyweightSeries, e));
+    MEASUREMENTS.forEach(m=>{
+      ((logs.measurements && logs.measurements[m.key]) || []).forEach(e=>upsertByDate(m.series, e));
+    });
+  })();
+  function logTodayMeasurements(vals){
+    const today = todayISO();
+    const logs = loadUserLogs();
+    if (vals.weight){
+      const entry = {date:today, value:+vals.weight};
+      upsertByDate(bodyweightSeries, entry);
+      logs.weight = logs.weight || [];
+      upsertByDate(logs.weight, entry);
+    }
+    ['waist','shoulders','chest','hips','upper_arm'].forEach(key=>{
+      if (!vals[key]) return;
+      const entry = {date:today, value:+vals[key]};
+      const m = MEASUREMENTS.find(mm=>mm.key===key);
+      if (!m) return;
+      upsertByDate(m.series, entry);
+      logs.measurements = logs.measurements || {};
+      logs.measurements[key] = logs.measurements[key] || [];
+      upsertByDate(logs.measurements[key], entry);
+    });
+    saveUserLogs(logs);
+    pushBodyLog(vals, today);
+  }
+
+  /* ---- selectable time window: 3 days up to 8 weeks — everything below recomputes for it ---- */
+  const WINDOW_OPTIONS = [
+    { label:'۳ روز', days:3 }, { label:'۱ هفته', days:7 }, { label:'۲ هفته', days:14 },
+    { label:'۳ هفته', days:21 }, { label:'۴ هفته', days:28 }, { label:'۵ هفته', days:35 },
+    { label:'۶ هفته', days:42 }, { label:'۷ هفته', days:49 }, { label:'۸ هفته', days:56 },
+  ];
+  let selectedWindowDays = 56;
+
+  /* ---- run the engine on the seed + logged data (recomputed per selected window) ---- */
+  let bw, waist, winWeeksLabel = '۸ هفته';
+  function computeLiftResults(){
+    const windowWeeks = selectedWindowDays/7;
+    return Object.entries(lifts).map(([id, l]) => {
+      const xs = sessionsFor(id).map(s=>({date:s.date, value:s.weightKg}));
+      const p = progression(xs, ASOF, windowWeeks);
+      return { id, name:l.name, group:l.group, ...p };
+    });
+  }
+  const statusFa = {progressing:'در حال پیشرفت', stalled:'متوقف شده', regressing:'رو به افت', inconclusive:'هنوز نامشخص', insufficient_data:'داده کافی نیست'};
+  let liftResults, progressingCount, stalledCount, regressingCount, evaluated, pattern, weightSignal, waistSignal, moreWeeks;
+  const openLiftCards = new Set();
+
+  /* ============================================================
+     Weekly performance score (1-10, deterministic — not an AI guess,
+     and not based on any self-rating). Score blends: what share of
+     tracked lifts are actually progressing, whether the bodyweight/waist
+     trend lines up with the athlete's stated goal, and whether they're
+     actually logging weight/waist consistently. See computeWeeklyScore().
+     ============================================================ */
+  const BADGE_TIERS = [
+    { min:1, max:3, key:'paye', name:'پایه', c1:'#9CA6BD', c2:'#6B7690', glow:'rgba(107,118,144,.18)', desc:'تازه شروع کردی — همینکه اومدی مهمه.' },
+    { min:3, max:5, key:'pishro', name:'پیشرو', c1:'#D6A05F', c2:'#9C6A2E', glow:'rgba(156,106,46,.18)', desc:'داری منظم می‌مونی، همینو ادامه بده.' },
+    { min:5, max:7, key:'herfei', name:'حرفه‌ای', c1:'#D7DCE6', c2:'#9AA4B6', glow:'rgba(154,164,182,.22)', desc:'این هفته واقعاً داشتی پیشرفت می‌کردی.' },
+    { min:7, max:10, key:'nokhbe', name:'نخبه', c1:'#FBD16B', c2:'#E0A422', glow:'rgba(224,164,34,.28)', desc:'عملکردت این هفته عالی بود 🎉' },
+  ];
+  function getTier(score){
+    if (score<=3) return BADGE_TIERS[0];
+    if (score<=5) return BADGE_TIERS[1];
+    if (score<=7) return BADGE_TIERS[2];
+    return BADGE_TIERS[3];
+  }
+  /* Demo leaderboard data — clearly fake, illustrating what cross-athlete comparison would look like
+     once Varz has real shared accounts. The viewer's own row uses their real computed score.
+     Segmented by age bracket so comparisons are meaningful, with a mix of Persian first-name-only,
+     Persian full-name, and English-transliterated pseudonyms so no one row looks identifiable. */
+  const AGE_BRACKETS = [
+    { key:'b1', min:14, max:20, label:'۱۴ تا ۲۰ سال' },
+    { key:'b2', min:20, max:25, label:'۲۰ تا ۲۵ سال' },
+    { key:'b3', min:25, max:35, label:'۲۵ تا ۳۵ سال' },
+    { key:'b4', min:35, max:45, label:'۳۵ تا ۴۵ سال' },
+    { key:'b5', min:45, max:60, label:'۴۵ تا ۶۰ سال' },
+    { key:'b6', min:60, max:200, label:'۶۰ سال به بالا' },
+  ];
+  function getAgeBracket(age){
+    if (!(age>0)) return { key:'default', label:'نامشخص' };
+    for (const b of AGE_BRACKETS){ if (age>=b.min && age<b.max) return b; }
+    return AGE_BRACKETS[AGE_BRACKETS.length-1];
+  }
+  /* Default demo-leaderboard identities, in the fixed rank order the athlete asked for
+     (each row keeps this name+avatar wherever it lands in a given bracket). */
+  const DEMO_NAME_POOL = [
+    { name:'Ali Mansour', avatar:'M1' },
+    { name:'کیانا ادب', avatar:'F1' },
+    { name:'Alimohammad K', avatar:'M3' },
+    { name:'نیما نصیری', avatar:'M9' },
+    { name:'Kiashashunam', avatar:'M3' },
+    { name:'علیرضا سرخوش', avatar:'M4' },
+    { name:'Solii', avatar:'F7' },
+  ];
+  function buildBracket(scores){
+    return scores.map((score,i)=>{
+      const p = DEMO_NAME_POOL[i % DEMO_NAME_POOL.length];
+      return { name:p.name, avatar:p.avatar, score:score };
+    });
+  }
+  const DEMO_ATHLETES = {
+    b1: buildBracket([9.1, 8.3, 7.4, 6.5, 5.2, 3.6]),
+    b2: buildBracket([9.2, 8.4, 7.6, 6.8, 5.5, 4.1, 2.7]),
+    b3: buildBracket([9.0, 8.2, 7.3, 6.4, 5.3, 3.9, 2.9]),
+    b4: buildBracket([8.8, 7.9, 6.9, 5.9, 4.6, 3.2]),
+    b5: buildBracket([8.1, 7.2, 6.1, 5.0, 3.7, 2.4]),
+    b6: buildBracket([6.9, 5.8, 4.9, 3.5]),
+    default: buildBracket([8.6, 7.4, 6.2, 4.8, 3.4]),
+  };
+  function computeWeeklyScore(){
+    /* Fully objective — no self-rating anywhere in this formula. Built only from
+       actually-logged weight, waist and lift data plus how those trends compare
+       to the athlete's stated goal:
+       1) lift progression ratio (how many tracked lifts are really progressing) — up to 5
+       2) bodyweight trend vs. goal direction — up to 2
+       3) waist trend vs. goal direction — up to 1
+       4) whether weight/waist are actually being logged (consistency) — up to 2 */
+    const hasData = evaluated>0 || bw.status==='ok' || !!waist;
+    if (!hasData) return null; // not enough data yet — no fake default score
+
+    const progRatio = evaluated>0 ? progressingCount/evaluated : 0.5;
+
+    let weightAlign = 0.5;
+    if (bw.status==='ok'){
+      if (GOAL==='gain') weightAlign = weightSignal==='up' ? 1 : (weightSignal==='flat' ? 0.5 : 0);
+      else if (GOAL==='lose') weightAlign = weightSignal==='down' ? 1 : (weightSignal==='flat' ? 0.5 : 0);
+      else weightAlign = weightSignal==='flat' ? 1 : 0.5;
+    }
+
+    let waistAlign = 0.5;
+    if (waist && waist.verdict==='meaningful'){
+      if (GOAL==='gain') waistAlign = 0.5; // waist isn't the target signal for a gain goal
+      else if (GOAL==='lose') waistAlign = waist.direction==='down' ? 1 : 0;
+      else waistAlign = waist.direction==='flat' ? 1 : 0.5;
+    } else if (waist){
+      waistAlign = 1; // meaningfully unchanged is a fine outcome when not actively cutting
+    }
+
+    const consistency = (bw.status==='ok' ? 1 : 0) + (waist ? 1 : 0);
+
+    let score = progRatio*5 + weightAlign*2 + waistAlign*1 + consistency;
+    return Math.max(1, Math.min(10, Math.round(score*10)/10));
+  }
+  function badgeSVG(tier, size){
+    size = size || 68;
+    const id = 'g'+tier.key+size;
+    return `<svg width="${size}" height="${size}" viewBox="0 0 68 68" fill="none">
+      <defs><linearGradient id="${id}" x1="0" y1="0" x2="68" y2="68"><stop offset="0" stop-color="${tier.c1}"/><stop offset="1" stop-color="${tier.c2}"/></linearGradient></defs>
+      <circle cx="34" cy="34" r="30" fill="url(#${id})"/>
+      <circle cx="34" cy="34" r="30" stroke="#fff" stroke-opacity=".35" stroke-width="1.5"/>
+      <path d="M34 20l4.2 8.6 9.4 1.4-6.8 6.6 1.6 9.4L34 41.6l-8.4 4.4 1.6-9.4-6.8-6.6 9.4-1.4L34 20z" fill="#fff" fill-opacity=".92"/>
+    </svg>`;
+  }
+
+  function renderWindowChips(){
+    document.getElementById('windowChips').innerHTML = WINDOW_OPTIONS.map(w=>
+      `<button class="chip" data-days="${w.days}" style="${w.days===selectedWindowDays?'background:var(--accent);color:var(--accent-ink)':''}">${w.label}</button>`
+    ).join('');
+  }
+
+  function renderAll(){
+    bw = trend(bodyweightSeries, selectedWindowDays, ASOF);
+    waist = compareMeasurement(waistSeries, ASOF, selectedWindowDays, 0.7);
+    renderWindowChips();
+    winWeeksLabel = WINDOW_OPTIONS.find(w=>w.days===selectedWindowDays).label;
+    document.getElementById('winLabel').textContent = winWeeksLabel + ' اخیر';
+    // The score title states the real window it's computed over (selectedWindowDays),
+    // instead of always saying "این هفته" regardless of the window the athlete picked.
+    document.getElementById('scoreTitleText').textContent = selectedWindowDays===7 ? 'امتیاز این هفته‌ات' : 'امتیاز عملکردت (' + winWeeksLabel + ' اخیر)';
+
+    liftResults = computeLiftResults();
+    progressingCount = liftResults.filter(l=>l.status==='progressing').length;
+    stalledCount = liftResults.filter(l=>l.status==='stalled').length;
+    regressingCount = liftResults.filter(l=>l.status==='regressing').length;
+    evaluated = liftResults.filter(l=>l.status!=='insufficient_data').length;
+
+    weightSignal = bw.status==='ok' ? bw.direction : 'flat';
+    waistSignal = waist ? waist.direction : 'flat';
+    let strengthSignal = 'flat';
+    if (evaluated>0){
+      if (progressingCount>regressingCount && progressingCount>=evaluated/2) strengthSignal='up';
+      else if (regressingCount>progressingCount) strengthSignal='down';
+    }
+    pattern = classifyPattern(weightSignal, waistSignal, strengthSignal, GOAL);
+    const statusLabel = bw.status!=='ok' ? 'داده کافی نیست برای این بازه' : {on_track:'در مسیر هدفت هستی', mixed:'سیگنال‌ها مخلوط‌اند', off_track:'در مسیر هدفت نیستی', not_enough_data:'داده کافی نیست'}[pattern.status];
+
+    /* ---- Home ---- */
+    document.getElementById('statusPill').textContent = statusLabel;
+    document.getElementById('headlineText').textContent = bw.status!=='ok' ? 'برای این بازه‌ی کوتاه هنوز داده کافی نیست — یه بازه‌ی بزرگ‌تر رو امتحان کن.' : pattern.headline;
+    document.getElementById('subText').textContent = 'این یک نمونه با داده آزمایشی است — روی داده واقعی خودت هم دقیقاً همین‌طور محاسبه می‌شود.';
+
+    const statRow = document.getElementById('statRow');
+    const bwOk = bw.status==='ok';
+    const bwChange = bwOk ? bw.change : 0;
+    const bwDeltaCls = bwChange>0.3 ? 'good' : (bwChange<-0.3 ? 'bad' : 'warn');
+    const iconCircle = (bg, svg) => `<div class="icon-circle" style="background:${bg}">${svg}</div>`;
+    const scaleIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3v18M7 7l-4 8a4 4 0 0 0 8 0l-4-8zM17 7l-4 8a4 4 0 0 0 8 0l-4-8zM5 21h14M9 5l3-2 3 2" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const tapeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="18" height="6" rx="3" stroke="#fff" stroke-width="1.7"/><path d="M7 9v3M11 9v3M15 9v3" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg>`;
+    const boltIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13 3L4 14h6l-1 7 9-11h-6l1-7z" fill="#fff"/></svg>`;
+    statRow.innerHTML = `
+      <div class="stat-tile">${iconCircle('#3B5BDB', scaleIcon)}<div class="v ${bwOk?bwDeltaCls:''}">${bwOk ? (bwChange>=0?'+':'')+faNum(bwChange)+' کیلو' : '—'}</div><div class="l">تغییر وزن (${winWeeksLabel})</div></div>
+      <div class="stat-tile">${iconCircle('#B8721A', tapeIcon)}<div class="v ${waist && waist.verdict==='meaningful' ? (waist.direction==='down'?'good':'warn') : ''}">${waist ? (waist.verdict==='meaningful' ? (waist.change>=0?'+':'')+faNum(waist.change)+' سانت' : 'بدون تغییر') : '—'}</div><div class="l">دور کمر</div></div>
+      <div class="stat-tile">${iconCircle('#0E8F5F', boltIcon)}<div class="v good">${faNum(progressingCount,0)} از ${faNum(evaluated,0)}</div><div class="l">حرکت پیشرونده</div></div>
+    `;
+
+    /* ---- weekly badge ---- */
+    const score = computeWeeklyScore();
+    if (score!=null) pushScoreSnapshot(score, selectedWindowDays);
+    if (score===null){
+      document.getElementById('badgeMedal').innerHTML = badgeSVG(BADGE_TIERS[0], 68);
+      document.getElementById('scoreVal').textContent = '—';
+      document.getElementById('levelName').textContent = 'بدون امتیاز';
+      document.getElementById('tierDesc').textContent = 'بعد از اولین حال‌پرسی هفتگیت، امتیازت اینجا محاسبه می‌شه.';
+      document.getElementById('badgeCard').style.setProperty('--badge-glow', BADGE_TIERS[0].glow);
+    } else {
+      const tier = getTier(score);
+      document.getElementById('badgeMedal').innerHTML = badgeSVG(tier, 68);
+      document.getElementById('scoreVal').textContent = faNum(score);
+      document.getElementById('levelName').textContent = tier.name;
+      document.getElementById('tierDesc').textContent = tier.desc;
+      document.getElementById('badgeCard').style.setProperty('--badge-glow', tier.glow);
+    }
+    document.getElementById('greetingTitle').textContent = checkins.length>0 ? 'بیا ببینیم این هفته چطوری گذشت' : 'به ورز خوش اومدی';
+
+    /* ---- demo leaderboard: real user row + fake rows within the user's own age bracket, sorted best-to-worst ---- */
+    const myName = authUser ? (authUser.username || (authUser.firstName + ' ' + authUser.lastName)) : 'خودت';
+    const myAvatar = (authUser && authUser.avatar) || DEFAULT_AVATAR;
+    const bracket = getAgeBracket(authUser && authUser.age);
+    const bracketAthletes = DEMO_ATHLETES[bracket.key] || DEMO_ATHLETES.default;
+    const lbNoteEl = document.getElementById('lbNote');
+    const bracketPhrase = bracket.key==='default' ? 'یه گروه عمومی — بعد از وارد کردن سنت توی پروفایل، با هم‌سن‌های خودت' : `هم‌سن‌های خودت توی بازه سنی ${bracket.label}`;
+    if (lbNoteEl) lbNoteEl.textContent = `این یه نمونه‌ی نمایشیه — امتیاز خودت (ردیف مشخص‌شده) واقعیه، بقیه‌ی اسم‌ها ساختگی‌ان. فقط با ${bracketPhrase} مقایسه می‌شی.`;
+    if (score===null){
+      document.getElementById('lbList').innerHTML = `<div style="padding:16px 4px;text-align:center;font-size:13px;color:var(--text-faint)">بعد از اولین حال‌پرسی هفتگیت، جایگاهت توی این لیست نشون داده می‌شه.</div>`;
+    } else {
+      const board = bracketAthletes.map(a=>({name:a.name, avatar:a.avatar, score:a.score, you:false}))
+        .concat([{name:myName, avatar:myAvatar, score:score, you:true}])
+        .sort((a,b)=>b.score-a.score);
+      document.getElementById('lbList').innerHTML = board.map((row,i)=>{
+        const rt = getTier(row.score);
+        return `<div class="lb-row ${row.you?'you':''}">
+          <div class="lb-rank">${faNum(i+1,0)}</div>
+          <div class="lb-avatar">${avatarSvg(row.avatar)}</div>
+          <div style="flex:1; min-width:0">
+            <div class="lb-name">${row.you?'⭐ ':''}${row.name}</div>
+            <div class="lb-level">${rt.name}</div>
+          </div>
+          <div class="lb-score">${faNum(row.score)}</div>
+        </div>`;
+      }).join('');
+    }
+
+    const caveats = [];
+    if (waist && waist.verdict==='within_measurement_error') caveats.push(`دور کمرت ${faNum(Math.abs(waist.change))} سانت تغییر کرده که این‌قدر کمه که با دقت خودِ متر هم قابل توضیحه — یعنی عملاً ثابت مانده.`);
+    moreWeeks = checkins.filter(c=>c.intake==='more').length;
+    if (moreWeeks>0) caveats.push(`${faNum(moreWeeks,0)} هفته گفتی بیشتر از حد معمول خوردی — بخشی از افزایش وزن احتمالاً همینه.`);
+    if (stalledCount>0) caveats.push(`${faNum(stalledCount,0)} حرکت این ${winWeeksLabel} عملاً متوقف بوده.`);
+    caveats.push('عکس پیشرفت می‌تونه کمک بصری بده ولی به‌تنهایی ساخت عضله یا کم‌شدن چربی رو ثابت نمی‌کنه.');
+    document.getElementById('caveatList').innerHTML = caveats.map(c=>`
+      <div class="note-row"><svg class="ic" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="var(--text-faint)" stroke-width="1.6"/><path d="M12 8v5M12 16h.01" stroke="var(--text-faint)" stroke-width="1.6" stroke-linecap="round"/></svg><span>${c}</span></div>
+    `).join('');
+
+    if (!document.getElementById('homeChips').dataset.built){
+      const suggestedQs = ['چرا وزنم این‌طوری تغییر می‌کنه؟', 'کدوم حرکتم متوقف شده؟', 'دور کمرم واقعاً تغییر کرده؟', 'از اول تا الان چی تغییر کرده؟'];
+      document.getElementById('homeChips').innerHTML = suggestedQs.map(q=>`<button class="chip" data-q="${q}">${q}</button>`).join('');
+      document.getElementById('homeChips').dataset.built = '1';
+    }
+
+    /* ---- Progress ---- */
+    document.getElementById('bwNow').textContent = bw.status==='ok' ? faNum(bw.endFitted) + ' کیلو' : '—';
+    const bwDeltaEl = document.getElementById('bwDelta');
+    if (bw.status==='ok'){
+      bwDeltaEl.textContent = (bw.change>=0?'+':'') + faNum(bw.change) + ' کیلو / ' + winWeeksLabel;
+      bwDeltaEl.className = 'delta ' + (bw.change>0.3?'good':(bw.change<-0.3?'bad':'warn'));
+    } else {
+      bwDeltaEl.textContent = 'داده کافی نیست';
+      bwDeltaEl.className = 'delta warn';
+    }
+
+    (function drawChart(){
+      const svg = document.getElementById('bwChart');
+      const from = addDays(ASOF, -selectedWindowDays);
+      const pts = bodyweightSeries.filter(p=>p.date>=from && p.date<=ASOF);
+      if (pts.length < 2 || bw.status!=='ok'){ svg.innerHTML = ''; return; }
+      const vals = pts.map(p=>p.value);
+      const min = Math.min(...vals)-0.4, max = Math.max(...vals)+0.4;
+      const W=400,H=120,pad=10;
+      const x = i => pad + (i/(pts.length-1))*(W-2*pad);
+      const y = v => H-pad - ((v-min)/(max-min))*(H-2*pad);
+      const linePts = pts.map((p,i)=>`${x(i)},${y(p.value)}`).join(' ');
+      const day0 = toDay(pts[0].date);
+      const trendLine = pts.map((p,i)=>{
+        const dx = toDay(p.date)-day0;
+        return `${x(i)},${y(bw.startFitted + (bw.slopePerWeek/7)*dx)}`;
+      }).join(' ');
+      svg.innerHTML = `
+        <polyline points="${trendLine}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        <polyline points="${linePts}" fill="none" stroke="var(--text-faint)" stroke-width="1.2" stroke-dasharray="2 3" opacity=".6"/>
+        ${pts.map((p,i)=>`<circle cx="${x(i)}" cy="${y(p.value)}" r="2.6" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.6"/>`).join('')}
+      `;
+    })();
+
+    const measResults = MEASUREMENTS.map(m=>({ ...m, r: compareMeasurement(m.series, ASOF, selectedWindowDays, m.tapeSD) }));
+    document.getElementById('measGrid').innerHTML = measResults.map(({label, r})=>{
+      if (!r || r.status==='insufficient_data') return `<div class="meas-card"><div class="m-label">${label}</div><div class="m-value">—</div><div class="m-tag" style="background:var(--surface-2);color:var(--text-dim)">داده کافی نیست</div></div>`;
+      const meaningful = r.verdict==='meaningful';
+      const tagCls = meaningful ? (r.direction==='down'?'good':'warn') : '';
+      const tagStyle = meaningful ? `background:var(--${tagCls}-soft);color:var(--${tagCls})` : 'background:var(--surface-2);color:var(--text-dim)';
+      const tagText = meaningful ? (r.direction==='down'?'کاهش واقعی':'افزایش واقعی') : 'بدون تغییر محسوس';
+      return `<div class="meas-card">
+        <div class="m-label">${label}</div>
+        <div class="m-value">${faNum(r.current)} سانت</div>
+        <div class="m-tag" style="${tagStyle}">${tagText}</div>
+      </div>`;
+    }).join('');
+
+    renderLiftList();
+
+    document.getElementById('checkinCard').innerHTML = `
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-dim);padding:4px 0">
+        <span>میانگین کیفیت تمرین</span><b style="color:var(--text)">${checkins.length ? faNum(mean(checkins.map(c=>c.quality)))+' از ۵' : '—'}</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-dim);padding:4px 0">
+        <span>حال‌پرسی‌های تکمیل‌شده</span><b style="color:var(--text)">${faNum(checkins.length,0)} هفته</b>
+      </div>
+    `;
+  }
+
+  let exerciseFilter = '';
+  function renderLiftList(){
+    const q = exerciseFilter.trim();
+    const filtered = q ? liftResults.filter(l=>l.name.indexOf(q)>-1) : liftResults;
+    const groups = {};
+    filtered.forEach(l=>{ (groups[l.group] = groups[l.group] || []).push(l); });
+    let html = '';
+    Object.entries(groups).forEach(([group, items])=>{
+      html += `<div class="group-label">${group}</div>`;
+      items.forEach(l=>{
+        const isOpen = openLiftCards.has(l.id);
+        html += `
+        <div class="lift-card ${isOpen?'open':''}" data-ex="${l.id}">
+          <div class="lift-card-head" data-toggle="${l.id}">
+            <div>
+              <div class="name">${l.name}</div>
+              <div class="meta">${l.status==='insufficient_data' ? 'داده کافی نیست — چند بار ثبت کن' : (l.changePct>=0?'+':'')+faNum(l.changePct)+'% در '+winWeeksLabel}</div>
+            </div>
+            <span class="status-badge ${l.status}">${statusFa[l.status]}</span>
+            <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="lift-log-form" data-form="${l.id}">
+            <div><label>وزنه (کیلوگرم)</label><input type="text" inputmode="decimal" class="log-weight" placeholder="60"></div>
+            <div><label>تعداد ست</label><input type="text" inputmode="numeric" class="log-sets" placeholder="3"></div>
+            <div><label>تکرار در هر ست</label><input type="text" inputmode="numeric" class="log-reps" placeholder="8"></div>
+            <button data-submit="${l.id}">ثبت</button>
+          </div>
+          <div class="log-toast" data-toast="${l.id}">ثبت شد ✓ — با چند بار ثبت دیگه وضعیتش مشخص می‌شه.</div>
+        </div>`;
+      });
+    });
+    if (q && !filtered.length){
+      html = `<div style="padding:16px 4px;text-align:center;font-size:13px;color:var(--text-faint)">حرکتی با اسم «${q}» توی دیتابیس ورز نیست. حرکت‌های نزدیک رو امتحان کن یا از چت با ورز بپرس.</div>`;
+    }
+    document.getElementById('liftList').innerHTML = html;
+  }
+  document.getElementById('exSearch').addEventListener('input', e=>{
+    exerciseFilter = e.target.value;
+    renderLiftList();
+  });
+
+  document.getElementById('liftList').addEventListener('click', e=>{
+    const head = e.target.closest('[data-toggle]');
+    if (head){
+      const id = head.dataset.toggle;
+      const card = document.querySelector(`.lift-card[data-ex="${id}"]`);
+      if (openLiftCards.has(id)){ openLiftCards.delete(id); card.classList.remove('open'); }
+      else { openLiftCards.add(id); card.classList.add('open'); }
+      return;
+    }
+    const submitBtn = e.target.closest('[data-submit]');
+    if (submitBtn){
+      const id = submitBtn.dataset.submit;
+      const card = document.querySelector(`.lift-card[data-ex="${id}"]`);
+      const w = parseFloat(card.querySelector('.log-weight').value);
+      const s = parseInt(card.querySelector('.log-sets').value, 10);
+      const r = parseInt(card.querySelector('.log-reps').value, 10);
+      if (!(w>=0) || !(s>=1) || !(r>=1)){
+        card.querySelector('.log-weight').style.borderColor = (!(w>=0)) ? 'var(--bad)' : '';
+        card.querySelector('.log-sets').style.borderColor = (!(s>=1)) ? 'var(--bad)' : '';
+        card.querySelector('.log-reps').style.borderColor = (!(r>=1)) ? 'var(--bad)' : '';
+        return;
+      }
+      loggedExtra[id] = loggedExtra[id] || [];
+      loggedExtra[id].push({ weightKg:w, sets:s, reps:r });
+      saveLogged();
+      openLiftCards.add(id);
+      renderAll();
+      const toast = document.querySelector(`.lift-card[data-ex="${id}"] [data-toast]`);
+      if (toast){ toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 3000); }
+    }
+  });
+
+  document.getElementById('windowChips').addEventListener('click', e=>{
+    const btn = e.target.closest('.chip[data-days]'); if (!btn) return;
+    selectedWindowDays = parseInt(btn.dataset.days, 10);
+    renderAll();
+  });
+
+  document.getElementById('logMoreToggle').addEventListener('click', ()=>{
+    const box = document.getElementById('logMoreFields');
+    const open = box.style.display === 'flex';
+    box.style.display = open ? 'none' : 'flex';
+    document.getElementById('logMoreToggle').textContent = open ? '+ اندازه‌گیری‌های بیشتر' : '− بستن';
+  });
+  document.getElementById('logTodaySubmitBtn').addEventListener('click', ()=>{
+    const val = id => { const v = document.getElementById(id).value; return v ? parseFloat(v) : null; };
+    const vals = {
+      weight: val('logWeightInput'), waist: val('logWaistInput'), shoulders: val('logShouldersInput'),
+      chest: val('logChestInput'), hips: val('logHipsInput'), upper_arm: val('logArmInput'),
+    };
+    if (!Object.values(vals).some(v=>v)) return;
+    logTodayMeasurements(vals);
+    ['logWeightInput','logWaistInput','logShouldersInput','logChestInput','logHipsInput','logArmInput'].forEach(id=>{ document.getElementById(id).value=''; });
+    const msg = document.getElementById('logTodayMsg');
+    msg.style.display = 'block';
+    setTimeout(()=>{ msg.style.display='none'; }, 3000);
+    renderAll();
+  });
+
+  renderAll();
+
+  /* ============================================================
+     Install as an app — Add to Home Screen (iOS/Safari has no
+     programmatic install, so we walk the user through it) or the
+     native one-tap install prompt (Chrome/Android, once the
+     manifest + service worker below make the page "installable").
+     No App Store / Bazaar / Myket account needed for this at all —
+     it's the same page, just pinned to the home screen without
+     browser chrome. ============================================================ */
+  if ('serviceWorker' in navigator){
+    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+  }
+  let deferredInstallPrompt = null;
+  function isStandaloneApp(){
+    return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  }
+  function isIOSDevice(){
+    return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  }
+  function updateInstallCardVisibility(){
+    const card = document.getElementById('installCard');
+    if (!card) return;
+    card.style.display = isStandaloneApp() ? 'none' : 'flex';
+  }
+  window.addEventListener('beforeinstallprompt', (e)=>{
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    updateInstallCardVisibility();
+  });
+  window.addEventListener('appinstalled', ()=>{
+    deferredInstallPrompt = null;
+    updateInstallCardVisibility();
+  });
+  function closeInstallModal(){
+    document.getElementById('installModal').classList.remove('open');
+  }
+  function renderInstallSheet(){
+    const sheet = document.getElementById('installSheet');
+    if (isStandaloneApp()){
+      sheet.innerHTML = `
+        <div class="install-already">
+          <div class="chk"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div style="font-weight:800">ورز از قبل روی گوشیت نصبه ✅</div>
+        </div>
+        <button class="install-modal-close" id="installCloseBtn">بستن</button>
+      `;
+      document.getElementById('installCloseBtn').addEventListener('click', closeInstallModal);
+    } else if (deferredInstallPrompt){
+      sheet.innerHTML = `
+        <h2>نصب ورز روی گوشیت</h2>
+        <p class="lead">با یه لمس، ورز رو مثل یه اپ واقعی به صفحه‌ی خونه‌ت اضافه کن — بدون بازار، بدون مایکت، بدون دانلود از استور.</p>
+        <button class="install-native-btn" id="installNativeBtn">نصب ورز</button>
+        <button class="install-modal-close" id="installCloseBtn">بعداً</button>
+      `;
+      document.getElementById('installNativeBtn').addEventListener('click', async ()=>{
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        try { await deferredInstallPrompt.userChoice; } catch(e){}
+        deferredInstallPrompt = null;
+        closeInstallModal();
+        updateInstallCardVisibility();
+      });
+      document.getElementById('installCloseBtn').addEventListener('click', closeInstallModal);
+    } else if (isIOSDevice()){
+      const shareIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0-12l-4 4m4-4l4 4M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      const plusIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+      const homeIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 11.5 12 4l8 7.5M6 10v9h12v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      sheet.innerHTML = `
+        <h2>نصب ورز روی آیفون</h2>
+        <p class="lead">سافاری برای امنیت اجازه نمی‌ده سایت‌ها خودشون رو نصب کنن — ولی با ۳ لمس ساده انجام می‌شه:</p>
+        <div class="install-step"><div class="step-icon">${shareIcon}</div><div class="step-text">پایین (یا بالای) صفحه‌ی سافاری، روی آیکون <b>Share</b> بزن</div></div>
+        <div class="install-step"><div class="step-icon">${plusIcon}</div><div class="step-text">توی لیست، بیا پایین و <b>«Add to Home Screen»</b> رو پیدا کن</div></div>
+        <div class="install-step"><div class="step-icon">${homeIcon}</div><div class="step-text">بالا سمت راست بزن <b>«Add»</b> — از این به بعد آیکون ورز روی صفحه‌ی خونه‌ته و بدون نوار آدرس باز می‌شه</div></div>
+        <button class="install-modal-close" id="installCloseBtn">متوجه شدم</button>
+      `;
+      document.getElementById('installCloseBtn').addEventListener('click', closeInstallModal);
+    } else {
+      sheet.innerHTML = `
+        <h2>نصب ورز روی گوشیت</h2>
+        <p class="lead">مرورگرت نصب یه‌کلیکی رو خودش پیشنهاد نداده — از منوی مرورگرت (معمولاً سه‌نقطه بالا) دنبال گزینه‌ی <b>«Install app»</b> یا <b>«Add to Home screen»</b> بگرد.</p>
+        <button class="install-modal-close" id="installCloseBtn">متوجه شدم</button>
+      `;
+      document.getElementById('installCloseBtn').addEventListener('click', closeInstallModal);
+    }
+  }
+  function openInstallModal(){
+    renderInstallSheet();
+    document.getElementById('installModal').classList.add('open');
+  }
+  document.getElementById('installCardBtn').addEventListener('click', openInstallModal);
+  document.getElementById('installModal').addEventListener('click', (e)=>{ if (e.target && e.target.id==='installModal') closeInstallModal(); });
+  updateInstallCardVisibility();
+
+  /* ============================================================
+     Tab switching
+     ============================================================ */
+  const tabs = { home: document.getElementById('tab-home'), progress: document.getElementById('tab-progress'), profile: document.getElementById('tab-profile'), chat: document.getElementById('tab-chat') };
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      Object.values(tabs).forEach(t=>t.classList.remove('active'));
+      tabs[btn.dataset.tab].classList.add('active');
+    });
+  });
+  function goToChatWith(q){
+    document.querySelector('.tab-btn[data-tab="chat"]').click();
+    document.getElementById('chatInput').value = q;
+    sendMessage();
+  }
+  document.getElementById('homeChips').addEventListener('click', e=>{
+    const btn = e.target.closest('.chip'); if (!btn) return;
+    goToChatWith(btn.dataset.q);
+  });
+
+  /* Home tab's own free-text ask box — types here, sends into "چت با ورز"
+     just like tapping one of the suggested chips does. */
+  const homeAskInput = document.getElementById('homeAskInput');
+  const homeAskBtn = document.getElementById('homeAskBtn');
+  function submitHomeAsk(){
+    const text = homeAskInput.value.trim();
+    if (!text) return;
+    homeAskInput.value = '';
+    homeAskInput.style.height = 'auto';
+    goToChatWith(text);
+  }
+  homeAskBtn.addEventListener('click', submitHomeAsk);
+  homeAskInput.addEventListener('keydown', e=>{
+    if (e.key==='Enter' && !e.shiftKey){ e.preventDefault(); submitHomeAsk(); }
+  });
+  homeAskInput.addEventListener('input', ()=>{
+    homeAskInput.style.height = 'auto';
+    homeAskInput.style.height = Math.min(homeAskInput.scrollHeight,80)+'px';
+  });
+
+  /* ============================================================
+     Chat — one warm conversational AI, grounded in the same
+     computed facts shown above. Never invents a number: the fact
+     block below IS the only source of truth it's given.
+     ============================================================ */
+  const chatSuggestQs = ['چرا وزنم بالا می‌ره؟', 'کدوم حرکتم بهترین پیشرفتو داشته؟', 'یه هفته بد داشتم، حس می‌کنم دارم عقب می‌رم'];
+  document.getElementById('chatSuggest').innerHTML = chatSuggestQs.map(q=>`<button class="chip" data-q="${q}">${q}</button>`).join('');
+  document.getElementById('chatSuggest').addEventListener('click', e=>{
+    const btn = e.target.closest('.chip'); if(!btn) return;
+    document.getElementById('chatInput').value = btn.dataset.q;
+    sendMessage();
+  });
+
+  function buildFactBlock(){
+    const athleteName = authUser ? (authUser.firstName + ' ' + authUser.lastName) : null;
+    return `
+داده‌های واقعی این ورزشکار (این ${winWeeksLabel} اخیر — این بازه رو خود ورزشکار از توی اپ انتخاب کرده) — این «داده آزمایشی نمونه» است، ولی از همین الان با محاسبه واقعی به‌دست اومده، نه حدسی. فقط از همین عددها استفاده کن، هیچ عدد دیگه‌ای نساز:
+${athleteName ? '- اسم ورزشکار: '+athleteName : ''}
+- هدف: افزایش حجم بدنی
+- تغییر وزن بدن: ${bw.status==='ok' ? (bw.change>=0?'+':'')+bw.change.toFixed(1)+' کیلوگرم در '+winWeeksLabel+'، نرخ هفتگی حدود '+((bw.slopePerWeek>=0?'+':'')+bw.slopePerWeek.toFixed(2))+' کیلوگرم، جهت: '+(weightSignal==='up'?'رو به بالا':weightSignal==='down'?'رو به پایین':'ثابت') : 'برای این بازه‌ی کوتاه داده کافی نیست'}
+- وزن فعلی روی خط روند: ${bw.status==='ok' ? bw.endFitted.toFixed(1)+' کیلوگرم' : 'نامشخص برای این بازه'}
+- دور کمر: ${waist ? 'تغییر '+waist.change.toFixed(1)+' سانت که '+(waist.verdict==='meaningful' ? 'واقعی و معنادار است' : 'به‌قدری کمه که عملاً بدون تغییر حساب می‌شه') : 'داده کافی نیست برای این بازه'}
+- سایر اندازه‌گیری‌ها (عرض شانه، دور سینه، دور باسن، دور بازو): ${MEASUREMENTS.filter(m=>m.key!=='waist').map(m=>{ const r = compareMeasurement(m.series, ASOF, selectedWindowDays, m.tapeSD); return r ? m.label+': '+r.current.toFixed(1)+' سانت ('+(r.verdict==='meaningful' ? (r.direction==='down'?'کاهش':'افزایش')+' واقعی' : 'بدون تغییر محسوس')+')' : m.label+': داده کافی نیست'; }).join('، ')}
+- حرکاتی که این ورزشکار داده کافی براشون ثبت کرده (${evaluated} حرکت از ${liftResults.length} حرکت کل کاتالوگ): ${liftResults.filter(l=>l.status!=='insufficient_data').map(l=>l.name+': '+(statusFa[l.status])+' ('+(l.changePct>=0?'+':'')+l.changePct.toFixed(1)+'% در '+winWeeksLabel+')').join('، ') || 'هنوز هیچ‌کدوم'}
+- تعداد حال‌پرسی‌های هفتگی تکمیل‌شده: ${checkins.length}${checkins.length ? '، میانگین کیفیت تمرین: '+mean(checkins.map(c=>c.quality)).toFixed(1)+' از ۵' : ' (هنوز هیچ حال‌پرسی‌ای ثبت نشده)'}
+- هفته‌هایی که بیشتر از حد معمول غذا خورده: ${moreWeeks} هفته
+- امتیاز عملکرد این هفته: ${(function(){ const s=computeWeeklyScore(); return s===null ? 'هنوز محاسبه نشده (داده کافی نیست)' : s.toFixed(1)+' از ۱۰ (سطح: '+getTier(s).name+')'; })()}
+`.trim();
+  }
+
+  function buildPersona(){
+    return `تو «ورز» هستی — یعنی خود اپ، همون همراهی که ورزشکار هر روز داخل اپ باهاش حرف می‌زنه. وقتی از هویتت پرسیده می‌شود (مثلاً «تو کی هستی؟» یا «تو چی هستی؟»)، بگو: «من ورزم». در معرفی معمولی هیچ‌وقت خودت رو با برچسب «هوش مصنوعی» یا «AI» صدا نزن — همیشه بگو بخشی از اپ ورزی. فقط اگر مستقیم و صادقانه پرسیدن که آیا واقعاً هوش مصنوعی هستی یا با یک انسان صحبت می‌کنن، صادق باش و بگو بله، بخشی هوشمند از اپ ورزی که بر پایه هوش مصنوعی کار می‌کنه — ولی این رو خودت جلو نمی‌ندازی و توی معرفی عادی تکرارش نمی‌کنی.
+با ورزشکاری صحبت می‌کنی که می‌خواهد بداند واقعاً دارد پیشرفت می‌کند یا نه، یا شاید فقط بخواهد حرف بزند.
+- تو گزارش‌ساز نیستی. یک هم‌صحبت واقعی‌ای که واقعاً گوش می‌دهد و بعد بهترین جوابی که می‌تواند می‌دهد.
+- وقتی نگرانی یا حس بدی مطرح می‌شود، اول مثل یک انسان واکنش نشان بده، نه یک جدول آمار.
+- هر عددی که می‌گویی باید دقیقاً از «داده‌های واقعی» زیر باشد؛ هرگز عدد نساز یا گرد نکن به شکلی که گمراه‌کننده باشد.
+- زبانت فارسی طبیعی و محاوره‌ای اما محترمانه است، نه ترجمه کلمه‌به‌کلمه.
+- هرگز تشخیص پزشکی نده، رژیم افراطی پیشنهاد نده، و ادعا نکن یک عکس پیشرفت به‌تنهایی ساخت عضله یا کاهش چربی را ثابت می‌کند.
+- اگر چیزی نشانه نگرانی جدی (آسیب‌دیدگی، رفتار غذایی نگران‌کننده) بود، با گرمی و بدون قضاوت او را به کمک واقعی (پزشک، متخصص تغذیه، روان‌شناس) راهنمایی کن و برای بقیه چیزها کنارش بمان.
+- کوتاه و صمیمی جواب بده؛ فقط اگر لازم شد عمیق‌تر برو. قضاوتش نکن.
+
+${buildFactBlock()}`;
+  }
+
+  let turns = [];
+  function resetTurnsWithFreshFacts(){
+    turns = [{ role:'user', content: buildPersona() + '\n\n(این پیام فقط راهنماست؛ منتظر پیام واقعی ورزشکار باش و فقط به آن جواب بده. وقتی پیام بعدی رسید، همان را جواب بده.)' }, { role:'assistant', content: 'باشه، آماده‌ام. هر چی می‌خوای بگو.' }];
+  }
+  resetTurnsWithFreshFacts();
+
+  const chatScroll = document.getElementById('chatScroll');
+  const chatInput = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('sendBtn');
+  let sampling = null, sampleAvailable = false;
+
+  function addBubble(role, text){
+    const row = document.createElement('div');
+    row.className = 'bubble-row ' + role;
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    b.textContent = text;
+    row.appendChild(b);
+    chatScroll.appendChild(row);
+    chatScroll.scrollTop = chatScroll.scrollHeight;
+    return b;
+  }
+
+  function localFallbackReply(userText){
+    // Used only if the "sample" capability is unavailable in this view (e.g. previewed outside a Claude account).
+    return 'الان نمی‌تونم بهت وصل بشم (این ویژگی توی این نما در دسترس نیست)، ولی بر اساس داده‌هات:\n\n' + buildFactBlock().split('\n').slice(1).join('\n');
+  }
+
+  async function sendMessage(){
+    const text = chatInput.value.trim();
+    if (!text) return;
+    chatInput.value = '';
+    chatInput.style.height='auto';
+    addBubble('user', text);
+    turns[0].content = buildPersona() + '\n\n(این پیام فقط راهنماست؛ منتظر پیام واقعی ورزشکار باش و فقط به آن جواب بده.)';
+    turns.push({ role:'user', content:text });
+    sendBtn.disabled = true;
+
+    const thinkingBubble = addBubble('assistant', 'در حال فکر کردن...');
+    thinkingBubble.classList.add('thinking');
+
+    if (!sampling){
+      try { sampling = (window.claude && window.claude.use) ? await window.claude.use('sample') : null; } catch(e){ sampling = null; }
+    }
+
+    if (!sampling){
+      thinkingBubble.classList.remove('thinking');
+      thinkingBubble.textContent = localFallbackReply(text);
+      turns.push({ role:'assistant', content: thinkingBubble.textContent });
+      sendBtn.disabled = false;
+      return;
+    }
+
+    try {
+      const ctl = new AbortController();
+      const { text: reply } = await sampling(turns, {
+        cache: false,
+        signal: ctl.signal,
+        modelTier: 'default',
+        onText: ({text})=>{ thinkingBubble.classList.remove('thinking'); thinkingBubble.textContent = text; chatScroll.scrollTop = chatScroll.scrollHeight; },
+      });
+      turns.push({ role:'assistant', content: reply });
+    } catch(e){
+      thinkingBubble.classList.remove('thinking');
+      if (e && e.code === 'not_granted'){
+        thinkingBubble.textContent = 'برای گفتگو با ورز باید اجازه استفاده از هوش مصنوعی رو بدی — دوباره امتحان کن و اجازه بده.';
+      } else if (e && e.code === 'rate_limited'){
+        thinkingBubble.textContent = 'یه‌کم شلوغه، چند لحظه دیگه دوباره امتحان کن.';
+      } else {
+        thinkingBubble.textContent = (e && e.text) ? e.text : 'یه مشکلی پیش اومد، دوباره امتحان کن.';
+      }
+    }
+    sendBtn.disabled = false;
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+  chatInput.addEventListener('keydown', e=>{
+    if (e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+  });
+  chatInput.addEventListener('input', ()=>{
+    chatInput.style.height='auto';
+    chatInput.style.height = Math.min(chatInput.scrollHeight,90)+'px';
+  });
+
+  /* ============================================================
+     Profile — deterministic readiness score (BMI-based, transparent
+     formula, no AI arithmetic), then the AI writes the personalized
+     plan TEXT around that score and the athlete's own inputs.
+     ============================================================ */
+  const GOAL_FA = { gain:'افزایش حجم عضله', lose:'کاهش چربی', recomp:'بازترکیب بدن (هم‌زمان چربی کم و عضله زیاد)', strength:'افزایش قدرت', maintain:'حفظ وضعیت فعلی' };
+  const EXP_FA = { beginner:'مبتدی', intermediate:'متوسط', advanced:'پیشرفته' };
+
+  function computeReadinessScore(heightCm, weightKg, age){
+    const h = heightCm/100;
+    const bmi = weightKg/(h*h);
+    let score = 100 - Math.abs(bmi-21.7)*4;
+    if (age>45) score -= 4; else if (age<18) score -= 6;
+    return Math.max(5, Math.min(100, Math.round(score)));
+  }
+
+  /* Deterministic macro targets — Mifflin-St Jeor BMR (which already
+     differs by gender on its own terms, not a guess) × an activity
+     factor from weekly training days × a goal-based calorie adjustment.
+     This gives NUMBERS only (calories/protein/carbs/fat) — never a
+     written diet or meal list, on purpose. */
+  function computeMacros(gender, heightCm, weightKg, age, days, goal){
+    const bmr = gender==='female'
+      ? (10*weightKg + 6.25*heightCm - 5*age - 161)
+      : (10*weightKg + 6.25*heightCm - 5*age + 5);
+    const activityFactor = days<=2 ? 1.3 : days<=4 ? 1.45 : days<=5 ? 1.6 : 1.75;
+    const tdee = bmr * activityFactor;
+    const goalMult = goal==='lose' ? 0.8 : goal==='gain' ? 1.1 : goal==='recomp' ? 0.95 : 1.0;
+    const calories = tdee * goalMult;
+
+    const proteinPerKg = gender==='female' ? 1.8 : 2.0;
+    const proteinG = Math.round(weightKg * proteinPerKg);
+    const fatCals = calories * 0.25;
+    const fatG = Math.round(fatCals/9);
+    const carbCals = Math.max(0, calories - proteinG*4 - fatCals);
+    const carbG = Math.round(carbCals/4);
+
+    return { calories: Math.round(calories), proteinG, carbG, fatG };
+  }
+
+  /* ============================================================
+     Real nutrition tracking: actual foods logged for today against
+     the calculated target above — not just the calculator by itself.
+     Persisted per-user, per-day, in localStorage.
+     ============================================================ */
+  function nutritionTargetKey(){ return 'varz_macro_target_' + (authUser && authUser.phone ? authUser.phone : 'guest'); }
+  function saveNutritionTarget(macros){ try { localStorage.setItem(nutritionTargetKey(), JSON.stringify(macros)); } catch(e){} }
+  function loadNutritionTarget(){
+    try { const raw = localStorage.getItem(nutritionTargetKey()); return raw ? JSON.parse(raw) : null; } catch(e){ return null; }
+  }
+  function foodLogKey(dateStr){ return 'varz_food_' + (authUser && authUser.phone ? authUser.phone : 'guest') + '_' + dateStr; }
+  function loadFoodLog(dateStr){
+    try { const raw = localStorage.getItem(foodLogKey(dateStr)); return raw ? JSON.parse(raw) : []; } catch(e){ return []; }
+  }
+  function saveFoodLog(dateStr, entries){ try { localStorage.setItem(foodLogKey(dateStr), JSON.stringify(entries)); } catch(e){} }
+  function renderNutritionCard(){
+    const target = loadNutritionTarget();
+    const card = document.getElementById('nutritionLogCard');
+    if (!target){ card.style.display = 'none'; return; }
+    card.style.display = 'block';
+    const today = todayISO();
+    const entries = loadFoodLog(today);
+    const totals = entries.reduce((a,e)=>({ kcal:a.kcal+e.kcal, protein:a.protein+e.protein, carb:a.carb+e.carb, fat:a.fat+e.fat }), {kcal:0,protein:0,carb:0,fat:0});
+    const totalsEl = document.getElementById('nutritionTotals');
+    totalsEl.innerHTML = `
+      <div class="form-field"><label>کالری</label><div style="font-weight:800">${faNum(Math.round(totals.kcal),0)} / ${faNum(target.calories,0)}</div></div>
+      <div class="form-field"><label>پروتئین</label><div style="font-weight:800">${faNum(Math.round(totals.protein),0)} / ${faNum(target.proteinG,0)}g</div></div>
+      <div class="form-field"><label>کربو</label><div style="font-weight:800">${faNum(Math.round(totals.carb),0)} / ${faNum(target.carbG,0)}g</div></div>
+      <div class="form-field"><label>چربی</label><div style="font-weight:800">${faNum(Math.round(totals.fat),0)} / ${faNum(target.fatG,0)}g</div></div>
+    `;
+    const listEl = document.getElementById('nutritionEntries');
+    listEl.innerHTML = entries.length ? entries.map((e,i)=>`
+      <div style="display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--surface-2); border-radius:10px; font-size:12.5px">
+        <div style="flex:1"><b>${e.name}</b> <span style="color:var(--text-faint)">— ${e.meal}</span></div>
+        <div style="color:var(--text-faint)">${faNum(e.kcal,0)} kcal</div>
+        <button type="button" data-food-del="${i}" style="background:none; border:none; color:var(--bad); cursor:pointer; font-size:14px; padding:0 4px">✕</button>
+      </div>
+    `).join('') : `<div style="font-size:12px; color:var(--text-faint)">امروز هنوز چیزی ثبت نکردی.</div>`;
+    listEl.querySelectorAll('[data-food-del]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const idx = parseInt(btn.dataset.foodDel, 10);
+        const cur = loadFoodLog(today);
+        cur.splice(idx, 1);
+        saveFoodLog(today, cur);
+        renderNutritionCard();
+      });
+    });
+  }
+  document.getElementById('foodAddBtn').addEventListener('click', ()=>{
+    const name = document.getElementById('foodNameInput').value.trim();
+    const meal = document.getElementById('foodMealInput').value;
+    const kcal = parseFloat(document.getElementById('foodKcalInput').value);
+    const protein = parseFloat(document.getElementById('foodProteinInput').value) || 0;
+    const carb = parseFloat(document.getElementById('foodCarbInput').value) || 0;
+    const fat = parseFloat(document.getElementById('foodFatInput').value) || 0;
+    if (!name || !(kcal>0)) return;
+    const today = todayISO();
+    const entries = loadFoodLog(today);
+    entries.push({ name, meal, kcal, protein, carb, fat });
+    saveFoodLog(today, entries);
+    pushNutritionLog({ name, meal, kcal, protein, carb, fat }, today);
+    ['foodNameInput','foodKcalInput','foodProteinInput','foodCarbInput','foodFatInput'].forEach(id=>{ document.getElementById(id).value=''; });
+    renderNutritionCard();
+  });
+  // Restore a previously computed target (from an earlier visit) on load.
+  if (loadNutritionTarget()){ document.getElementById('nutritionLogCard').style.display = 'block'; renderNutritionCard(); }
+
+  document.getElementById('pfSubmit').addEventListener('click', async ()=>{
+    const height = parseFloat(document.getElementById('pfHeight').value);
+    const weight = parseFloat(document.getElementById('pfWeight').value);
+    const age = parseInt(document.getElementById('pfAge').value, 10);
+    const gender = document.getElementById('pfGender').value;
+    const exp = document.getElementById('pfExp').value;
+    const goal = document.getElementById('pfGoal').value;
+    const days = parseInt(document.getElementById('pfDays').value, 10);
+    const btn = document.getElementById('pfSubmit');
+
+    if (!(height>80 && height<230) || !(weight>25 && weight<300) || !(age>10 && age<100) || !(days>=1 && days<=7)){
+      btn.textContent = 'لطفاً همه فیلدها رو درست پر کن';
+      setTimeout(()=>{ btn.textContent = 'دریافت امتیاز و برنامه شخصی‌سازی‌شده'; }, 2200);
+      return;
+    }
+
+    const score = computeReadinessScore(height, weight, age);
+    const scoreCard = document.getElementById('scoreCard');
+    document.getElementById('scoreNum').textContent = faNum(score, 0);
+    scoreCard.classList.add('show');
+
+    const macros = computeMacros(gender, height, weight, age, days, goal);
+    const macroCard = document.getElementById('macroCard');
+    const macroGrid = document.getElementById('macroGrid');
+    macroGrid.innerHTML = `
+      <div class="form-field full"><label>کالری روزانه</label><div style="font-weight:800; font-size:16px">${faNum(macros.calories,0)}</div></div>
+      <div class="form-field"><label>پروتئین</label><div style="font-weight:800; font-size:16px">${faNum(macros.proteinG,0)} گرم</div></div>
+      <div class="form-field"><label>کربوهیدرات</label><div style="font-weight:800; font-size:16px">${faNum(macros.carbG,0)} گرم</div></div>
+      <div class="form-field"><label>چربی</label><div style="font-weight:800; font-size:16px">${faNum(macros.fatG,0)} گرم</div></div>
+    `;
+    macroCard.style.display = 'block';
+    saveNutritionTarget(macros);
+    document.getElementById('nutritionLogCard').style.display = 'block';
+    renderNutritionCard();
+    if (authUser){ authUser.gender = gender; authUser.age = age; saveAuthUser(); renderAll(); }
+
+    const planCard = document.getElementById('planCard');
+    const planText = document.getElementById('planText');
+    planCard.style.display = 'block';
+    planText.textContent = 'در حال نوشتن برنامه...';
+    btn.disabled = true;
+
+    let sampler = null;
+    try { sampler = (window.claude && window.claude.use) ? await window.claude.use('sample') : null; } catch(e){ sampler = null; }
+
+    if (!sampler){
+      planText.textContent = `ورز الان در دسترس نیست، ولی بر اساس اطلاعاتت:\nقد ${faNum(height,0)} سانت، وزن ${faNum(weight,0)} کیلو، سن ${faNum(age,0)}، سطح ${EXP_FA[exp]}، هدف «${GOAL_FA[goal]}»، ${faNum(days,0)} روز در هفته.\nامتیاز آمادگی اولیه‌ات ${faNum(score,0)} از ۱۰۰ شد. وقتی وصل بشه، اینجا یه برنامه شخصی‌سازی‌شده برات می‌نویسه.`;
+      btn.disabled = false;
+      return;
+    }
+
+    const prompt = `تو «ورز» هستی — بخشی از خود اپ ورز، نه یک هوش مصنوعی مستقل و بی‌نام. یک برنامه تمرینی و رویکرد کوتاه، گرم و شخصی‌سازی‌شده (نه یک جدول خشک) برای این ورزشکار بنویس. فارسی محاوره‌ای و دلگرم‌کننده باش، نه رسمی.
+اطلاعات ورزشکار:
+- قد: ${height} سانتی‌متر، وزن: ${weight} کیلوگرم، سن: ${age}
+- سطح تجربه: ${EXP_FA[exp]}
+- هدف اصلی: ${GOAL_FA[goal]}
+- روزهای تمرین در هفته: ${days}
+- امتیاز آمادگی اولیه (از یک فرمول ساده و شفاف بر پایه BMI محاسبه شده، نه حدس تو): ${score} از ۱۰۰
+
+دستورالعمل:
+- فقط از همین امتیاز (${score}) استفاده کن؛ عدد دیگه‌ای برای امتیاز نساز.
+- تشخیص پزشکی نده و رژیم افراطی پیشنهاد نده.
+- خروجی: ۲-۳ جمله دلگرم‌کننده درباره نقطه شروعش، بعد یک تقسیم‌بندی هفتگی ساده (کدوم روزها چه نوع تمرینی) متناسب با ${days} روز در هفته و سطح ${EXP_FA[exp]}، و در پایان یک نکته تغذیه‌ای کلی (نه رژیم دقیق با عدد کالری).
+- کوتاه باش؛ حداکثر حدود ۱۵۰ کلمه.`;
+
+    try {
+      const { text } = await sampler(prompt, { modelTier:'default', cache:false, onText:({text})=>{ planText.textContent = text; } });
+      planText.textContent = text;
+    } catch(e){
+      planText.textContent = (e && e.code==='not_granted')
+        ? 'برای نوشتن برنامه شخصی‌سازی‌شده باید اجازه استفاده از هوش مصنوعی رو بدی — دوباره امتحان کن.'
+        : ((e && e.text) || 'یه مشکلی پیش اومد، دوباره امتحان کن.');
+    }
+    btn.disabled = false;
+  });
+
+  /* ============================================================
+     Progress photos — local-only preview for this prototype, plus an
+     optional AI look at the photo (via the sample capability's image
+     input) for rough, clearly-labeled visual feedback. This is NOT a
+     medical or clinical body-fat measurement — just a visual estimate,
+     and the app says so before and after every result.
+     ============================================================ */
+  const photoGrid = document.getElementById('photoGrid');
+  const photoInput = document.getElementById('photoInput');
+  const photoAddBtn = document.getElementById('photoAddBtn');
+  const photoAnalysisWrap = document.getElementById('photoAnalysis');
+  const photoAnalysisText = document.getElementById('photoAnalysisText');
+  photoAddBtn.addEventListener('click', ()=> photoInput.click());
+  photoInput.addEventListener('change', ()=>{
+    [...photoInput.files].forEach(file=>{
+      const url = URL.createObjectURL(file);
+      const tile = document.createElement('div');
+      tile.className = 'photo-tile';
+      tile.innerHTML = `<img src="${url}" alt="عکس پیشرفت"><button class="del" aria-label="حذف">✕</button><button class="analyze" aria-label="تحلیل با ورز">🔍</button>`;
+      const delBtn = tile.querySelector('.del');
+      if (delBtn) delBtn.addEventListener('click', ()=> tile.remove());
+      const analyzeBtn = tile.querySelector('.analyze');
+      if (analyzeBtn) analyzeBtn.addEventListener('click', ()=> analyzePhoto(file));
+      photoGrid.insertBefore(tile, photoAddBtn);
+      // uploaded to the private per-user storage bucket in the background —
+      // the tile above is the instant local preview, this just makes the
+      // same photo reachable from another device.
+      pushPhoto(file);
+    });
+    photoInput.value = '';
+  });
+
+  /* pulls this account's previously-uploaded photos (from another device,
+     or an earlier session) into the grid — runs once on app entry. */
+  async function loadRemotePhotos(){
+    if (!isOnline()) return;
+    try {
+      const res = await sbFetch('/storage/v1/object/list/progress-photos', {
+        method: 'POST', body: JSON.stringify({ prefix: authUser.uid + '/', limit: 60, sortBy: { column:'created_at', order:'desc' } })
+      });
+      if (!res || !res.ok) return;
+      const files = await res.json();
+      for (const f of files){
+        if (photoGrid.querySelector(`[data-remote-path="${authUser.uid}/${f.name}"]`)) continue;
+        const signRes = await sbFetch('/storage/v1/object/sign/progress-photos/' + authUser.uid + '/' + f.name, {
+          method: 'POST', body: JSON.stringify({ expiresIn: 3600 })
+        });
+        if (!signRes || !signRes.ok) continue;
+        const { signedURL } = await signRes.json();
+        if (!signedURL) continue;
+        const tile = document.createElement('div');
+        tile.className = 'photo-tile';
+        tile.dataset.remotePath = authUser.uid + '/' + f.name;
+        tile.innerHTML = `<img src="${SUPABASE_URL}${signedURL}" alt="عکس پیشرفت"><button class="del" aria-label="حذف">✕</button>`;
+        const delBtn = tile.querySelector('.del');
+        if (delBtn) delBtn.addEventListener('click', ()=> tile.remove());
+        photoGrid.insertBefore(tile, photoAddBtn);
+      }
+    } catch(e){}
+  }
+
+  async function analyzePhoto(file){
+    photoAnalysisWrap.style.display = 'block';
+    photoAnalysisText.textContent = 'در حال بررسی عکس...';
+    let sampler = null;
+    try { sampler = (window.claude && window.claude.use) ? await window.claude.use('sample') : null; } catch(e){ sampler = null; }
+    if (!sampler){
+      photoAnalysisText.textContent = 'الان نمی‌تونم عکس رو تحلیل کنم — این ویژگی توی این نما در دسترس نیست.';
+      return;
+    }
+    let limits = null;
+    try { limits = await sampler.limits(); } catch(e){ limits = null; }
+    if (!limits || !limits.images){
+      photoAnalysisText.textContent = 'تحلیل عکس توی این نما فعال نیست.';
+      return;
+    }
+    const prompt = `این عکس پیشرفت بدنی یه ورزشکاره. یه تحلیل کوتاه و محترمانه بده:
+۱. یک یا دو نقطه‌ی قوت که توی عکس دیده می‌شه.
+۲. یک یا دو گروه عضلانی که به نظرت نسبت به بقیه‌ی بدن عقب‌ترن و ارزش تمرکز بیشتر رو دارن (مثلاً شانه، سینه، پا).
+۳. یه بازه‌ی تقریبی درصد چربی بدن (مثلاً «حدود ۱۸ تا ۲۲ درصد») — با تاکید صریح که این فقط یه حدس بصریه از روی یک عکس، نه یک اندازه‌گیری دقیق پزشکی (مثل DEXA یا کالیپر)، و می‌تونه چند درصد خطا داشته باشه.
+لحن گرم و فارسی محاوره‌ای باشه، نه بالینی و خشک. حداکثر ۱۲۰ کلمه. تشخیص پزشکی نده و نظر درباره وزن یا شکل بدن رو با ملاحظه و بدون قضاوت مطرح کن.`;
+    try {
+      const { text } = await sampler(prompt, { images: file, modelTier:'default', cache:false, onText:({text})=>{ photoAnalysisText.textContent = text; } });
+      photoAnalysisText.textContent = text + '\n\n(یادآوری: این یه برآورد بصری از هوش مصنوعیه، نه اندازه‌گیری پزشکی دقیق.)';
+    } catch(e){
+      photoAnalysisText.textContent = (e && e.code==='not_granted')
+        ? 'برای تحلیل عکس باید اجازه استفاده رو بدی — دوباره امتحان کن.'
+        : ((e && e.text) || 'یه مشکلی پیش اومد، دوباره امتحان کن.');
+    }
+  }
+
+  /* ============================================================
+     Periodic in-app motivational message ("PM"). Only runs if the
+     athlete opted in on the notification screen. Shows at most once
+     every NOTIF_INTERVAL_DAYS, on the Home tab, and is personalized
+     from the athlete's own real data (via buildFactBlock) whenever the
+     AI sampling capability is available — otherwise falls back to a
+     rotating set of canned Persian messages so it never breaks.
+     This is an in-app banner, not a system push notification — this
+     preview has no push server behind it.
+     ============================================================ */
+  const NOTIF_INTERVAL_DAYS = 3;
+  const FALLBACK_PMS = [
+    'همینکه امروز بازم اومدی سراغ ورز، خودش یه قدمه. ادامه بده.',
+    'پیشرفت همیشه خط صاف نیست — چیزی که مهمه اینه که این هفته رو هم ادامه دادی.',
+    'یه نگاه به روند تمرینات و اندازه‌گیری‌هات بنداز؛ شاید بیشتر از چیزی که فکر می‌کنی جلو رفتی.',
+    'اگه این هفته سخت بود، اشکالی نداره — همین که برنگشتی عقب یعنی داری درست پیش می‌ری.',
+  ];
+
+  async function maybeShowPMNotification(){
+    if (!authUser || !authUser.notifOptIn) return;
+    const last = authUser.lastNotifDate;
+    if (last && daysSince(last) < NOTIF_INTERVAL_DAYS) return;
+
+    const pmCard = document.getElementById('pmNotifCard');
+    const pmText = document.getElementById('pmNotifText');
+    if (!pmCard || !pmText) return;
+
+    let message = null;
+    try {
+      const sampler = (window.claude && window.claude.use) ? await window.claude.use('sample') : null;
+      if (sampler){
+        const name = authUser.firstName || '';
+        const prompt = `تو «ورز» هستی، بخشی از اپ تمرینی که این ورزشکار هر روز باهاش کار می‌کنه. یه پیام انگیزشی خیلی کوتاه (حداکثر ۲-۳ جمله) براش بنویس، خطاب به اسم کوچیکش «${name}»، که دقیقاً بر اساس داده‌های واقعی زیرش باشه — مثلاً بگو کدوم بخش پیشرفت خوبی داشته و روی کدوم بخش بیشتر تمرکز کنه. لحن گرم، محاوره‌ای و شخصی باشه، نه کلی‌گویی. فقط از همین عددها استفاده کن، هیچ عدد دیگه‌ای نساز:\n\n${buildFactBlock()}`;
+        const { text } = await sampler(prompt, { modelTier:'default', cache:false });
+        message = text;
+      }
+    } catch(e){ message = null; }
+
+    if (!message){
+      message = FALLBACK_PMS[Math.floor(Math.random()*FALLBACK_PMS.length)];
+    }
+
+    pmText.textContent = message;
+    pmCard.style.display = 'block';
+    authUser.lastNotifDate = todayISO();
+    saveAuthUser();
+  }
+})();
+</script>
