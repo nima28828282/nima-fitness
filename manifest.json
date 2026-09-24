@@ -1,6 +1,6 @@
 {
-  "name": "ورز",
-  "short_name": "ورز",
+  "name": "Vaarz",
+  "short_name": "Vaarz",
   "description": "دستیار تمرین، تغذیه و پیشرفت بدنی — بدون نیاز به استور",
   "start_url": "./index.html",
   "scope": "./",

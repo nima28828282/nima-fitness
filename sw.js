@@ -2,7 +2,7 @@
    installability requirement (a registered SW with a fetch handler) and give
    the app shell basic offline resilience. It does not try to cache or work
    with Supabase API calls; those always go to the network. */
-const CACHE_NAME = 'varz-shell-v1';
+const CACHE_NAME = 'varz-shell-v2'; // bumped so the renamed manifest/icons (ورز -> Vaarz) reach installed users promptly
 const SHELL_FILES = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', (event) => {
