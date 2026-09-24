@@ -1,0 +1,13 @@
+{
+  "name": "vaarz-payment-backend",
+  "version": "1.0.0",
+  "description": "Small standalone backend for ورز's ZarinPal payment flow — runs on a VPS with a fixed IP, since ZarinPal's IP allowlist needs one and Netlify Functions don't have one.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=18"
+  }
+}
