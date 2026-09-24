@@ -626,8 +626,8 @@
          stuck here. -->
     <button type="button" id="subGateCloseBtn" aria-label="بستن" style="position:absolute; top:14px; left:14px; width:30px; height:30px; border-radius:50%; border:none; background:var(--surface-2); color:var(--text-dim); font-size:16px; line-height:1; cursor:pointer">✕</button>
     <div style="font-size:36px; margin-bottom:6px">💪</div>
-    <h1 id="subTitle">دوره‌ی رایگانت تموم شد</h1>
-    <p id="subDesc">برای ادامه‌ی استفاده از تحلیل‌های ورز، تمرین‌نگاری، و چت با ورز، اشتراک ماهانه رو از سایت ورز فعال کن.</p>
+    <h1 id="subTitle">دوره رایگان شما به اتمام رسید</h1>
+    <p id="subDesc">برای ادامه‌ی استفاده از تحلیل‌ها، تمرین‌نگاری و چت با ورز، لطفاً اشتراک ماهانه‌ی خود را از سایت ورز فعال کنید.</p>
     <div class="score-card show" style="padding:16px; margin-bottom:14px">
       <div class="num" style="font-size:28px">۸۹٬۰۰۰ تومان</div>
       <div class="lbl">برای هر ماه، پرداخت از طریق سایت</div>
@@ -1420,17 +1420,17 @@
     const descEl = document.getElementById('subDesc');
     if (!titleEl || !descEl || !state) return;
     if (state.kind === 'active'){
-      titleEl.textContent = `${faNum(state.daysLeft,0)} روز تا پایان اشتراکت مونده`;
-      descEl.textContent = 'اشتراکت فعاله و به همه‌چیز دسترسی داری. وقتی این دوره تموم بشه، برای ادامه باید تمدیدش کنی.';
+      titleEl.textContent = `${faNum(state.daysLeft,0)} روز تا پایان اشتراک شما باقی مانده`;
+      descEl.textContent = 'اشتراک شما فعال است و به همه‌ی امکانات دسترسی دارید. پس از پایان این دوره، برای ادامه‌ی استفاده باید آن را تمدید کنید.';
     } else if (state.kind === 'trial'){
-      titleEl.textContent = `${faNum(state.daysLeft,0)} روز از اشتراک رایگانت مونده`;
-      descEl.textContent = 'الان توی دوره‌ی آزمایشی رایگانی و به همه‌چیز دسترسی داری. بعد از تموم شدن این چند روز، برای ادامه‌ی استفاده باید اشتراک ماهانه رو فعال کنی.';
+      titleEl.textContent = `${faNum(state.daysLeft,0)} روز از اشتراک رایگان شما باقی مانده`;
+      descEl.textContent = 'شما در حال حاضر در دوره‌ی آزمایشی رایگان هستید و به همه‌ی امکانات دسترسی دارید. پس از پایان این دوره، برای ادامه‌ی استفاده باید اشتراک ماهانه را فعال کنید.';
     } else if (state.kind === 'sub_ended'){
-      titleEl.textContent = 'اشتراکت تموم شده';
-      descEl.textContent = 'برای ادامه‌ی استفاده از تحلیل‌های ورز، تمرین‌نگاری، و چت با ورز، اشتراک ماهانه رو از سایت ورز فعال کن.';
+      titleEl.textContent = 'اشتراک شما به پایان رسیده است';
+      descEl.textContent = 'برای ادامه‌ی استفاده از تحلیل‌ها، تمرین‌نگاری و چت با ورز، لطفاً اشتراک ماهانه‌ی خود را از سایت ورز فعال کنید.';
     } else {
-      titleEl.textContent = 'دوره‌ی رایگانت تموم شد';
-      descEl.textContent = 'برای ادامه‌ی استفاده از تحلیل‌های ورز، تمرین‌نگاری، و چت با ورز، اشتراک ماهانه رو از سایت ورز فعال کن.';
+      titleEl.textContent = 'دوره رایگان شما به اتمام رسید';
+      descEl.textContent = 'برای ادامه‌ی استفاده از تحلیل‌ها، تمرین‌نگاری و چت با ورز، لطفاً اشتراک ماهانه‌ی خود را از سایت ورز فعال کنید.';
     }
   }
   function checkSubscriptionGate(){
@@ -1445,9 +1445,9 @@
     const state = getSubscriptionState();
     if (!state) return;
     if (state.kind === 'active') pill.textContent = faNum(state.daysLeft,0) + ' روز تا پایان اشتراک';
-    else if (state.kind === 'trial') pill.textContent = faNum(state.daysLeft,0) + ' روز از اشتراک رایگان مونده';
-    else if (state.kind === 'sub_ended') pill.textContent = 'اشتراک تموم شده';
-    else pill.textContent = 'دوره رایگان تموم شد';
+    else if (state.kind === 'trial') pill.textContent = faNum(state.daysLeft,0) + ' روز از اشتراک رایگان باقی‌مانده';
+    else if (state.kind === 'sub_ended') pill.textContent = 'اشتراک به پایان رسیده';
+    else pill.textContent = 'دوره رایگان به اتمام رسید';
     renderSubGateContent(state);
   }
 
@@ -1837,13 +1837,16 @@
   });
 
   /* Subscription purchase never happens inside this app — only on the
-     website (vaarz.ir), which is the only place Zibal payment runs.
-     This keeps the app free of any in-app purchase flow, so App Store
-     rules around IAP never come into play: the app only checks
-     subscription status (once a real backend exists), it never sells
-     anything itself. */
+     website (vaarz.ir/pay.html), which is the only place ZarinPal payment
+     runs. This keeps the app free of any in-app purchase flow, so App
+     Store rules around IAP never come into play: the app only checks
+     subscription status (via the `subscriptions` table Supabase already
+     has), it never sells anything itself. */
   document.getElementById('subUpgradeBtn').addEventListener('click', ()=>{
-    try { window.open('https://vaarz.ir', '_blank'); } catch(e){}
+    // Send straight to the payment page, not just the marketing homepage —
+    // no reason to make someone who's already decided to pay find the
+    // "activate" link themselves.
+    try { window.open('https://vaarz.ir/pay.html', '_blank'); } catch(e){}
   });
   document.getElementById('trialPill').addEventListener('click', ()=>{
     if (!authUser) return;
