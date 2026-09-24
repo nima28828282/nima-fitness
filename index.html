@@ -453,6 +453,16 @@
   }
   .brand-mark.sm{width:34px; height:34px; border-radius:var(--radius-md); font-size:12.5px}
   .brand-mark.lg{width:56px; height:56px; border-radius:var(--radius-xl); font-size:20px; margin-bottom:14px}
+  /* Cold-open splash — see the HTML comment above #appSplash for why this
+     exists. Uses the same gradient/wordmark as the app icon so the very
+     first frame already looks like "the app", not "a webpage loading". */
+  #appSplash{
+    position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(165deg, var(--accent) 0%, #021d6e 100%);
+    transition:opacity .25s ease, visibility .25s ease;
+  }
+  #appSplash.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+  .appSplash-mark{ color:#fff; font-family:var(--font-fa); font-weight:800; font-size:44px; letter-spacing:.5px; }
   .landing-box h1{ font-size:21px; line-height:1.5; font-weight:800; margin:0 0 10px; }
   .landing-box h1 b{ color:var(--accent); }
   .landing-box .landing-sub{ font-size:13px; color:var(--text-dim); line-height:1.85; margin:0 0 22px; }
@@ -491,6 +501,24 @@
 </style>
 </head>
 <body>
+
+<!-- Cold-open splash: painted before any JS runs, covering the landing/auth
+     screens underneath while script.js decides which one a returning user
+     should actually land on. Without this, a returning athlete would see a
+     flash of the marketing landing page (FAQ accordion and all) for a beat
+     before JS swaps it for their real app — the exact "this feels like a
+     website, not an app" moment. Removed by JS right after that decision is
+     made, whichever screen it resolves to. -->
+<div id="appSplash"><div class="appSplash-mark">ورز</div></div>
+<script>
+  // Safety net: if anything later in the page's script throws before it gets
+  // a chance to remove the splash itself, don't leave the athlete staring at
+  // a frozen splash screen forever with the real app hidden behind it.
+  setTimeout(function(){
+    var s = document.getElementById('appSplash');
+    if (s) s.parentNode.removeChild(s);
+  }, 4000);
+</script>
 
 <div id="landingGate">
   <div class="landing-box">
@@ -1548,6 +1576,14 @@
     saveAuthUser();
     showApp();
   }
+  // The routing decision above (or the "just show the landing page" default
+  // for a first-time visitor) has now been made — safe to drop the splash.
+  (function hideSplash(){
+    const splash = document.getElementById('appSplash');
+    if (!splash) return;
+    splash.classList.add('hide');
+    setTimeout(()=>{ splash.remove(); }, 300);
+  })();
 
   /* ---- background session bootstrap: runs after the UI is already up so
      it never blocks first paint.
