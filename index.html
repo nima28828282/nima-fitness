@@ -95,7 +95,7 @@
   }
   .brand{display:flex; align-items:center; gap:8px; font-weight:700; font-size:17px}
   .brand svg{flex:none}
-  .topbar .win{margin-inline-start:auto; font-size:12px; color:var(--text-faint); background:var(--surface-2); border:1px solid var(--border); padding:5px 10px; border-radius:var(--radius-pill); font-variant-numeric:tabular-nums}
+  .topbar .win{margin-inline-start:auto; font-size:12px; color:var(--text-faint); background:var(--surface-2); border:1px solid var(--border); padding:5px 10px; border-radius:var(--radius-pill); font-variant-numeric:tabular-nums; font-family:inherit}
 
   main{flex:1; padding:6px 18px 100px; display:none; flex-direction:column; gap:16px}
   main.active{display:flex; animation:tabFadeIn .22s ease}
@@ -619,7 +619,12 @@
 </div>
 
 <div id="subGate" style="display:none">
-  <div class="auth-box">
+  <div class="auth-box" style="position:relative">
+    <!-- Previously had no way out at all: tapping the trial pill opened this
+         screen with no close/back control, so anyone who tapped it out of
+         curiosity — including mid-trial, before this even matters — got
+         stuck here. -->
+    <button type="button" id="subGateCloseBtn" aria-label="بستن" style="position:absolute; top:14px; left:14px; width:30px; height:30px; border-radius:50%; border:none; background:var(--surface-2); color:var(--text-dim); font-size:16px; line-height:1; cursor:pointer">✕</button>
     <div style="font-size:36px; margin-bottom:6px">💪</div>
     <h1 id="subTitle">دوره‌ی رایگانت تموم شد</h1>
     <p id="subDesc">برای ادامه‌ی استفاده از تحلیل‌های ورز، تمرین‌نگاری، و چت با ورز، اشتراک ماهانه رو از سایت ورز فعال کن.</p>
@@ -1378,7 +1383,56 @@
 
   /* Not a paywall — nothing in this preview blocks access. The pill just shows
      an informational trial/subscribe screen if tapped; it never locks anyone out
-     (there's no real payment processing behind it — see the subGate note). */
+     (there's no real payment processing behind it — see the subGate note).
+
+     Rewritten so the pill text and the subGate screen it opens are always
+     driven by the SAME computed state — previously the pill could say "۲ روز
+     رایگان مونده" while tapping it opened a screen titled "دوره‌ی رایگانت تموم
+     شد" (trial ended), which is confusing regardless of what the countdown
+     actually says. Also spells out "اشتراک" explicitly in the trial countdown
+     (not just "روز رایگان مونده") so it reads as a subscription clock, not a
+     vague freebie, and makes clear payment is expected once it hits zero. */
+  function getSubscriptionState(){
+    if (!authUser) return null;
+    if (serverSubscription){
+      if (serverSubscription.status === 'active'){
+        const subLeft = serverSubscription.current_period_end ? Math.ceil((new Date(serverSubscription.current_period_end) - new Date())/86400000) : null;
+        const endDate = serverSubscription.current_period_end || null;
+        return (subLeft!=null && subLeft>0) ? { kind:'active', daysLeft:subLeft, endDate } : { kind:'sub_ended' };
+      }
+      const trialLeft = serverSubscription.trial_ends_at ? Math.max(0, Math.ceil((new Date(serverSubscription.trial_ends_at) - new Date())/86400000)) : 0;
+      return trialLeft>0 ? { kind:'trial', daysLeft:trialLeft, endDate: serverSubscription.trial_ends_at } : { kind:'trial_ended' };
+    }
+    // fallback for a not-yet-synced / offline session
+    if (authUser.subscribed){
+      const subElapsed = daysSince(authUser.subscribedSince || authUser.since || todayISO());
+      const subLeft = SUBSCRIPTION_DAYS - subElapsed;
+      const endDate = addDays(authUser.subscribedSince || authUser.since || todayISO(), SUBSCRIPTION_DAYS);
+      return subLeft>0 ? { kind:'active', daysLeft:subLeft, endDate } : { kind:'sub_ended' };
+    }
+    const elapsed = daysSince(authUser.since || todayISO());
+    const trialLeft = Math.max(0, TRIAL_DAYS - elapsed);
+    const endDate = addDays(authUser.since || todayISO(), TRIAL_DAYS);
+    return trialLeft>0 ? { kind:'trial', daysLeft:trialLeft, endDate } : { kind:'trial_ended' };
+  }
+  function renderSubGateContent(state){
+    const titleEl = document.getElementById('subTitle');
+    const descEl = document.getElementById('subDesc');
+    if (!titleEl || !descEl || !state) return;
+    if (state.kind === 'active'){
+      titleEl.textContent = `${faNum(state.daysLeft,0)} روز تا پایان اشتراکت مونده`;
+      descEl.textContent = 'اشتراکت فعاله و به همه‌چیز دسترسی داری. وقتی این دوره تموم بشه، برای ادامه باید تمدیدش کنی.';
+    } else if (state.kind === 'trial'){
+      titleEl.textContent = `${faNum(state.daysLeft,0)} روز از اشتراک رایگانت مونده`;
+      descEl.textContent = 'الان توی دوره‌ی آزمایشی رایگانی و به همه‌چیز دسترسی داری. بعد از تموم شدن این چند روز، برای ادامه‌ی استفاده باید اشتراک ماهانه رو فعال کنی.';
+    } else if (state.kind === 'sub_ended'){
+      titleEl.textContent = 'اشتراکت تموم شده';
+      descEl.textContent = 'برای ادامه‌ی استفاده از تحلیل‌های ورز، تمرین‌نگاری، و چت با ورز، اشتراک ماهانه رو از سایت ورز فعال کن.';
+    } else {
+      titleEl.textContent = 'دوره‌ی رایگانت تموم شد';
+      descEl.textContent = 'برای ادامه‌ی استفاده از تحلیل‌های ورز، تمرین‌نگاری، و چت با ورز، اشتراک ماهانه رو از سایت ورز فعال کن.';
+    }
+  }
   function checkSubscriptionGate(){
     if (!authUser){ return; }
     subGate.style.display = 'none';
@@ -1388,26 +1442,13 @@
     // server subscription row is the source of truth once we have one —
     // it can only be changed from the backend (service_role), never from
     // this client, so it can't be spoofed by editing localStorage.
-    if (serverSubscription){
-      if (serverSubscription.status === 'active'){
-        const subLeft = serverSubscription.current_period_end ? Math.ceil((new Date(serverSubscription.current_period_end) - new Date())/86400000) : null;
-        pill.textContent = (subLeft!=null && subLeft>0) ? (faNum(subLeft,0) + ' روز تا پایان اشتراک') : 'اشتراک تموم شده';
-      } else {
-        const trialLeft = serverSubscription.trial_ends_at ? Math.max(0, Math.ceil((new Date(serverSubscription.trial_ends_at) - new Date())/86400000)) : 0;
-        pill.textContent = trialLeft>0 ? (faNum(trialLeft,0) + ' روز رایگان مونده') : 'اشتراک';
-      }
-      return;
-    }
-    // fallback for a not-yet-synced / offline session
-    if (authUser.subscribed){
-      const subElapsed = daysSince(authUser.subscribedSince || authUser.since || todayISO());
-      const subLeft = SUBSCRIPTION_DAYS - subElapsed;
-      pill.textContent = subLeft>0 ? (faNum(subLeft,0) + ' روز تا پایان اشتراک') : 'اشتراک تموم شده';
-    } else {
-      const elapsed = daysSince(authUser.since || todayISO());
-      const trialLeft = Math.max(0, TRIAL_DAYS - elapsed);
-      pill.textContent = trialLeft>0 ? (faNum(trialLeft,0) + ' روز رایگان مونده') : 'اشتراک';
-    }
+    const state = getSubscriptionState();
+    if (!state) return;
+    if (state.kind === 'active') pill.textContent = faNum(state.daysLeft,0) + ' روز تا پایان اشتراک';
+    else if (state.kind === 'trial') pill.textContent = faNum(state.daysLeft,0) + ' روز از اشتراک رایگان مونده';
+    else if (state.kind === 'sub_ended') pill.textContent = 'اشتراک تموم شده';
+    else pill.textContent = 'دوره رایگان تموم شد';
+    renderSubGateContent(state);
   }
 
   function prefillProfileFromOnboarding(){
@@ -1806,8 +1847,16 @@
   });
   document.getElementById('trialPill').addEventListener('click', ()=>{
     if (!authUser) return;
+    renderSubGateContent(getSubscriptionState()); // e.g. don't say "trial ended" while it's still running
     subGate.style.display = 'flex';
     appRoot.style.display = 'none';
+  });
+  document.getElementById('subGateCloseBtn').addEventListener('click', ()=>{
+    // Tapping the trial pill just to check remaining days shouldn't strand
+    // the user on this screen with no way back — closing it just returns
+    // to the app, same as dismissing any other overlay.
+    subGate.style.display = 'none';
+    appRoot.style.display = 'flex';
   });
 
   /* ============================================================
@@ -1837,7 +1886,14 @@
   function trend(series, windowDays, asOf){
     const from = addDays(asOf, -windowDays);
     const pts = series.filter(p=>p.date>=from && p.date<=asOf).sort((a,b)=>a.date<b.date?-1:1);
-    if (pts.length < 4) return { status:'insufficient_data' };
+    // A flat "need 4 points" requirement effectively disabled the 3-day/1-week/
+    // 2-week windows: at a realistic logging cadence there's rarely room for 4
+    // points inside 3-14 days, so those windows almost always fell back to
+    // "insufficient data" while 3+ week windows worked fine. Scale the
+    // requirement down for short windows instead of using one fixed bar for
+    // every window from 3 days to 8 weeks.
+    const minPts = windowDays <= 7 ? 2 : (windowDays <= 14 ? 3 : 4);
+    if (pts.length < minPts) return { status:'insufficient_data' };
     const day0 = toDay(pts[0].date);
     const xs = pts.map(p=>toDay(p.date)-day0), ys = pts.map(p=>p.value);
     const reg = linreg(xs, ys);
@@ -1852,9 +1908,18 @@
     return { status:'ok', startFitted, endFitted, change:endFitted-startFitted, slopePerWeek, direction, noiseSD:reg.residualSD, n:pts.length };
   }
   function compareMeasurement(series, asOf, daysAgo, tapeSD){
-    const curPts = series.filter(p=>p.date>addDays(asOf,-14) && p.date<=asOf).slice(-3);
+    // "current" used to always look back a fixed 14 days, and "previous" was
+    // always smoothed over a fixed ±10-day window centered on daysAgo ago —
+    // fine for the 8-week window, but for a short window (e.g. daysAgo=3) that
+    // ±10-day previous window overlapped almost entirely with the "current"
+    // window, so short-window comparisons could end up averaging nearly the
+    // same points on both sides and report ~0 change regardless of what
+    // actually happened. Scale both windows down for short daysAgo instead.
+    const curWindow = Math.min(14, Math.max(daysAgo, 3));
+    const curPts = series.filter(p=>p.date>addDays(asOf,-curWindow) && p.date<=asOf).slice(-3);
     const prevCenter = addDays(asOf, -daysAgo);
-    const prevPts = series.filter(p=>p.date>=addDays(prevCenter,-10) && p.date<=addDays(prevCenter,10));
+    const prevSpread = Math.max(1, Math.min(10, Math.round(daysAgo/3)));
+    const prevPts = series.filter(p=>p.date>=addDays(prevCenter,-prevSpread) && p.date<=addDays(prevCenter,prevSpread));
     if (!curPts.length || !prevPts.length) return null;
     const current = mean(curPts.map(p=>p.value)), previous = mean(prevPts.map(p=>p.value));
     const se = tapeSD*Math.sqrt(1/curPts.length + 1/prevPts.length);
