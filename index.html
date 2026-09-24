@@ -539,12 +539,12 @@
     <p id="authSubtitle">برای شروع، اسمت و شماره موبایلت رو وارد کن.</p>
     <div class="err" id="authErr"></div>
     <div id="authSignupOnlyFields">
-      <div class="form-field"><label>نام</label><input type="text" id="authFirst" placeholder="مثلاً امیر"></div>
-      <div class="form-field"><label>نام خانوادگی</label><input type="text" id="authLast" placeholder="مثلاً رضایی"></div>
+      <div class="form-field"><label for="authFirst">نام</label><input type="text" id="authFirst" placeholder="مثلاً امیر"></div>
+      <div class="form-field"><label for="authLast">نام خانوادگی</label><input type="text" id="authLast" placeholder="مثلاً رضایی"></div>
     </div>
-    <div class="form-field"><label>شماره موبایل</label><input type="tel" id="authPhone" inputmode="numeric" placeholder="09xxxxxxxxx"></div>
-    <div class="form-field" id="authUsernameField"><label>نام نمایشی (برای جدول رتبه‌بندی)</label><input type="text" id="authUsername" placeholder="اسم واقعیت یا یه نیک‌نیم — بدون عدد"></div>
-    <div class="form-field"><label>رمز عبور</label><input type="password" id="authPassword" placeholder="حداقل ۸ کاراکتر"></div>
+    <div class="form-field"><label for="authPhone">شماره موبایل</label><input type="tel" id="authPhone" inputmode="numeric" placeholder="09xxxxxxxxx"></div>
+    <div class="form-field" id="authUsernameField"><label for="authUsername">نام نمایشی (برای جدول رتبه‌بندی)</label><input type="text" id="authUsername" placeholder="اسم واقعیت یا یه نیک‌نیم — بدون عدد"></div>
+    <div class="form-field"><label for="authPassword">رمز عبور</label><input type="password" id="authPassword" placeholder="حداقل ۸ کاراکتر"></div>
     <div style="height:4px"></div>
     <button class="primary-btn" id="authSubmit">ورود به ورز</button>
     <button type="button" id="authModeToggle" style="background:none; border:none; color:var(--text-faint); font-size:12.5px; margin-top:10px; cursor:pointer; text-decoration:underline">قبلاً حساب ساختی؟ وارد شو</button>
@@ -665,7 +665,7 @@
 
     <!-- Time-window filter — a control, not content, so it now sits after the
          things it filters rather than being the very first thing on Home. -->
-    <h2 class="section-title" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer" id="windowToggleRow">
+    <h2 class="section-title" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer" id="windowToggleRow" role="button" tabindex="0" aria-expanded="false" aria-controls="windowChips">
       <span>بازه‌ی محاسبه</span>
       <svg id="windowToggleIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" style="transition:transform .2s"><path d="M6 9l6 6 6-6" stroke="var(--text-faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </h2>
@@ -690,7 +690,7 @@
     <h2 class="section-title">می‌خوای بیشتر بدونی؟</h2>
     <div class="chips" id="homeChips"></div>
     <div class="card" style="display:flex; gap:8px; align-items:flex-end; padding:12px">
-      <textarea id="homeAskInput" rows="1" placeholder="یا هر چیز دیگه‌ای بپرس..." style="flex:1; resize:none; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:14px; padding:10px 13px; font-family:inherit; font-size:13.5px; max-height:80px; line-height:1.6"></textarea>
+      <textarea id="homeAskInput" rows="1" placeholder="یا هر چیز دیگه‌ای بپرس..." aria-label="یه سوال دیگه از ورز بپرس" style="flex:1; resize:none; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:14px; padding:10px 13px; font-family:inherit; font-size:13.5px; max-height:80px; line-height:1.6"></textarea>
       <button id="homeAskBtn" aria-label="ارسال" style="flex:none; width:40px; height:40px; border-radius:50%; border:none; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 11l18-8-8 18-2-8-8-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="none" style="transform:scaleX(-1); transform-origin:center"/></svg>
       </button>
@@ -773,9 +773,9 @@
           قد، وزن و هدفت رو بگو تا ورز یه امتیاز آمادگی بده و برات یه برنامه شخصی‌سازی‌شده بنویسه. امتیاز از روی محاسبه واقعی (نه حدس) به‌دست میاد؛ متن برنامه رو ورز می‌نویسه.
         </p>
         <div class="form-grid">
-          <div class="form-field"><label>قد (سانتی‌متر)</label><input type="text" id="pfHeight" inputmode="numeric" placeholder="175"></div>
-          <div class="form-field"><label>وزن (کیلوگرم)</label><input type="text" id="pfWeight" inputmode="numeric" placeholder="78"></div>
-          <div class="form-field"><label>سن</label><input type="text" id="pfAge" inputmode="numeric" placeholder="26"></div>
+          <div class="form-field"><label for="pfHeight">قد (سانتی‌متر)</label><input type="text" id="pfHeight" inputmode="numeric" placeholder="175"></div>
+          <div class="form-field"><label for="pfWeight">وزن (کیلوگرم)</label><input type="text" id="pfWeight" inputmode="numeric" placeholder="78"></div>
+          <div class="form-field"><label for="pfAge">سن</label><input type="text" id="pfAge" inputmode="numeric" placeholder="26"></div>
           <div class="form-field">
             <label>جنسیت</label>
             <select id="pfGender"><option value="male">مرد</option><option value="female">زن</option></select>
@@ -794,7 +794,7 @@
               <option value="maintain">حفظ وضعیت فعلی</option>
             </select>
           </div>
-          <div class="form-field full"><label>چند روز در هفته تمرین می‌کنی؟</label><input type="text" id="pfDays" inputmode="numeric" placeholder="4"></div>
+          <div class="form-field full"><label for="pfDays">چند روز در هفته تمرین می‌کنی؟</label><input type="text" id="pfDays" inputmode="numeric" placeholder="4"></div>
         </div>
         <div style="height:14px"></div>
         <button class="primary-btn" id="pfSubmit">دریافت امتیاز و برنامه شخصی‌سازی‌شده</button>
@@ -885,6 +885,20 @@
         </div>
       </div>
     </details>
+
+    <details class="acc-section" id="accAccount">
+      <summary>
+        <span>حساب کاربری</span>
+        <span class="acc-sub"></span>
+        <svg class="acc-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="acc-body">
+        <p style="margin:0 0 12px;font-size:12.5px;color:var(--text-dim);line-height:1.7">
+          روی دستگاه/گوشی مشترک هستی؟ با زدن این دکمه از حسابت خارج می‌شی و برای ورود بعدی دوباره شماره و رمز عبور لازمه.
+        </p>
+        <button type="button" class="primary-btn btn-secondary" id="signOutBtn">خروج از حساب</button>
+      </div>
+    </details>
   </main>
 
   <!-- ===================== CHAT ===================== -->
@@ -897,7 +911,7 @@
       </div>
       <div class="chat-suggest" id="chatSuggest"></div>
       <div class="composer">
-        <textarea id="chatInput" rows="1" placeholder="هر چی می‌خوای بپرس یا بگو..."></textarea>
+        <textarea id="chatInput" rows="1" placeholder="هر چی می‌خوای بپرس یا بگو..." aria-label="پیام برای ورز"></textarea>
         <button class="send-btn" id="sendBtn" aria-label="ارسال">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 11l18-8-8 18-2-8-8-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="none"/></svg>
         </button>
@@ -925,8 +939,8 @@
   </div>
 </div>
 
-<div id="installModal">
-  <div class="install-sheet" id="installSheet"></div>
+<div id="installModal" role="dialog" aria-modal="true" aria-label="نصب ورز">
+  <div class="install-sheet" id="installSheet" tabindex="-1"></div>
 </div>
 
 <script>
@@ -1011,6 +1025,17 @@
   function saveAuthUser(){
     try { localStorage.setItem('varz_user', JSON.stringify(authUser)); } catch(e){}
     syncProfileToServer();
+  }
+  /* There was previously no way to sign out at all — on a shared device the
+     app would just keep opening straight into whoever last used it, with no
+     re-authentication. This clears the local session and reloads back to
+     the sign-in screen. Per-user local data (food logs, logged sets, etc.)
+     is keyed by phone number already, so it simply won't show for whoever
+     signs in next. */
+  function signOut(){
+    try { localStorage.removeItem('varz_user'); } catch(e){}
+    try { localStorage.removeItem('varz_sb_session'); } catch(e){}
+    window.location.reload();
   }
 
   /* ============================================================
@@ -1124,6 +1149,10 @@
   async function pushBodyLog(vals, dateStr){
     if (!isOnline()) return;
     try {
+      // Replace, don't accumulate: re-logging the same date used to always
+      // insert a new row, so a same-day correction never reached the server
+      // and old values kept coming back on the next pull.
+      await sbFetch('/rest/v1/body_logs?user_id=eq.' + authUser.uid + '&logged_at=eq.' + dateStr, { method:'DELETE' });
       await sbFetch('/rest/v1/body_logs', { method:'POST', headers:{'Prefer':'return=minimal'}, body: JSON.stringify({
         user_id: authUser.uid, logged_at: dateStr, weight_kg: vals.weight||null, waist_cm: vals.waist||null,
         shoulders_cm: vals.shoulders||null, chest_cm: vals.chest||null, hips_cm: vals.hips||null, arm_cm: vals.upper_arm||null
@@ -1131,20 +1160,34 @@
     } catch(e){}
   }
   async function pushNutritionLog(entry, dateStr){
-    if (!isOnline()) return;
+    if (!isOnline()) return null;
     try {
-      await sbFetch('/rest/v1/nutrition_logs', { method:'POST', headers:{'Prefer':'return=minimal'}, body: JSON.stringify({
+      // return=representation so we get the row's id back — needed to
+      // actually delete this exact row later (see deleteNutritionLog).
+      const res = await sbFetch('/rest/v1/nutrition_logs', { method:'POST', headers:{'Prefer':'return=representation'}, body: JSON.stringify({
         user_id: authUser.uid, logged_at: dateStr, meal: entry.meal||null, food_name: entry.name,
         kcal: entry.kcal||null, protein_g: entry.protein||null, carb_g: entry.carb||null, fat_g: entry.fat||null
       })});
+      if (res && res.ok){ const rows = await res.json().catch(()=>[]); return (rows[0] && rows[0].id) || null; }
     } catch(e){}
+    return null;
   }
-  let scoreSnapshotDay = null;
+  /* Deletes one row from nutrition_logs by id — previously the "✕" on a food
+     entry only removed it from localStorage, so the row stayed on the server
+     and the entry could silently come back on the next login/device. */
+  async function deleteNutritionLog(id){
+    if (!id || !isOnline()) return false;
+    try {
+      const res = await sbFetch('/rest/v1/nutrition_logs?id=eq.' + id, { method:'DELETE' });
+      return !!(res && res.ok);
+    } catch(e){ return false; }
+  }
+  let lastPushedSnapshot = null; // { key, score } — re-push when the SCORE changes, not just once per day/window
   async function pushScoreSnapshot(score, windowDays){
     if (!isOnline() || score==null) return;
     const key = todayISO() + '_' + windowDays;
-    if (scoreSnapshotDay === key) return; // already pushed once this session for this window/day
-    scoreSnapshotDay = key;
+    if (lastPushedSnapshot && lastPushedSnapshot.key === key && lastPushedSnapshot.score === score) return; // nothing actually changed
+    lastPushedSnapshot = { key, score };
     try {
       await sbFetch('/rest/v1/score_snapshots', { method:'POST', headers:{'Prefer':'return=minimal'}, body: JSON.stringify({
         user_id: authUser.uid, window_days: windowDays, score: score
@@ -1204,7 +1247,7 @@
       if (foodRes && foodRes.ok){
         const rows = await foodRes.json();
         const byDate = {};
-        rows.forEach(r=>{ (byDate[r.logged_at] = byDate[r.logged_at]||[]).push({ name:r.food_name, meal:r.meal, kcal:+r.kcal||0, protein:+r.protein_g||0, carb:+r.carb_g||0, fat:+r.fat_g||0 }); });
+        rows.forEach(r=>{ (byDate[r.logged_at] = byDate[r.logged_at]||[]).push({ name:r.food_name, meal:r.meal, kcal:+r.kcal||0, protein:+r.protein_g||0, carb:+r.carb_g||0, fat:+r.fat_g||0, serverId: r.id || null }); });
         Object.keys(byDate).forEach(d=> saveFoodLog(d, byDate[d]));
       }
     } catch(e){}
@@ -1275,18 +1318,30 @@
       const opt = document.createElement('div');
       opt.className = 'avatar-opt';
       opt.dataset.key = key;
+      opt.setAttribute('role', 'button');
+      opt.setAttribute('tabindex', '0');
+      opt.setAttribute('aria-label', 'آواتار ' + key);
       opt.innerHTML = avatarSvg(key) + `<span>${key}</span>`;
-      opt.addEventListener('click', ()=>{
+      const selectThis = ()=>{
         selectedAvatarKey = key;
         Array.from(grid.children).forEach(c=>c.classList.remove('selected'));
         opt.classList.add('selected');
         document.getElementById('avatarSubmit').disabled = false;
-      });
+      };
+      opt.addEventListener('click', selectThis);
+      opt.addEventListener('keydown', (e)=>{ if (e.key==='Enter' || e.key===' '){ e.preventDefault(); selectThis(); } });
       grid.appendChild(opt);
     });
   }
 
-  function todayISO(){ return new Date().toISOString().slice(0,10); }
+  function todayISO(){
+    // Local calendar date, not UTC — toISOString() alone shifts by the
+    // device's UTC offset, so a Tehran evening (UTC+3:30) could log as
+    // "yesterday" server-side. Subtracting the offset before slicing keeps
+    // the date the athlete's own clock shows.
+    const d = new Date();
+    return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  }
   function daysSince(dateStr){
     try { return Math.floor((toDay(todayISO()) - toDay(dateStr))); } catch(e){ return 0; }
   }
@@ -1603,6 +1658,7 @@
           firstName: nameParts[0] || '', lastName: nameParts.slice(1).join(' ') || ''
         });
         saveAuthUser();
+        clearSeedDataForFreshUser(); // this is a real account — never show demo/seed numbers next to its real data
         await Promise.all([refreshSubscription(), pullRemoteLogsAfterLogin()]);
         try { renderAll(); } catch(e){}
         showApp();
@@ -1827,7 +1883,7 @@
      shown on screen is COMPUTED from this data with the functions
      above, never hand-typed.
      ============================================================ */
-  const ASOF = todayISO();
+  let ASOF = todayISO();
   /* A brand-new account (freshStart, set at signup) starts with NO seed
      data anywhere — every chart, score and lift shows "not enough data
      yet" until the athlete actually logs something themselves. The seed
@@ -2211,6 +2267,7 @@
   }
 
   function renderAll(){
+    ASOF = todayISO(); // re-read "today" on every render, not just at page load
     bw = trend(bodyweightSeries, selectedWindowDays, ASOF);
     waist = compareMeasurement(waistSeries, ASOF, selectedWindowDays, 0.7);
     renderWindowChips();
@@ -2420,7 +2477,7 @@
         const isOpen = openLiftCards.has(l.id);
         html += `
         <div class="lift-card ${isOpen?'open':''}" data-ex="${l.id}">
-          <div class="lift-card-head" data-toggle="${l.id}">
+          <div class="lift-card-head" data-toggle="${l.id}" role="button" tabindex="0" aria-expanded="${isOpen}">
             <div>
               <div class="name">${l.name}</div>
               <div class="meta">${l.status==='insufficient_data' ? 'داده کافی نیست — چند بار ثبت کن' : (l.changePct>=0?'+':'')+faNum(l.changePct)+'% در '+winWeeksLabel}</div>
@@ -2443,18 +2500,25 @@
     }
     document.getElementById('liftList').innerHTML = html;
   }
+  let exSearchDebounce = null;
   document.getElementById('exSearch').addEventListener('input', e=>{
     exerciseFilter = e.target.value;
-    renderLiftList();
+    clearTimeout(exSearchDebounce);
+    exSearchDebounce = setTimeout(renderLiftList, 120);
   });
 
+  function toggleLiftCard(head){
+    const id = head.dataset.toggle;
+    const card = document.querySelector(`.lift-card[data-ex="${id}"]`);
+    const nowOpen = !openLiftCards.has(id);
+    if (nowOpen){ openLiftCards.add(id); card.classList.add('open'); }
+    else { openLiftCards.delete(id); card.classList.remove('open'); }
+    head.setAttribute('aria-expanded', String(nowOpen));
+  }
   document.getElementById('liftList').addEventListener('click', e=>{
     const head = e.target.closest('[data-toggle]');
     if (head){
-      const id = head.dataset.toggle;
-      const card = document.querySelector(`.lift-card[data-ex="${id}"]`);
-      if (openLiftCards.has(id)){ openLiftCards.delete(id); card.classList.remove('open'); }
-      else { openLiftCards.add(id); card.classList.add('open'); }
+      toggleLiftCard(head);
       return;
     }
     const submitBtn = e.target.closest('[data-submit]');
@@ -2480,6 +2544,11 @@
     }
   });
 
+  document.getElementById('liftList').addEventListener('keydown', e=>{
+    const head = e.target.closest('[data-toggle]');
+    if (!head) return;
+    if (e.key==='Enter' || e.key===' '){ e.preventDefault(); toggleLiftCard(head); }
+  });
   document.getElementById('windowChips').addEventListener('click', e=>{
     const btn = e.target.closest('.chip[data-days]'); if (!btn) return;
     selectedWindowDays = parseInt(btn.dataset.days, 10);
@@ -2493,11 +2562,19 @@
     document.getElementById('logMoreToggle').textContent = open ? '+ اندازه‌گیری‌های بیشتر' : '− بستن';
   });
   document.getElementById('logTodaySubmitBtn').addEventListener('click', ()=>{
+    // A negative or zero measurement is never valid (weight/waist/etc. are all
+    // strictly-positive quantities) and used to be accepted as-is, corrupting
+    // trend charts. Reject the whole submission instead of silently zeroing.
     const val = id => { const v = document.getElementById(id).value; return v ? parseFloat(v) : null; };
     const vals = {
       weight: val('logWeightInput'), waist: val('logWaistInput'), shoulders: val('logShouldersInput'),
       chest: val('logChestInput'), hips: val('logHipsInput'), upper_arm: val('logArmInput'),
     };
+    if (Object.values(vals).some(v=>v!=null && !(v>0))){
+      const msg = document.getElementById('logTodayMsg');
+      if (msg){ const old = msg.textContent; msg.textContent = 'عدد باید بزرگ‌تر از صفر باشه.'; msg.style.display='block'; setTimeout(()=>{ msg.style.display='none'; msg.textContent = old; }, 2500); }
+      return;
+    }
     if (!Object.values(vals).some(v=>v)) return;
     logTodayMeasurements(vals);
     ['logWeightInput','logWaistInput','logShouldersInput','logChestInput','logHipsInput','logArmInput'].forEach(id=>{ document.getElementById(id).value=''; });
@@ -2541,8 +2618,10 @@
     deferredInstallPrompt = null;
     updateInstallCardVisibility();
   });
+  let installModalOpener = null;
   function closeInstallModal(){
     document.getElementById('installModal').classList.remove('open');
+    if (installModalOpener && installModalOpener.focus) installModalOpener.focus();
   }
   function renderInstallSheet(){
     const sheet = document.getElementById('installSheet');
@@ -2594,11 +2673,17 @@
     }
   }
   function openInstallModal(){
+    installModalOpener = document.activeElement;
     renderInstallSheet();
     document.getElementById('installModal').classList.add('open');
+    const sheet = document.getElementById('installSheet');
+    sheet.focus();
   }
   document.getElementById('installCardBtn').addEventListener('click', openInstallModal);
   document.getElementById('installModal').addEventListener('click', (e)=>{ if (e.target && e.target.id==='installModal') closeInstallModal(); });
+  document.getElementById('installModal').addEventListener('keydown', (e)=>{
+    if (e.key==='Escape') closeInstallModal();
+  });
   updateInstallCardVisibility();
 
   /* ============================================================
@@ -2625,12 +2710,17 @@
       }, 60);
     }
   }
-  document.getElementById('windowToggleRow').addEventListener('click', ()=>{
+  function toggleWindowChips(){
     const chips = document.getElementById('windowChips');
     const icon = document.getElementById('windowToggleIcon');
     const open = chips.style.display !== 'none';
     chips.style.display = open ? 'none' : 'flex';
     icon.style.transform = open ? '' : 'rotate(180deg)';
+    document.getElementById('windowToggleRow').setAttribute('aria-expanded', String(!open));
+  }
+  document.getElementById('windowToggleRow').addEventListener('click', toggleWindowChips);
+  document.getElementById('windowToggleRow').addEventListener('keydown', (e)=>{
+    if (e.key==='Enter' || e.key===' '){ e.preventDefault(); toggleWindowChips(); }
   });
   function goToChatWith(q){
     document.querySelector('.tab-btn[data-tab="chat"]').click();
@@ -2675,12 +2765,19 @@
     sendMessage();
   });
 
+  // Declared here (rather than down near the other profile-form constants)
+  // because buildFactBlock() below is reachable synchronously during initial
+  // chat setup (buildPersona -> resetTurnsWithFreshFacts, called at script
+  // load) — a const declared later in the file would be a TDZ ReferenceError
+  // the first time that path runs, the same class of bug the onboarding
+  // wizard had earlier.
+  const GOAL_FA = { gain:'افزایش حجم عضله', lose:'کاهش چربی', recomp:'بازترکیب بدن (هم‌زمان چربی کم و عضله زیاد)', strength:'افزایش قدرت', maintain:'حفظ وضعیت فعلی' };
   function buildFactBlock(){
     const athleteName = authUser ? (authUser.firstName + ' ' + authUser.lastName) : null;
     return `
 داده‌های واقعی این ورزشکار (این ${winWeeksLabel} اخیر — این بازه رو خود ورزشکار از توی اپ انتخاب کرده) — این «داده آزمایشی نمونه» است، ولی از همین الان با محاسبه واقعی به‌دست اومده، نه حدسی. فقط از همین عددها استفاده کن، هیچ عدد دیگه‌ای نساز:
 ${athleteName ? '- اسم ورزشکار: '+athleteName : ''}
-- هدف: افزایش حجم بدنی
+- هدف: ${GOAL_FA[currentGoal()] || 'نامشخص'}
 - تغییر وزن بدن: ${bw.status==='ok' ? (bw.change>=0?'+':'')+bw.change.toFixed(1)+' کیلوگرم در '+winWeeksLabel+'، نرخ هفتگی حدود '+((bw.slopePerWeek>=0?'+':'')+bw.slopePerWeek.toFixed(2))+' کیلوگرم، جهت: '+(weightSignal==='up'?'رو به بالا':weightSignal==='down'?'رو به پایین':'ثابت') : 'برای این بازه‌ی کوتاه داده کافی نیست'}
 - وزن فعلی روی خط روند: ${bw.status==='ok' ? bw.endFitted.toFixed(1)+' کیلوگرم' : 'نامشخص برای این بازه'}
 - دور کمر: ${waist ? 'تغییر '+waist.change.toFixed(1)+' سانت که '+(waist.verdict==='meaningful' ? 'واقعی و معنادار است' : 'به‌قدری کمه که عملاً بدون تغییر حساب می‌شه') : 'داده کافی نیست برای این بازه'}
@@ -2795,7 +2892,6 @@ ${buildFactBlock()}`;
      formula, no AI arithmetic), then the AI writes the personalized
      plan TEXT around that score and the athlete's own inputs.
      ============================================================ */
-  const GOAL_FA = { gain:'افزایش حجم عضله', lose:'کاهش چربی', recomp:'بازترکیب بدن (هم‌زمان چربی کم و عضله زیاد)', strength:'افزایش قدرت', maintain:'حفظ وضعیت فعلی' };
   const EXP_FA = { beginner:'مبتدی', intermediate:'متوسط', advanced:'پیشرفته' };
 
   function computeReadinessScore(heightCm, weightKg, age){
@@ -2901,9 +2997,11 @@ ${buildFactBlock()}`;
       btn.addEventListener('click', ()=>{
         const idx = parseInt(btn.dataset.foodDel, 10);
         const cur = loadFoodLog(today);
+        const removed = cur[idx];
         cur.splice(idx, 1);
         saveFoodLog(today, cur);
         renderNutritionCard();
+        if (removed && removed.serverId) deleteNutritionLog(removed.serverId); // used to only delete locally — the row stayed on the server and could come back
       });
     });
   }
@@ -2911,15 +3009,24 @@ ${buildFactBlock()}`;
     const name = document.getElementById('foodNameInput').value.trim();
     const meal = document.getElementById('foodMealInput').value;
     const kcal = parseFloat(document.getElementById('foodKcalInput').value);
-    const protein = parseFloat(document.getElementById('foodProteinInput').value) || 0;
-    const carb = parseFloat(document.getElementById('foodCarbInput').value) || 0;
-    const fat = parseFloat(document.getElementById('foodFatInput').value) || 0;
+    // Math.max(0, ...) — a negative macro used to pass straight through
+    // (parseFloat(-50)||0 is still -50, since -50 is truthy) and quietly
+    // reduce the day's totals.
+    const protein = Math.max(0, parseFloat(document.getElementById('foodProteinInput').value) || 0);
+    const carb = Math.max(0, parseFloat(document.getElementById('foodCarbInput').value) || 0);
+    const fat = Math.max(0, parseFloat(document.getElementById('foodFatInput').value) || 0);
     if (!name || !(kcal>0)) return;
     const today = todayISO();
+    const localId = 'l' + Date.now() + Math.random().toString(36).slice(2,7);
     const entries = loadFoodLog(today);
-    entries.push({ name, meal, kcal, protein, carb, fat });
+    entries.push({ localId, name, meal, kcal, protein, carb, fat });
     saveFoodLog(today, entries);
-    pushNutritionLog({ name, meal, kcal, protein, carb, fat }, today);
+    pushNutritionLog({ name, meal, kcal, protein, carb, fat }, today).then(id=>{
+      if (!id) return;
+      const cur = loadFoodLog(today);
+      const e = cur.find(x=>x.localId===localId);
+      if (e){ e.serverId = id; saveFoodLog(today, cur); }
+    });
     ['foodNameInput','foodKcalInput','foodProteinInput','foodCarbInput','foodFatInput'].forEach(id=>{ document.getElementById(id).value=''; });
     renderNutritionCard();
   });
@@ -2933,6 +3040,8 @@ ${buildFactBlock()}`;
     renderNutritionCard();
   }
 
+  const signOutBtnEl = document.getElementById('signOutBtn');
+  if (signOutBtnEl) signOutBtnEl.addEventListener('click', ()=>{ if (confirm('از حسابت خارج بشی؟')) signOut(); });
   document.getElementById('pfSubmit').addEventListener('click', async ()=>{
     const height = parseFloat(document.getElementById('pfHeight').value);
     const weight = parseFloat(document.getElementById('pfWeight').value);
@@ -3055,7 +3164,9 @@ ${buildFactBlock()}`;
         // if the athlete deletes before that finishes, wait for it so the file
         // doesn't end up orphaned (uploaded but un-deletable) in storage.
         const path = await tile.__uploadPromise;
-        if (path) await deletePhoto(path);
+        const ok = path ? await deletePhoto(path) : true;
+        if (!ok){ delBtn.disabled = false; return; } // remote delete failed — keep the tile, don't lie that it's gone
+        URL.revokeObjectURL(url);
         tile.remove();
       });
       const analyzeBtn = tile.querySelector('.analyze');
@@ -3079,14 +3190,22 @@ ${buildFactBlock()}`;
       });
       if (!res || !res.ok) return;
       const files = await res.json();
-      for (const f of files){
-        if (photoGrid.querySelector(`[data-remote-path="${authUser.uid}/${f.name}"]`)) continue;
-        const signRes = await sbFetch('/storage/v1/object/sign/progress-photos/' + authUser.uid + '/' + f.name, {
-          method: 'POST', body: JSON.stringify({ expiresIn: 3600 })
-        });
-        if (!signRes || !signRes.ok) continue;
-        const { signedURL } = await signRes.json();
-        if (!signedURL) continue;
+      const toShow = files.filter(f => !photoGrid.querySelector(`[data-remote-path="${authUser.uid}/${f.name}"]`));
+      // Sign all URLs concurrently instead of one round trip at a time — with a
+      // full 60-photo page this used to mean up to 60 serial network requests.
+      const signed = await Promise.all(toShow.map(async f=>{
+        try {
+          const signRes = await sbFetch('/storage/v1/object/sign/progress-photos/' + authUser.uid + '/' + f.name, {
+            method: 'POST', body: JSON.stringify({ expiresIn: 3600 })
+          });
+          if (!signRes || !signRes.ok) return null;
+          const { signedURL } = await signRes.json();
+          return signedURL ? { f, signedURL } : null;
+        } catch(e){ return null; }
+      }));
+      for (const item of signed){
+        if (!item) continue;
+        const { f, signedURL } = item;
         const tile = document.createElement('div');
         tile.className = 'photo-tile';
         tile.dataset.remotePath = authUser.uid + '/' + f.name;
@@ -3094,7 +3213,8 @@ ${buildFactBlock()}`;
         const delBtn = tile.querySelector('.del');
         if (delBtn) delBtn.addEventListener('click', async ()=>{
           delBtn.disabled = true;
-          await deletePhoto(tile.dataset.remotePath);
+          const ok = await deletePhoto(tile.dataset.remotePath);
+          if (!ok){ delBtn.disabled = false; return; } // remote delete failed — keep the tile, don't lie that it's gone
           tile.remove();
         });
         photoGrid.insertBefore(tile, photoAddBtn);
