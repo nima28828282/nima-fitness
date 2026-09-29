@@ -222,6 +222,176 @@ async function handleZarinpalVerify(req, res) {
   return sendJson(res, 200, { ok: true, refId, periodEnd: newPeriodEnd.toISOString() });
 }
 
+// --- Password reset via SMS code (Farapayamak) ---
+// In-memory is fine here: codes are short-lived (5 min) and this process
+// isn't expected to restart mid-reset. If it does restart, the person just
+// requests a new code.
+const resetCodes = new Map(); // phone -> { code, expiresAt, lastSentAt, attempts }
+
+function generateCode() {
+  return String(Math.floor(100000 + Math.random() * 900000)); // 6 digits
+}
+
+// Farapayamak's pattern/OTP endpoint (rather than a plain promotional SMS)
+// is used here on purpose: sending one-time verification codes through an
+// approved pattern is the compliant way to do it on Farapayamak (and most
+// Iranian SMS panels) and avoids the message being filtered or delayed the
+// way a free-text promotional line can be.
+//
+// Setup needed once in the Farapayamak panel (سامانه پیامکی):
+//   1. Create a "پترن" (pattern) for the reset code, e.g. body text:
+//        "کد بازیابی رمز عبور ورز: %code%"
+//      (Farapayamak assigns a numeric "کد پترن" / bodyId once it's approved.)
+//   2. Put that numeric id in FARAPAYAMAK_PATTERN_CODE below.
+// None of the actual username/password/pattern-id values are ever typed
+// into chat with Claude — they only ever live in this server's .env file,
+// which is filled in directly on the VPS.
+async function sendFarapayamakOtp(phone, code) {
+  const username = required('FARAPAYAMAK_USERNAME');
+  const password = required('FARAPAYAMAK_PASSWORD');
+  const patternCode = required('FARAPAYAMAK_PATTERN_CODE');
+
+  const res = await fetch('https://rest.payamak-panel.com/api/SendSMS/BaseNumber', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({
+      username,
+      password,
+      text: code, // fills the pattern's single %code%-style placeholder
+      to: phone,
+      bodyId: Number(patternCode)
+    })
+  });
+  const data = await res.json().catch(() => ({}));
+  // Farapayamak returns a numeric Value > 0 (the message id) on success, or
+  // an error code as a string/negative number on failure.
+  const value = data && data.Value;
+  const ok = value && Number(value) > 0;
+  if (!ok) {
+    const err = new Error('farapayamak_send_failed');
+    err.details = data;
+    throw err;
+  }
+  return data;
+}
+
+async function handleSendResetCode(req, res) {
+  let body;
+  try { body = await readJsonBody(req); } catch (e) { return sendJson(res, 400, { error: 'invalid_body' }); }
+
+  let phone = String(body.phone || '').replace(/[^\d]/g, '');
+  if (!/^0?9\d{9}$/.test(phone)) return sendJson(res, 400, { error: 'invalid_phone' });
+  if (phone.length === 10) phone = '0' + phone;
+
+  let supabaseUrl, serviceKey;
+  try {
+    supabaseUrl = required('SUPABASE_URL');
+    serviceKey = required('SUPABASE_SERVICE_ROLE_KEY');
+  } catch (e) {
+    return sendJson(res, 500, { error: 'not_configured', message: e.message });
+  }
+
+  // Don't reveal whether a phone number has an account — just always say ok,
+  // but only actually send a code (and burn SMS credit) when one exists.
+  try {
+    const profRes = await fetch(
+      supabaseUrl.replace(/\/$/, '') + '/rest/v1/profiles?phone=eq.' + encodeURIComponent(phone) + '&select=id',
+      { headers: { apikey: serviceKey, Authorization: 'Bearer ' + serviceKey } }
+    );
+    const profRows = await profRes.json();
+    if (!Array.isArray(profRows) || !profRows.length) {
+      return sendJson(res, 200, { ok: true });
+    }
+  } catch (e) {
+    return sendJson(res, 502, { error: 'supabase_unreachable', message: String(e) });
+  }
+
+  const existing = resetCodes.get(phone);
+  if (existing && Date.now() - existing.lastSentAt < 60 * 1000) {
+    return sendJson(res, 429, { error: 'too_soon', message: 'یه دقیقه صبر کن و دوباره امتحان کن.' });
+  }
+
+  const code = generateCode();
+  resetCodes.set(phone, { code, expiresAt: Date.now() + 5 * 60 * 1000, lastSentAt: Date.now(), attempts: 0 });
+
+  try {
+    await sendFarapayamakOtp(phone, code);
+  } catch (e) {
+    return sendJson(res, 502, { error: 'sms_send_failed', details: e.details || String(e) });
+  }
+
+  return sendJson(res, 200, { ok: true });
+}
+
+async function handleVerifyResetCode(req, res) {
+  let body;
+  try { body = await readJsonBody(req); } catch (e) { return sendJson(res, 400, { error: 'invalid_body' }); }
+
+  let phone = String(body.phone || '').replace(/[^\d]/g, '');
+  const code = String(body.code || '').trim();
+  const newPassword = String(body.newPassword || '');
+  if (!/^0?9\d{9}$/.test(phone)) return sendJson(res, 400, { error: 'invalid_phone' });
+  if (phone.length === 10) phone = '0' + phone;
+  if (!code) return sendJson(res, 400, { error: 'missing_code' });
+  if (newPassword.length < 8) return sendJson(res, 400, { error: 'weak_password' });
+
+  const entry = resetCodes.get(phone);
+  if (!entry || Date.now() > entry.expiresAt) {
+    return sendJson(res, 400, { error: 'code_expired' });
+  }
+  entry.attempts = (entry.attempts || 0) + 1;
+  if (entry.attempts > 5) {
+    resetCodes.delete(phone);
+    return sendJson(res, 429, { error: 'too_many_attempts' });
+  }
+  if (entry.code !== code) {
+    return sendJson(res, 400, { error: 'wrong_code' });
+  }
+
+  let supabaseUrl, serviceKey;
+  try {
+    supabaseUrl = required('SUPABASE_URL');
+    serviceKey = required('SUPABASE_SERVICE_ROLE_KEY');
+  } catch (e) {
+    return sendJson(res, 500, { error: 'not_configured', message: e.message });
+  }
+
+  let userId;
+  try {
+    const profRes = await fetch(
+      supabaseUrl.replace(/\/$/, '') + '/rest/v1/profiles?phone=eq.' + encodeURIComponent(phone) + '&select=id',
+      { headers: { apikey: serviceKey, Authorization: 'Bearer ' + serviceKey } }
+    );
+    const profRows = await profRes.json();
+    if (!Array.isArray(profRows) || !profRows.length) {
+      return sendJson(res, 404, { error: 'no_account_for_phone' });
+    }
+    userId = profRows[0].id;
+  } catch (e) {
+    return sendJson(res, 502, { error: 'supabase_unreachable', message: String(e) });
+  }
+
+  try {
+    const updRes = await fetch(
+      supabaseUrl.replace(/\/$/, '') + '/auth/v1/admin/users/' + userId,
+      {
+        method: 'PUT',
+        headers: { apikey: serviceKey, Authorization: 'Bearer ' + serviceKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: newPassword })
+      }
+    );
+    if (!updRes.ok) {
+      const errBody = await updRes.text();
+      return sendJson(res, 502, { error: 'password_update_failed', details: errBody });
+    }
+  } catch (e) {
+    return sendJson(res, 502, { error: 'password_update_failed', message: String(e) });
+  }
+
+  resetCodes.delete(phone);
+  return sendJson(res, 200, { ok: true });
+}
+
 const server = http.createServer((req, res) => {
   if (req.method === 'OPTIONS') {
     res.writeHead(204, {
@@ -240,6 +410,12 @@ const server = http.createServer((req, res) => {
   }
   if (req.method === 'POST' && url === '/api/zarinpal-verify') {
     return handleZarinpalVerify(req, res).catch((e) => sendJson(res, 500, { error: 'internal', message: String(e) }));
+  }
+  if (req.method === 'POST' && url === '/api/send-reset-code') {
+    return handleSendResetCode(req, res).catch((e) => sendJson(res, 500, { error: 'internal', message: String(e) }));
+  }
+  if (req.method === 'POST' && url === '/api/verify-reset-code') {
+    return handleVerifyResetCode(req, res).catch((e) => sendJson(res, 500, { error: 'internal', message: String(e) }));
   }
   sendJson(res, 404, { error: 'not_found' });
 });
