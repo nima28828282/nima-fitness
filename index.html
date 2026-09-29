@@ -379,7 +379,7 @@
   a{color:inherit}
 
   /* ---- check-in gate / onboarding gate / subscription gate ---- */
-  #landingGate, #authGate, #avatarGate, #onboardGate, #notifGate, #subGate{
+  #landingGate, #authGate, #forgotGate, #avatarGate, #onboardGate, #notifGate, #subGate{
     position:fixed; inset:0; z-index:50; background:var(--bg); display:flex; align-items:center; justify-content:center;
     padding:24px; font-family:var(--font-fa); direction:rtl;
   }
@@ -573,9 +573,35 @@
     <div class="form-field"><label for="authPhone">شماره موبایل</label><input type="tel" id="authPhone" inputmode="numeric" placeholder="09xxxxxxxxx"></div>
     <div class="form-field" id="authUsernameField"><label for="authUsername">نام نمایشی (برای جدول رتبه‌بندی)</label><input type="text" id="authUsername" placeholder="اسم واقعیت یا یه نیک‌نیم — بدون عدد"></div>
     <div class="form-field"><label for="authPassword">رمز عبور</label><input type="password" id="authPassword" placeholder="حداقل ۸ کاراکتر"></div>
+    <div id="authForgotRow" style="display:none; text-align:left; margin-top:-8px; margin-bottom:8px">
+      <button type="button" id="authForgotBtn" style="background:none; border:none; color:var(--text-faint); font-size:12px; cursor:pointer; text-decoration:underline; padding:0">رمز عبورت رو فراموش کردی؟</button>
+    </div>
     <div style="height:4px"></div>
     <button class="primary-btn" id="authSubmit">ورود به ورز</button>
     <button type="button" id="authModeToggle" style="background:none; border:none; color:var(--text-faint); font-size:12.5px; margin-top:10px; cursor:pointer; text-decoration:underline">قبلاً حساب ساختی؟ وارد شو</button>
+  </div>
+</div>
+
+<div id="forgotGate" style="display:none">
+  <div class="auth-box">
+    <div class="brand-mark lg">ورز</div>
+    <h1>بازیابی رمز عبور</h1>
+    <p id="forgotSubtitle">شماره موبایلی که باهاش ثبت‌نام کردی رو وارد کن تا یه کد براش پیامک کنیم.</p>
+    <div class="err" id="forgotErr"></div>
+
+    <div id="forgotStepPhone">
+      <div class="form-field"><label for="forgotPhone">شماره موبایل</label><input type="tel" id="forgotPhone" inputmode="numeric" placeholder="09xxxxxxxxx"></div>
+      <button class="primary-btn" id="forgotSendBtn">ارسال کد</button>
+    </div>
+
+    <div id="forgotStepCode" style="display:none">
+      <div class="form-field"><label for="forgotCode">کد پیامک‌شده</label><input type="text" id="forgotCode" inputmode="numeric" placeholder="۶ رقمی"></div>
+      <div class="form-field"><label for="forgotNewPassword">رمز عبور جدید</label><input type="password" id="forgotNewPassword" placeholder="حداقل ۸ کاراکتر"></div>
+      <button class="primary-btn" id="forgotVerifyBtn">تغییر رمز عبور و ورود</button>
+      <button type="button" id="forgotResendBtn" style="background:none; border:none; color:var(--text-faint); font-size:12px; margin-top:10px; cursor:pointer; text-decoration:underline">کد رو دوباره بفرست</button>
+    </div>
+
+    <button type="button" id="forgotBackBtn" style="background:none; border:none; color:var(--text-faint); font-size:12.5px; margin-top:14px; cursor:pointer; text-decoration:underline">بازگشت به ورود</button>
   </div>
 </div>
 
@@ -856,7 +882,9 @@
 
         <div class="card" id="nutritionLogCard" style="display:none">
           <h2 class="section-title" style="margin:0 0 10px">ثبت غذای امروز</h2>
-          <div id="nutritionTotals" style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px"></div>
+          <div id="nutritionStatusMsg" style="display:none; font-size:12.5px; font-weight:700; border-radius:10px; padding:9px 12px; margin-bottom:10px"></div>
+          <div id="nutritionTotals" style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:6px"></div>
+          <div id="nutritionRemaining" style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px"></div>
           <div id="nutritionEntries" style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px"></div>
           <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px">
             <input type="text" id="foodNameInput" placeholder="اسم غذا (مثلاً برنج و مرغ)" style="flex:2; min-width:140px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); border-radius:12px; padding:10px 12px; font-family:inherit; font-size:13px; box-sizing:border-box">
@@ -1074,12 +1102,17 @@
   /* ============================================================
      Real backend (Supabase) — plain REST calls (no SDK, keeps the
      artifact self-contained). Auth uses a synthetic email built
-     from the phone number since real phone/SMS OTP needs a paid
-     SMS provider we haven't wired up; the person never sees this,
-     they still just type a phone number + password.
+     from the phone number; sign-up/sign-in themselves still work this
+     way (the person just types a phone number + password), but
+     "forgot password" now sends a real SMS code through the VPS
+     backend (Farapayamak) further down, instead of no recovery path
+     at all.
      ============================================================ */
   const SUPABASE_URL = 'https://yoqtcnlzirqegshiirhh.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_y1TszsO9LsyGwsBV411ftw_V7Xiye9h';
+  // Same VPS backend the payment flow (pay.html on vaarz.ir) talks to.
+  // If your backend is deployed at a different domain, update this one line.
+  const BACKEND_URL = 'https://api.vaarz.ir';
   function emailForPhone(phone){ return 'p' + String(phone||'').replace(/[^\d]/g,'') + '@varz.local'; }
 
   function loadSbSession(){ try { return JSON.parse(localStorage.getItem('varz_sb_session') || 'null'); } catch(e){ return null; } }
@@ -1214,6 +1247,20 @@
       const res = await sbFetch('/rest/v1/nutrition_logs?id=eq.' + id, { method:'DELETE' });
       return !!(res && res.ok);
     } catch(e){ return false; }
+  }
+  /* Pushes one logged lift set to the server. Previously loggedExtra lived only in
+     localStorage (saveLogged()), so lift progress never reached Supabase and the
+     server had no raw data to recompute the leaderboard score's lift-progression
+     component from. Fire-and-forget, same pattern as pushBodyLog/pushNutritionLog —
+     localStorage stays the source of truth for the on-device UI. */
+  async function pushLiftLog(exerciseId, entry){
+    if (!isOnline()) return;
+    try {
+      await sbFetch('/rest/v1/lift_logs', { method:'POST', headers:{'Prefer':'return=minimal'}, body: JSON.stringify({
+        user_id: authUser.uid, exercise_id: exerciseId, weight_kg: entry.weightKg||null,
+        sets: entry.sets||null, reps: entry.reps||null, logged_at: entry.date
+      })});
+    } catch(e){}
   }
   let lastPushedSnapshot = null; // { key, score } — re-push when the SCORE changes, not just once per day/window
   async function pushScoreSnapshot(score, windowDays){
@@ -1701,6 +1748,7 @@
     document.getElementById('authSubtitle').textContent = isLogin ? 'شماره موبایل و رمز عبورت رو وارد کن.' : 'برای شروع، اسمت و شماره موبایلت رو وارد کن.';
     document.getElementById('authSubmit').textContent = isLogin ? 'ورود' : 'ورود به ورز';
     document.getElementById('authModeToggle').textContent = isLogin ? 'حساب نداری؟ ثبت‌نام کن' : 'قبلاً حساب ساختی؟ وارد شو';
+    document.getElementById('authForgotRow').style.display = isLogin ? 'block' : 'none';
     document.getElementById('authErr').textContent = '';
   });
   document.getElementById('authSubmit').addEventListener('click', async ()=>{
@@ -1793,6 +1841,128 @@
       btn.disabled = false; btn.textContent = oldTxt;
     }
   });
+
+  /* ---- Forgot password (SMS code via the VPS backend / Farapayamak) ---- */
+  (function(){
+    const forgotGate = document.getElementById('forgotGate');
+    const authGateEl = document.getElementById('authGate');
+    const forgotErr = document.getElementById('forgotErr');
+    const stepPhone = document.getElementById('forgotStepPhone');
+    const stepCode = document.getElementById('forgotStepCode');
+    let forgotPhoneDigits = '';
+    let resendCooldownUntil = 0;
+
+    function showForgot(){
+      forgotErr.textContent = '';
+      stepPhone.style.display = 'block';
+      stepCode.style.display = 'none';
+      document.getElementById('forgotPhone').value = document.getElementById('authPhone').value.trim();
+      authGateEl.style.display = 'none';
+      forgotGate.style.display = 'flex';
+    }
+    document.getElementById('authForgotBtn').addEventListener('click', showForgot);
+    document.getElementById('forgotBackBtn').addEventListener('click', ()=>{
+      forgotGate.style.display = 'none';
+      authGateEl.style.display = 'flex';
+    });
+
+    async function sendCode(){
+      const phone = toEnDigits(document.getElementById('forgotPhone').value.trim());
+      const phoneDigits = phone.replace(/[^\d]/g,'');
+      if (!/^0?9\d{9}$/.test(phoneDigits)){
+        forgotErr.textContent = 'شماره موبایل درست نیست — مثلاً 0912xxxxxxx (با اعداد انگلیسی).';
+        return false;
+      }
+      if (Date.now() < resendCooldownUntil){
+        forgotErr.textContent = 'یه دقیقه صبر کن و دوباره امتحان کن.';
+        return false;
+      }
+      forgotErr.textContent = '';
+      try {
+        const res = await fetch(BACKEND_URL + '/api/send-reset-code', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: phoneDigits })
+        });
+        const data = await res.json().catch(()=>({}));
+        if (!res.ok){
+          forgotErr.textContent = data.error === 'too_soon'
+            ? 'یه دقیقه صبر کن و دوباره امتحان کن.'
+            : 'ارسال کد با مشکل مواجه شد. یه لحظه دیگه امتحان کن.';
+          return false;
+        }
+        forgotPhoneDigits = phoneDigits;
+        resendCooldownUntil = Date.now() + 60*1000;
+        return true;
+      } catch(e){
+        forgotErr.textContent = 'اتصال به سرور برقرار نشد. اینترنتت رو چک کن.';
+        return false;
+      }
+    }
+
+    document.getElementById('forgotSendBtn').addEventListener('click', async ()=>{
+      const btn = document.getElementById('forgotSendBtn');
+      btn.disabled = true; const oldTxt = btn.textContent; btn.textContent = 'در حال ارسال...';
+      const ok = await sendCode();
+      btn.disabled = false; btn.textContent = oldTxt;
+      if (ok){
+        stepPhone.style.display = 'none';
+        stepCode.style.display = 'block';
+        const faPhone = String(forgotPhoneDigits).replace(/[0-9]/g,d=>FA_DIGITS[+d]);
+        document.getElementById('forgotSubtitle').textContent = `کد ۶ رقمی به ${faPhone} پیامک شد.`;
+      }
+    });
+
+    document.getElementById('forgotResendBtn').addEventListener('click', async ()=>{
+      const btn = document.getElementById('forgotResendBtn');
+      btn.disabled = true;
+      document.getElementById('forgotPhone').value = forgotPhoneDigits;
+      await sendCode();
+      btn.disabled = false;
+    });
+
+    document.getElementById('forgotVerifyBtn').addEventListener('click', async ()=>{
+      const code = document.getElementById('forgotCode').value.trim();
+      const newPassword = document.getElementById('forgotNewPassword').value;
+      if (!code){ forgotErr.textContent = 'کد رو وارد کن.'; return; }
+      if (!newPassword || newPassword.length < 8){ forgotErr.textContent = 'رمز عبور جدید باید حداقل ۸ کاراکتر باشه.'; return; }
+      forgotErr.textContent = '';
+      const btn = document.getElementById('forgotVerifyBtn');
+      btn.disabled = true; const oldTxt = btn.textContent; btn.textContent = 'در حال بررسی...';
+      try {
+        const res = await fetch(BACKEND_URL + '/api/verify-reset-code', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: forgotPhoneDigits, code: toEnDigits(code), newPassword })
+        });
+        const data = await res.json().catch(()=>({}));
+        if (!res.ok){
+          forgotErr.textContent = data.error === 'wrong_code' ? 'کد وارد شده اشتباهه.'
+            : data.error === 'code_expired' ? 'کد منقضی شده — دوباره درخواست بده.'
+            : data.error === 'too_many_attempts' ? 'چندبار اشتباه زدی — یه کد جدید بگیر.'
+            : 'رمز عبور عوض نشد. یه لحظه دیگه امتحان کن.';
+          return;
+        }
+        // Password changed on the server — sign the person straight in with it.
+        const signInData = await sbSignIn(emailForPhone(forgotPhoneDigits), newPassword);
+        const profile = await sbFetchProfile(signInData.user.id);
+        if (!profile) throw new Error('no_profile');
+        const nameParts = String(profile.name||'').trim().split(/\s+/);
+        authUser = Object.assign({}, profile.settings || {}, {
+          uid: signInData.user.id, phone: forgotPhoneDigits, username: profile.username || '',
+          firstName: nameParts[0] || '', lastName: nameParts.slice(1).join(' ') || ''
+        });
+        saveAuthUser();
+        clearSeedDataForFreshUser();
+        await Promise.all([refreshSubscription(), pullRemoteLogsAfterLogin()]);
+        try { renderAll(); } catch(e){}
+        forgotGate.style.display = 'none';
+        showApp();
+      } catch(e){
+        forgotErr.textContent = 'رمز عبور عوض شد ولی ورود خودکار انجام نشد — با رمز جدید وارد شو.';
+      } finally {
+        btn.disabled = false; btn.textContent = oldTxt;
+      }
+    });
+  })();
 
   /* ---- avatar picker — shown once right after signup (before the 5-question
      onboarding), and reachable again anytime from the profile tab. ---- */
@@ -2639,8 +2809,10 @@
         return;
       }
       loggedExtra[id] = loggedExtra[id] || [];
-      loggedExtra[id].push({ weightKg:w, sets:s, reps:r, date: todayISO() });
+      const entry = { weightKg:w, sets:s, reps:r, date: todayISO() };
+      loggedExtra[id].push(entry);
       saveLogged();
+      pushLiftLog(id, entry);
       openLiftCards.add(id);
       renderAll();
       const toast = document.querySelector(`.lift-card[data-ex="${id}"] [data-toast]`);
@@ -3089,6 +3261,47 @@ ${buildFactBlock()}`;
       <div class="form-field"><label>کربو</label><div style="font-weight:800">${faNum(Math.round(totals.carb),0)} / ${faNum(target.carbG,0)}g</div></div>
       <div class="form-field"><label>چربی</label><div style="font-weight:800">${faNum(Math.round(totals.fat),0)} / ${faNum(target.fatG,0)}g</div></div>
     `;
+
+    /* Dynamic remaining-budget recalculation: every time a food entry is
+       added or removed, show what's actually left of today's target (not
+       just consumed-vs-target side by side) so the number that matters —
+       "how much do I still have left today" — updates immediately instead
+       of requiring the user to do the subtraction themselves. */
+    const remaining = {
+      kcal: target.calories - totals.kcal,
+      protein: target.proteinG - totals.protein,
+      carb: target.carbG - totals.carb,
+      fat: target.fatG - totals.fat
+    };
+    const remField = (label, value, unit) => {
+      const over = value < 0;
+      const shown = Math.round(Math.abs(value));
+      const color = over ? 'var(--bad)' : 'var(--text)';
+      return `<div class="form-field"><label>باقی‌مانده ${label}</label><div style="font-weight:800; color:${color}">${over?'−':''}${faNum(shown,0)}${unit}</div></div>`;
+    };
+    document.getElementById('nutritionRemaining').innerHTML =
+      remField('کالری', remaining.kcal, '') +
+      remField('پروتئین', remaining.protein, 'g') +
+      remField('کربو', remaining.carb, 'g') +
+      remField('چربی', remaining.fat, 'g');
+
+    const statusEl = document.getElementById('nutritionStatusMsg');
+    if (entries.length === 0){
+      statusEl.style.display = 'none';
+    } else {
+      statusEl.style.display = 'block';
+      const kcalOverBy = Math.round(totals.kcal - target.calories);
+      if (kcalOverBy > 0){
+        statusEl.style.background = 'var(--bad-soft)';
+        statusEl.style.color = 'var(--bad)';
+        statusEl.textContent = `⚠️ امروز ${faNum(kcalOverBy,0)} کالری بیشتر از هدف ثبت کردی — باقی روز رو سبک‌تر ببند یا فردا رو با همین هدف ادامه بده، دور از انتظار نیست.`;
+      } else {
+        statusEl.style.background = 'var(--accent-soft)';
+        statusEl.style.color = 'var(--text)';
+        statusEl.textContent = `🎯 ${faNum(Math.round(remaining.kcal),0)} کالری تا هدف امروزت باقی مونده — با همین روند جلو برو.`;
+      }
+    }
+
     const listEl = document.getElementById('nutritionEntries');
     listEl.innerHTML = entries.length ? entries.map((e,i)=>`
       <div style="display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--surface-2); border-radius:10px; font-size:12.5px">
